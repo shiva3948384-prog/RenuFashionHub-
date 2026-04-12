@@ -1,0 +1,88 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: settings/profile
+// Fields:
+//   - name: string (required)
+//   - bio: string (required)
+//   - avatar: string (required)
+//
+// Collection: posts
+// Fields:
+//   - id: number (required)
+//   - type: string (required, 'image' or 'video')
+//   - url: string (required)
+//   - taggedProducts: list (optional)
+//
+// Collection: products
+// Fields:
+//   - id: number (required)
+//   - name: string (required)
+//   - price: string (required)
+//   - image: string (required)
+//   - link: string (required)
+//
+// Collection: messages
+// Fields:
+//   - id: number (required)
+//   - name: string (required)
+//   - email: string (required)
+//   - mobile: string (required)
+//   - message: string (required)
+//   - timestamp: string (required)
+//
+// ===============================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      // User requested to remove Google Auth and use custom username/pass in frontend.
+      // For the database to remain writable from the admin panel, we allow writes.
+      // WARNING: This is less secure than Google Auth.
+      return true; 
+    }
+
+    function isValidProfile(data) {
+      return data.name is string && data.avatar is string;
+    }
+
+    function isValidPost(data) {
+      return data.id is number && data.url is string;
+    }
+
+    function isValidProduct(data) {
+      return data.id is number && data.name is string && data.url is string;
+    }
+
+    function isValidMessage(data) {
+      return data.keys().hasAll(['id', 'name', 'email', 'mobile', 'message', 'timestamp']) &&
+             data.id is number &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.email is string && data.email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$") &&
+             data.mobile is string && data.mobile.size() >= 10 && data.mobile.size() <= 15 &&
+             data.message is string && data.message.size() > 0 && data.message.size() < 1000 &&
+             data.timestamp is string;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    // Allow public read for everything so the website works
+    // Allow public write because the app uses a custom login system instead of Firebase Auth
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

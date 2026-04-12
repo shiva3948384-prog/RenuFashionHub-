@@ -1,0 +1,72 @@
+{
+  "entities": {
+    "profile": {
+      "title": "Profile",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "bio": { "type": "string" },
+        "avatar": { "type": "string" }
+      },
+      "required": ["name", "bio", "avatar"]
+    },
+    "post": {
+      "title": "Post",
+      "description": "Social media post",
+      "type": "object",
+      "properties": {
+        "id": { "type": "number" },
+        "type": { "type": "string", "enum": ["image", "video"] },
+        "url": { "type": "string" },
+        "taggedProducts": { "type": "array" }
+      },
+      "required": ["id", "type", "url"]
+    },
+    "product": {
+      "title": "Product",
+      "description": "Product information",
+      "type": "object",
+      "properties": {
+        "id": { "type": "number" },
+        "name": { "type": "string" },
+        "price": { "type": "string" },
+        "image": { "type": "string" },
+        "link": { "type": "string" }
+      },
+      "required": ["id", "name", "price", "image", "link"]
+    },
+    "message": {
+      "title": "Message",
+      "description": "Contact form message",
+      "type": "object",
+      "properties": {
+        "id": { "type": "number" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "mobile": { "type": "string" },
+        "message": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["id", "name", "email", "mobile", "message", "timestamp"]
+    }
+  },
+  "firestore": {
+    "settings/profile": {
+      "schema": "profile",
+      "description": "Global profile settings"
+    },
+    "posts": {
+      "schema": "post",
+      "description": "Collection of posts"
+    },
+    "products": {
+      "schema": "product",
+      "description": "Collection of products"
+    },
+    "messages": {
+      "schema": "message",
+      "description": "Collection of contact messages"
+    }
+  }
+}
