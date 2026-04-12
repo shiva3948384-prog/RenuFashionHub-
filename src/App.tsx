@@ -332,6 +332,138 @@ const VideoEmbed = React.memo(({ url, isMuted = true, minimal = false }: { url: 
   );
 });
 
+const CustomCursor = ({ theme }: { theme: string }) => {
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isPointer, setIsPointer] = useState(false);
+  const [isClicking, setIsClicking] = useState(false);
+  const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({ x: e.clientX, y: e.clientY });
+      setIsVisible(true);
+      const target = e.target as HTMLElement;
+      setIsPointer(window.getComputedStyle(target).cursor === "pointer" || target.tagName === "BUTTON" || target.tagName === "A");
+    };
+
+    const handleMouseDown = (e: MouseEvent) => {
+      setIsClicking(true);
+      addRipple(e.clientX, e.clientY);
+    };
+
+    const handleMouseUp = () => setIsClicking(false);
+
+    const handleTouchStart = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      addRipple(touch.clientX, touch.clientY);
+    };
+
+    const addRipple = (x: number, y: number) => {
+      const id = Date.now();
+      setRipples((prev) => [...prev, { id, x, y }]);
+      setTimeout(() => {
+        setRipples((prev) => prev.filter((r) => r.id !== id));
+      }, 600);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("touchstart", handleTouchStart);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("touchstart", handleTouchStart);
+    };
+  }, []);
+
+  return (
+    <>
+      {/* Desktop Trailing Cursor */}
+      <div className="hidden md:block pointer-events-none fixed inset-0 z-[9999]">
+        {/* Main Dot */}
+        <motion.div
+          className="fixed top-0 left-0 w-3 h-3 bg-purple-500 rounded-full shadow-[0_0_15px_rgba(168,85,247,0.5)]"
+          animate={{
+            x: mousePos.x - 6,
+            y: mousePos.y - 6,
+            scale: isClicking ? 0.6 : isPointer ? 1.2 : 1,
+            opacity: isVisible ? 1 : 0
+          }}
+          transition={{ type: "spring", damping: 30, stiffness: 1000, mass: 0.1 }}
+        />
+        {/* Trailing Ring */}
+        <motion.div
+          className="fixed top-0 left-0 w-10 h-10 border-2 border-purple-500/40 rounded-full"
+          animate={{
+            x: mousePos.x - 20,
+            y: mousePos.y - 20,
+            scale: isClicking ? 1.4 : isPointer ? 1.8 : 1,
+            opacity: isVisible ? 1 : 0,
+            borderWidth: isPointer ? "1px" : "2px"
+          }}
+          transition={{ type: "spring", damping: 25, stiffness: 250, mass: 0.5 }}
+        />
+      </div>
+
+      {/* Ripple Effect (Mobile & Desktop) */}
+      <AnimatePresence>
+        {ripples.map((ripple) => (
+          <motion.div
+            key={ripple.id}
+            initial={{ opacity: 0.6, scale: 0 }}
+            animate={{ opacity: 0, scale: 5 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="fixed pointer-events-none z-[9998] w-12 h-12 border-2 border-purple-500 rounded-full"
+            style={{ left: ripple.x - 24, top: ripple.y - 24 }}
+          />
+        ))}
+      </AnimatePresence>
+    </>
+  );
+};
+
+const PremiumButton = ({ children, onClick, className = "", variant = "primary", icon: Icon }: { children: React.ReactNode, onClick?: (e?: any) => void, className?: string, variant?: "primary" | "secondary", icon?: any }) => {
+  return (
+    <motion.button
+      onClick={onClick}
+      whileHover="hover"
+      whileTap="tap"
+      initial="initial"
+      className={`group relative overflow-hidden px-6 py-4 rounded-2xl font-black text-sm transition-all duration-500 ${className} ${
+        variant === "primary" 
+          ? "border-2 border-purple-500 text-purple-500" 
+          : "border-2 border-white/20 text-white"
+      }`}
+    >
+      <motion.div
+        variants={{
+          initial: { y: "100%" },
+          hover: { y: 0 },
+          tap: { scale: 0.95 }
+        }}
+        transition={{ type: "tween", ease: [0.22, 1, 0.36, 1], duration: 0.4 }}
+        className={`absolute inset-0 -z-10 ${variant === "primary" ? "bg-purple-500" : "bg-white"}`}
+      />
+      <motion.div
+        variants={{
+          initial: { color: variant === "primary" ? "#a855f7" : "#ffffff" },
+          hover: { color: variant === "primary" ? "#ffffff" : "#000000" }
+        }}
+        transition={{ duration: 0.3 }}
+        className="relative z-10 flex items-center justify-center gap-3"
+      >
+        {Icon && <Icon className="w-5 h-5 transition-colors duration-300" />}
+        {children}
+      </motion.div>
+    </motion.button>
+  );
+};
+
 const InteractiveStarRating = ({ rating, onChange, theme }: { rating: number; onChange: (rating: number) => void; theme: string }) => {
   const [activeRating, setActiveRating] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -450,8 +582,12 @@ const ProductDetailPage = ({ products, theme, navigate, db }: { products: any[];
       className={`min-h-screen ${theme === "dark" ? "bg-[#0a0a0a] text-white" : "bg-white text-black"} p-6 pb-24`}
     >
       <div className="max-w-md mx-auto">
-        <button onClick={() => navigate("/")} className="mb-6 flex items-center gap-2 opacity-60 hover:opacity-100 transition-opacity">
-          <ChevronLeft className="w-5 h-5" /> Back
+        <button 
+          onClick={() => navigate("/")} 
+          className={`mb-6 p-3 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border flex items-center gap-2 group transition-all hover:bg-purple-500/10 hover:border-purple-500/50`}
+        >
+          <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" /> 
+          <span className="text-sm font-bold">Back</span>
         </button>
         <div className="aspect-[3/4] rounded-3xl overflow-hidden mb-6 border border-white/10 shadow-2xl">
           <MediaImage url={product.url} className="w-full h-full object-cover" />
@@ -467,12 +603,13 @@ const ProductDetailPage = ({ products, theme, navigate, db }: { products: any[];
         )}
 
         {product.buyUrl && (
-          <button 
+          <PremiumButton
             onClick={() => window.open(product.buyUrl, "_blank")}
-            className="w-full py-4 rounded-2xl bg-white text-black font-bold text-lg shadow-xl hover:opacity-90 transition-all active:scale-95 mb-12"
+            className="w-full mb-12"
+            icon={ShoppingBag}
           >
             Buy Now
-          </button>
+          </PremiumButton>
         )}
 
         {/* Reviews Section */}
@@ -666,7 +803,11 @@ const EmptyState = React.memo(({ icon: Icon, message }: { icon: any; message: st
 ));
 
 const ProductCard = React.memo(({ product, navigate }: { product: any; navigate: any }) => (
-  <div 
+  <motion.div 
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
     onClick={() => navigate(`/product/${product.id}`)}
     className="group cursor-pointer flex flex-col"
   >
@@ -685,11 +826,15 @@ const ProductCard = React.memo(({ product, navigate }: { product: any; navigate:
       <h4 className="font-semibold text-[11px] truncate mb-0.5">{product.name}</h4>
       <p className="text-white/40 text-[10px]">₹{product.price}</p>
     </div>
-  </div>
+  </motion.div>
 ));
 
 const ShopPostCard = React.memo(({ post, navigate }: { post: any; navigate: any }) => (
-  <div 
+  <motion.div 
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
     onClick={() => navigate(`/post/${post.id}`)}
     className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-white/5 border border-white/10 group cursor-pointer"
   >
@@ -709,11 +854,15 @@ const ShopPostCard = React.memo(({ post, navigate }: { post: any; navigate: any 
         <span className="text-[9px] font-bold text-white">{post.taggedProducts.length}</span>
       </div>
     )}
-  </div>
+  </motion.div>
 ));
 
 const PostCard = React.memo(({ post, products, navigate, onTabChange }: { post: any; products: any[]; navigate: any; onTabChange: (tab: string) => void }) => (
-  <div 
+  <motion.div 
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
     onClick={() => navigate(`/post/${post.id}`)}
     className="w-full rounded-2xl overflow-hidden bg-white/5 border border-white/10 relative group cursor-pointer"
   >
@@ -765,19 +914,20 @@ const PostCard = React.memo(({ post, products, navigate, onTabChange }: { post: 
             );
           })}
         </div>
-        <button 
+        <PremiumButton 
           onClick={(e) => {
-            e.stopPropagation();
+            e?.stopPropagation();
             onTabChange("products");
           }}
-          className="w-full mt-2 py-4 rounded-2xl bg-[#1a1a1a] hover:bg-[#222] border border-white/10 text-white font-bold text-sm flex items-center justify-center gap-3 transition-all active:scale-95 shadow-xl"
+          className="w-full mt-2"
+          icon={ShoppingBag}
+          variant="secondary"
         >
-          <ShoppingBag className="w-5 h-5 text-red-500" />
           Shop Tagged Products
-        </button>
+        </PremiumButton>
       </div>
     )}
-  </div>
+  </motion.div>
 ));
 
 const ShareModal = ({ isOpen, onClose, profileName }: { isOpen: boolean; onClose: () => void; profileName: string }) => {
@@ -1326,8 +1476,10 @@ export default function App() {
   };
 
   return (
-    <AnimatePresence mode="wait">
-      {showSplash ? (
+    <>
+      <CustomCursor theme={theme} />
+      <AnimatePresence mode="wait">
+        {showSplash ? (
         <motion.div
           key="splash"
           initial={{ opacity: 0 }}
@@ -2303,9 +2455,10 @@ export default function App() {
 
         {/* Profile Section */}
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           className="flex flex-col items-center text-center mb-10"
         >
           <div className="relative mb-4">
@@ -2346,22 +2499,29 @@ export default function App() {
         </motion.div>
 
         {/* Social Links */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="space-y-3 mb-12"
-        >
+        <div className="space-y-3 mb-12">
           {INITIAL_SOCIAL_LINKS.map((social, index) => (
             <motion.a 
               key={index}
               href={social.href}
               target="_blank"
               rel="noopener noreferrer"
-              whileHover={{ x: 4 }}
-              className={`flex items-center justify-between p-4 rounded-2xl ${theme === "dark" ? "bg-white/5 hover:bg-white/10 border-white/10" : "bg-black/5 hover:bg-black/10 border-black/10"} transition-all border group`}
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
+              whileHover="hover"
+              className={`relative overflow-hidden flex items-center justify-between p-4 rounded-2xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} transition-all border group`}
             >
-              <div className="flex items-center gap-4">
+              <motion.div
+                variants={{
+                  initial: { y: "100%" },
+                  hover: { y: 0 }
+                }}
+                transition={{ type: "tween", ease: [0.22, 1, 0.36, 1], duration: 0.4 }}
+                className="absolute inset-0 bg-purple-500/10 -z-10"
+              />
+              <div className="relative z-10 flex items-center gap-4">
                 <div className={`p-2 rounded-xl ${theme === "dark" ? "bg-white/5 group-hover:bg-white/10" : "bg-black/5 group-hover:bg-black/10"} transition-colors`}>
                   <social.icon className={`w-5 h-5 ${social.color}`} />
                 </div>
@@ -2370,48 +2530,61 @@ export default function App() {
                   <p className={`text-[10px] ${theme === "dark" ? "text-white/40" : "text-black/40"} uppercase tracking-widest`}>{social.label}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="relative z-10 flex items-center gap-2">
                 <ExternalLink className={`w-4 h-4 ${theme === "dark" ? "text-white/20 group-hover:text-white/40" : "text-black/20 group-hover:text-black/40"} transition-colors`} />
               </div>
             </motion.a>
           ))}
-        </motion.div>
+        </div>
 
         {/* Contact Button */}
         <div className="mb-12">
-          <motion.button
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
+          <PremiumButton
             onClick={() => navigate("/contact")}
-            className={`w-full py-4 rounded-2xl ${theme === "dark" ? "bg-white text-black shadow-white/5" : "bg-black text-white shadow-black/5"} font-bold text-[15px] hover:opacity-90 transition-all active:scale-95 shadow-xl`}
+            className="w-full"
+            variant={theme === "dark" ? "secondary" : "primary"}
           >
             Contact Us
-          </motion.button>
+          </PremiumButton>
         </div>
 
         {/* Tabs Navigation */}
-        <div className={`flex border-b ${theme === "dark" ? "border-white/10" : "border-black/10"} mb-8`}>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className={`flex p-1.5 rounded-2xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border backdrop-blur-2xl mb-8`}
+        >
           {INITIAL_TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => handleSetActiveTab(tab.id)}
-              className={`flex-1 py-4 text-sm font-semibold transition-all relative ${
+              className={`flex-1 py-3 rounded-xl text-xs font-bold transition-all relative overflow-hidden group ${
                 activeTab === tab.id 
                   ? (theme === "dark" ? "text-white" : "text-black") 
                   : (theme === "dark" ? "text-white/40" : "text-black/40")
               }`}
             >
-              {tab.label}
+              <motion.div
+                initial={false}
+                animate={{ 
+                  y: activeTab === tab.id ? 0 : "100%",
+                  opacity: activeTab === tab.id ? 1 : 0
+                }}
+                transition={{ type: "tween", ease: [0.22, 1, 0.36, 1], duration: 0.4 }}
+                className={`absolute inset-0 -z-10 ${theme === "dark" ? "bg-purple-500/20" : "bg-purple-500/10"}`}
+              />
+              <span className="relative z-10">{tab.label}</span>
               {activeTab === tab.id && (
                 <motion.div 
-                  layoutId="activeTab"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-500"
+                  layoutId="activeTabIndicator"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-500"
                 />
               )}
             </button>
           ))}
-        </div>
+        </motion.div>
 
         {/* Tab Content */}
         <div className="min-h-[400px] will-change-[transform,opacity]">
@@ -2609,18 +2782,18 @@ export default function App() {
                       })}
                     </div>
                     
-                    <button 
+                    <PremiumButton 
                       onClick={() => {
                         if (selectedPost.taggedProducts?.[0]) {
                           const product = products.find((p: any) => p.id === selectedPost.taggedProducts[0]);
                           if (product?.buyUrl) window.open(product.buyUrl, "_blank");
                         }
                       }}
-                      className="w-full py-4 rounded-2xl bg-white text-black font-black text-sm flex items-center justify-center gap-3 transition-all active:scale-95 shadow-xl hover:bg-gray-100"
+                      className="w-full"
+                      icon={ShoppingBag}
                     >
-                      <ShoppingBag className="w-5 h-5 text-red-500" />
                       Shop Tagged Products
-                    </button>
+                    </PremiumButton>
                   </div>
                 )}
               </div>
@@ -2661,5 +2834,6 @@ export default function App() {
         </Routes>
       )}
     </AnimatePresence>
+    </>
   );
 }
