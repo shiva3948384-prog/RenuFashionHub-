@@ -40,6 +40,9 @@ import {
   Image as ImageIcon,
   Layers,
   Play,
+  Pause,
+  SkipBack,
+  SkipForward,
   Settings,
   Plus,
   Trash2,
@@ -117,7 +120,7 @@ const MediaImage = React.memo(({ url, className, alt, fallback, ...props }: { ur
   );
 });
 
-const VideoEmbed = React.memo(({ url, isMuted = true, minimal = false }: { url: string | File | Blob; isMuted?: boolean; minimal?: boolean }) => {
+const VideoEmbed = React.memo(({ url, isMuted = true, minimal = false, isPlaying = true }: { url: string | File | Blob; isMuted?: boolean; minimal?: boolean; isPlaying?: boolean }) => {
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [isInView, setIsInView] = React.useState(false);
@@ -146,23 +149,22 @@ const VideoEmbed = React.memo(({ url, isMuted = true, minimal = false }: { url: 
       ([entry]) => {
         setIsInView(entry.isIntersecting);
       },
-      { threshold: 0.1 }
+      { 
+        threshold: 0.1,
+        rootMargin: "50px" // Start loading slightly before it enters the viewport
+      }
     );
 
     if (containerRef.current) {
       observer.observe(containerRef.current);
     }
 
-    return () => {
-      if (containerRef.current) {
-        observer.unobserve(containerRef.current);
-      }
-    };
+    return () => observer.disconnect();
   }, []);
 
   React.useEffect(() => {
     if (videoRef.current && mediaUrl) {
-      if (isInView) {
+      if (isInView && isPlaying) {
         // Ensure video is muted for reliable auto-play
         videoRef.current.muted = isMuted;
         videoRef.current.play().catch(e => {
@@ -175,7 +177,7 @@ const VideoEmbed = React.memo(({ url, isMuted = true, minimal = false }: { url: 
         videoRef.current.pause();
       }
     }
-  }, [isInView, mediaUrl, isMuted]);
+  }, [isInView, mediaUrl, isMuted, isPlaying]);
 
   const isProfileUrl = (url: any) => {
     if (typeof url !== "string") return false;
@@ -203,7 +205,7 @@ const VideoEmbed = React.memo(({ url, isMuted = true, minimal = false }: { url: 
           id = url.split("/").pop()?.split("?")[0] || "";
         }
         // Add autoplay and mute params for youtube
-        return `https://www.youtube.com/embed/${id}?autoplay=${isInView ? 1 : 0}&mute=${isMuted ? 1 : 0}&loop=1&playlist=${id}&controls=0&modestbranding=1&rel=0`;
+        return `https://www.youtube.com/embed/${id}?autoplay=${(isInView && isPlaying) ? 1 : 0}&mute=${isMuted ? 1 : 0}&loop=1&playlist=${id}&controls=0&modestbranding=1&rel=0`;
       }
       if (url.includes("instagram.com")) {
         if (isProfileUrl(url)) return null;
@@ -212,7 +214,7 @@ const VideoEmbed = React.memo(({ url, isMuted = true, minimal = false }: { url: 
       }
       if (url.includes("facebook.com")) {
         if (isProfileUrl(url)) return null;
-        return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=0&width=560&autoplay=${isInView}&mute=${isMuted}`;
+        return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=0&width=560&autoplay=${isInView && isPlaying}&mute=${isMuted}`;
       }
     } catch (e) {
       console.error("Error parsing video URL", e);
@@ -250,14 +252,25 @@ const VideoEmbed = React.memo(({ url, isMuted = true, minimal = false }: { url: 
     }
   }, [isInView, isProfile]);
 
+  const handleRipple = (e: React.MouseEvent | React.TouchEvent) => {
+    const clientX = 'touches' in e ? (e as React.TouchEvent).touches[0].clientX : (e as React.MouseEvent).clientX;
+    const clientY = 'touches' in e ? (e as React.TouchEvent).touches[0].clientY : (e as React.MouseEvent).clientY;
+    window.dispatchEvent(new CustomEvent("custom-ripple", { detail: { x: clientX, y: clientY } }));
+  };
+
   if (isDirectVideo) {
     return (
-      <div className="relative w-full h-full bg-black overflow-hidden" ref={containerRef}>
-        {/* Blurred Background for Premium Feel - Only in non-minimal mode */}
+      <div 
+        className={`relative w-full h-full bg-black overflow-hidden ${minimal ? 'pointer-events-none' : ''}`} 
+        ref={containerRef}
+        onMouseDown={handleRipple}
+        onTouchStart={handleRipple}
+      >
+        {/* Blurred Background for Premium Feel - Only in non-minimal mode and non-mobile */}
         {!minimal && mediaUrl && (
           <video 
             src={mediaUrl} 
-            className="absolute inset-0 w-full h-full object-cover blur-3xl opacity-40 scale-110 pointer-events-none"
+            className="absolute inset-0 w-full h-full object-cover blur-3xl opacity-40 scale-110 pointer-events-none hidden md:block"
             muted
             playsInline
             autoPlay={isInView}
@@ -276,6 +289,8 @@ const VideoEmbed = React.memo(({ url, isMuted = true, minimal = false }: { url: 
             preload="metadata"
             controlsList="nodownload noplaybackrate"
             disablePictureInPicture
+            onMouseDown={handleRipple}
+            onTouchStart={handleRipple}
           />
         )}
         {/* Subtle Watermark */}
@@ -314,15 +329,30 @@ const VideoEmbed = React.memo(({ url, isMuted = true, minimal = false }: { url: 
   }
 
   return (
-    <div className="w-full h-full bg-black/20" ref={containerRef}>
+    <div 
+      className={`w-full h-full bg-black/20 relative ${minimal ? 'pointer-events-none' : ''}`} 
+      ref={containerRef}
+      onMouseDown={handleRipple}
+      onTouchStart={handleRipple}
+    >
       {shouldRenderIframe && embedUrl ? (
-        <iframe
-          src={embedUrl}
-          className="w-full h-full border-0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          referrerPolicy="no-referrer-when-downgrade"
-          allowFullScreen
-        />
+        <>
+          <iframe
+            src={embedUrl}
+            className="w-full h-full border-0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="no-referrer-when-downgrade"
+            allowFullScreen
+            loading="lazy"
+          />
+          {/* Transparent overlay to catch clicks for ripples without blocking iframe (using pointer-events: none is not enough, so we use a small delay or just accept it) */}
+          {/* Actually, if we want ripples, we need to catch the click. 
+              We'll use a transparent div that dispatches ripple and then becomes pointer-events: none for a moment? 
+              No, that's too complex. Let's just use a div that dispatches ripple and the iframe is behind it.
+              But then the user can't click play.
+              Wait! If we use a custom play button, we can handle everything.
+          */}
+        </>
       ) : (
         <div className="w-full h-full flex items-center justify-center">
           <Play className="w-8 h-8 text-white/20 animate-pulse" />
@@ -332,7 +362,7 @@ const VideoEmbed = React.memo(({ url, isMuted = true, minimal = false }: { url: 
   );
 });
 
-const CustomCursor = ({ theme }: { theme: string }) => {
+const CustomCursor = ({ theme, isMobile }: { theme: string, isMobile: boolean }) => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isPointer, setIsPointer] = useState(false);
   const [isClicking, setIsClicking] = useState(false);
@@ -341,6 +371,7 @@ const CustomCursor = ({ theme }: { theme: string }) => {
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
+      if (isMobile) return;
       setMousePos({ x: e.clientX, y: e.clientY });
       setIsVisible(true);
       const target = e.target as HTMLElement;
@@ -352,77 +383,90 @@ const CustomCursor = ({ theme }: { theme: string }) => {
       addRipple(e.clientX, e.clientY);
     };
 
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        addRipple(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    };
+
     const handleMouseUp = () => setIsClicking(false);
 
-    const handleTouchStart = (e: TouchEvent) => {
-      const touch = e.touches[0];
-      addRipple(touch.clientX, touch.clientY);
+    const handleCustomRipple = (e: any) => {
+      if (e.detail) {
+        addRipple(e.detail.x, e.detail.y);
+      }
     };
 
     const addRipple = (x: number, y: number) => {
-      const id = Date.now();
+      const id = Date.now() + Math.random();
       setRipples((prev) => [...prev, { id, x, y }]);
       setTimeout(() => {
         setRipples((prev) => prev.filter((r) => r.id !== id));
       }, 600);
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mousedown", handleMouseDown);
-    window.addEventListener("mouseup", handleMouseUp);
-    window.addEventListener("touchstart", handleTouchStart);
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    window.addEventListener("mousedown", handleMouseDown, { passive: true });
+    window.addEventListener("mouseup", handleMouseUp, { passive: true });
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("custom-ripple", handleCustomRipple);
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mousedown", handleMouseDown);
       window.removeEventListener("mouseup", handleMouseUp);
       window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("custom-ripple", handleCustomRipple);
     };
-  }, []);
+  }, [isMobile]);
 
   return (
     <>
       {/* Desktop Trailing Cursor */}
-      <div className="hidden md:block pointer-events-none fixed inset-0 z-[9999]">
-        {/* Main Dot */}
-        <motion.div
-          className="fixed top-0 left-0 w-3 h-3 bg-purple-500 rounded-full shadow-[0_0_15px_rgba(168,85,247,0.5)]"
-          animate={{
-            x: mousePos.x - 6,
-            y: mousePos.y - 6,
-            scale: isClicking ? 0.6 : isPointer ? 1.2 : 1,
-            opacity: isVisible ? 1 : 0
-          }}
-          transition={{ type: "spring", damping: 30, stiffness: 1000, mass: 0.1 }}
-        />
-        {/* Trailing Ring */}
-        <motion.div
-          className="fixed top-0 left-0 w-10 h-10 border-2 border-purple-500/40 rounded-full"
-          animate={{
-            x: mousePos.x - 20,
-            y: mousePos.y - 20,
-            scale: isClicking ? 1.4 : isPointer ? 1.8 : 1,
-            opacity: isVisible ? 1 : 0,
-            borderWidth: isPointer ? "1px" : "2px"
-          }}
-          transition={{ type: "spring", damping: 25, stiffness: 250, mass: 0.5 }}
-        />
-      </div>
-
-      {/* Ripple Effect (Mobile & Desktop) */}
-      <AnimatePresence>
-        {ripples.map((ripple) => (
+      {!isMobile && (
+        <div className="hidden md:block pointer-events-none fixed inset-0 z-[9999]">
+          {/* Main Dot */}
           <motion.div
-            key={ripple.id}
-            initial={{ opacity: 0.6, scale: 0 }}
-            animate={{ opacity: 0, scale: 5 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="fixed pointer-events-none z-[9998] w-12 h-12 border-2 border-purple-500 rounded-full"
-            style={{ left: ripple.x - 24, top: ripple.y - 24 }}
+            className="fixed top-0 left-0 w-3 h-3 bg-purple-500 rounded-full shadow-[0_0_15px_rgba(168,85,247,0.5)]"
+            animate={{
+              x: mousePos.x - 6,
+              y: mousePos.y - 6,
+              scale: isClicking ? 0.6 : isPointer ? 1.2 : 1,
+              opacity: isVisible ? 1 : 0
+            }}
+            transition={{ type: "spring", damping: 30, stiffness: 1000, mass: 0.1 }}
           />
-        ))}
-      </AnimatePresence>
+          {/* Trailing Ring */}
+          <motion.div
+            className="fixed top-0 left-0 w-10 h-10 border-2 border-purple-500/40 rounded-full"
+            animate={{
+              x: mousePos.x - 20,
+              y: mousePos.y - 20,
+              scale: isClicking ? 1.4 : isPointer ? 1.8 : 1,
+              opacity: isVisible ? 1 : 0,
+              borderWidth: isPointer ? "1px" : "2px"
+            }}
+            transition={{ type: "spring", damping: 25, stiffness: 250, mass: 0.5 }}
+          />
+        </div>
+      )}
+
+      {/* Ripple Effect (Desktop & Mobile) */}
+      <div className="fixed inset-0 pointer-events-none z-[9998] overflow-hidden">
+        <AnimatePresence>
+          {ripples.map((ripple) => (
+            <motion.div
+              key={ripple.id}
+              initial={{ opacity: 0.8, scale: 0 }}
+              animate={{ opacity: 0, scale: isMobile ? 4 : 6 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="absolute w-12 h-12 border-4 border-purple-500 rounded-full shadow-[0_0_30px_rgba(168,85,247,0.6)]"
+              style={{ left: ripple.x - 24, top: ripple.y - 24 }}
+            />
+          ))}
+        </AnimatePresence>
+      </div>
     </>
   );
 };
@@ -434,7 +478,7 @@ const PremiumButton = ({ children, onClick, className = "", variant = "primary",
       whileHover="hover"
       whileTap="tap"
       initial="initial"
-      className={`group relative overflow-hidden px-6 py-4 rounded-2xl font-black text-sm transition-all duration-500 ${className} ${
+      className={`group relative overflow-hidden px-6 py-4 rounded-2xl font-black text-sm transition-all duration-500 will-change-transform ${className} ${
         variant === "primary" 
           ? "border-2 border-purple-500 text-purple-500" 
           : "border-2 border-white/20 text-white"
@@ -689,7 +733,17 @@ const ProductDetailPage = ({ products, theme, navigate, db }: { products: any[];
 
 const PostDetailPage = ({ posts, products, profile, theme, navigate, isMuted, setIsMuted }: { posts: any[]; products: any[]; profile: any; theme: string; navigate: any; isMuted: boolean; setIsMuted: any }) => {
   const { id } = useParams();
-  const post = posts.find(p => p.id.toString() === id || p.docId === id);
+  const currentIndex = posts.findIndex(p => p.id.toString() === id || p.docId === id);
+  const post = posts[currentIndex];
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [showControls, setShowControls] = useState(true);
+
+  useEffect(() => {
+    if (showControls) {
+      const timer = setTimeout(() => setShowControls(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showControls]);
 
   if (!post) {
     return (
@@ -702,35 +756,105 @@ const PostDetailPage = ({ posts, products, profile, theme, navigate, isMuted, se
     );
   }
 
+  const triggerRipple = (e: React.MouseEvent | React.TouchEvent) => {
+    const clientX = 'touches' in e ? (e as React.TouchEvent).touches[0].clientX : (e as React.MouseEvent).clientX;
+    const clientY = 'touches' in e ? (e as React.TouchEvent).touches[0].clientY : (e as React.MouseEvent).clientY;
+    window.dispatchEvent(new CustomEvent("custom-ripple", { detail: { x: clientX, y: clientY } }));
+  };
+
+  const handleNext = (e?: React.MouseEvent | React.TouchEvent) => {
+    e?.stopPropagation();
+    const nextIndex = (currentIndex + 1) % posts.length;
+    navigate(`/post/${posts[nextIndex].id}`);
+    setIsPlaying(true);
+  };
+
+  const handlePrev = (e?: React.MouseEvent | React.TouchEvent) => {
+    e?.stopPropagation();
+    const prevIndex = (currentIndex - 1 + posts.length) % posts.length;
+    navigate(`/post/${posts[prevIndex].id}`);
+    setIsPlaying(true);
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[200] bg-black flex flex-col"
+      onClick={() => setShowControls(true)}
+      onMouseDown={triggerRipple}
+      onTouchStart={triggerRipple}
     >
       <button 
         onClick={() => navigate("/")}
-        className="absolute top-6 right-6 z-[210] p-3 rounded-full bg-black/40 backdrop-blur-xl text-white border border-white/10 hover:bg-black/60 transition-all"
+        className="absolute top-6 right-6 z-[210] p-3 rounded-full bg-black/80 md:backdrop-blur-xl text-white border border-white/10 hover:bg-black/60 transition-all"
       >
         <X className="w-6 h-6" />
       </button>
 
       <div className="flex-1 relative flex items-center justify-center overflow-hidden">
         {post.type === "video" ? (
-          <div className="w-full h-full">
-            <VideoEmbed url={post.url} isMuted={isMuted} />
+          <div 
+            className="w-full h-full" 
+            onClick={(e) => { e.stopPropagation(); setIsPlaying(!isPlaying); }}
+            onMouseDown={triggerRipple}
+            onTouchStart={triggerRipple}
+          >
+            <VideoEmbed url={post.url} isMuted={isMuted} isPlaying={isPlaying} />
           </div>
         ) : (
           <MediaImage url={post.url} className="w-full h-full object-contain" />
         )}
 
+        {/* Video Controls Overlay */}
+        <AnimatePresence>
+          {showControls && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-30 flex items-center justify-center gap-8 pointer-events-none"
+            >
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={handlePrev}
+                onMouseDown={(e) => { e.stopPropagation(); triggerRipple(e); }}
+                onTouchStart={(e) => { e.stopPropagation(); triggerRipple(e); }}
+                className="p-5 rounded-full bg-black/60 md:backdrop-blur-md text-white border border-white/20 pointer-events-auto hover:bg-black/80 transition-all shadow-2xl"
+              >
+                <SkipBack className="w-8 h-8 fill-white" />
+              </motion.button>
+
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={(e) => { e.stopPropagation(); setIsPlaying(!isPlaying); }}
+                onMouseDown={(e) => { e.stopPropagation(); triggerRipple(e); }}
+                onTouchStart={(e) => { e.stopPropagation(); triggerRipple(e); }}
+                className="p-10 rounded-full bg-black/60 md:backdrop-blur-md text-white border border-white/20 pointer-events-auto hover:bg-black/80 transition-all shadow-2xl"
+              >
+                {isPlaying ? <Pause className="w-12 h-12 fill-white" /> : <Play className="w-12 h-12 fill-white ml-2" />}
+              </motion.button>
+
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={handleNext}
+                onMouseDown={(e) => { e.stopPropagation(); triggerRipple(e); }}
+                onTouchStart={(e) => { e.stopPropagation(); triggerRipple(e); }}
+                className="p-5 rounded-full bg-black/60 md:backdrop-blur-md text-white border border-white/20 pointer-events-auto hover:bg-black/80 transition-all shadow-2xl"
+              >
+                <SkipForward className="w-8 h-8 fill-white" />
+              </motion.button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <div className="absolute top-6 left-6 z-20 flex items-center gap-3">
           <motion.button 
             whileTap={{ scale: 0.8 }}
             whileHover={{ scale: 1.15 }}
-            onClick={() => setIsMuted(!isMuted)}
-            className="p-4 rounded-full bg-black/50 backdrop-blur-2xl text-white hover:bg-black/70 transition-all border border-white/20 shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
+            onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }}
+            className="p-4 rounded-full bg-black/80 md:backdrop-blur-2xl text-white hover:bg-black/70 transition-all border border-white/20 shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
           >
             <AnimatePresence mode="wait">
               <motion.div
@@ -766,7 +890,7 @@ const PostDetailPage = ({ posts, products, profile, theme, navigate, isMuted, se
                   <div 
                     key={productId} 
                     onClick={() => product.buyUrl && window.open(product.buyUrl, "_blank")}
-                    className="flex-shrink-0 w-64 p-2 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/20 transition-all cursor-pointer group/item flex gap-3 snap-center"
+                    className="flex-shrink-0 w-64 p-2 rounded-2xl bg-white/10 md:backdrop-blur-xl border border-white/20 hover:bg-white/20 transition-all cursor-pointer group/item flex gap-3 snap-center"
                   >
                     <MediaImage url={product.url} className="w-20 h-20 object-cover rounded-xl" />
                     <div className="flex-1 min-w-0 flex flex-col justify-center">
@@ -802,14 +926,14 @@ const EmptyState = React.memo(({ icon: Icon, message }: { icon: any; message: st
   </motion.div>
 ));
 
-const ProductCard = React.memo(({ product, navigate }: { product: any; navigate: any }) => (
+const ProductCard = React.memo(({ product, navigate, isMobile }: { product: any; navigate: any; isMobile: boolean }) => (
   <motion.div 
-    initial={{ opacity: 0, y: 20 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true }}
-    transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+    initial={isMobile ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+    whileInView={isMobile ? undefined : { opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: "-50px" }}
+    transition={{ duration: 0.4, ease: "easeOut" }}
     onClick={() => navigate(`/product/${product.id}`)}
-    className="group cursor-pointer flex flex-col"
+    className="group cursor-pointer flex flex-col will-change-transform"
   >
     <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-white/5 border border-white/10 mb-2 relative">
       <MediaImage 
@@ -829,19 +953,19 @@ const ProductCard = React.memo(({ product, navigate }: { product: any; navigate:
   </motion.div>
 ));
 
-const ShopPostCard = React.memo(({ post, navigate }: { post: any; navigate: any }) => (
+const ShopPostCard = React.memo(({ post, navigate, isMobile }: { post: any; navigate: any; isMobile: boolean }) => (
   <motion.div 
-    initial={{ opacity: 0, y: 20 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true }}
-    transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+    initial={isMobile ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+    whileInView={isMobile ? undefined : { opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: "-50px" }}
+    transition={{ duration: 0.4, ease: "easeOut" }}
     onClick={() => navigate(`/post/${post.id}`)}
-    className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-white/5 border border-white/10 group cursor-pointer"
+    className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-white/5 border border-white/10 group cursor-pointer will-change-transform"
   >
     {post.type === "video" ? (
       <div className="w-full h-full">
         <VideoEmbed url={post.url} minimal={true} />
-        <div className="absolute top-3 right-3 p-1.5 rounded-lg bg-black/40 backdrop-blur-md">
+        <div className="absolute top-3 right-3 p-1.5 rounded-lg bg-black/80 md:backdrop-blur-md">
           <Play className="w-3 h-3 text-white fill-white" />
         </div>
       </div>
@@ -849,7 +973,7 @@ const ShopPostCard = React.memo(({ post, navigate }: { post: any; navigate: any 
       <MediaImage url={post.url} className="w-full h-full object-cover" loading="lazy" />
     )}
     {post.taggedProducts?.length > 0 && (
-      <div className="absolute top-3 left-3 p-1.5 rounded-lg bg-black/40 backdrop-blur-md flex items-center gap-1">
+      <div className="absolute top-3 left-3 p-1.5 rounded-lg bg-black/80 md:backdrop-blur-md flex items-center gap-1">
         <ShoppingBag className="w-3 h-3 text-white" />
         <span className="text-[9px] font-bold text-white">{post.taggedProducts.length}</span>
       </div>
@@ -857,14 +981,14 @@ const ShopPostCard = React.memo(({ post, navigate }: { post: any; navigate: any 
   </motion.div>
 ));
 
-const PostCard = React.memo(({ post, products, navigate, onTabChange }: { post: any; products: any[]; navigate: any; onTabChange: (tab: string) => void }) => (
+const PostCard = React.memo(({ post, products, navigate, onTabChange, isMobile }: { post: any; products: any[]; navigate: any; onTabChange: (tab: string) => void; isMobile: boolean }) => (
   <motion.div 
-    initial={{ opacity: 0, y: 20 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true }}
-    transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+    initial={isMobile ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+    whileInView={isMobile ? undefined : { opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: "-50px" }}
+    transition={{ duration: 0.4, ease: "easeOut" }}
     onClick={() => navigate(`/post/${post.id}`)}
-    className="w-full rounded-2xl overflow-hidden bg-white/5 border border-white/10 relative group cursor-pointer"
+    className="w-full rounded-2xl overflow-hidden bg-white/5 border border-white/10 relative group cursor-pointer will-change-transform"
   >
     {post.type === "video" ? (
       <div className="aspect-[9/16] w-full">
@@ -958,7 +1082,7 @@ const ShareModal = ({ isOpen, onClose, profileName }: { isOpen: boolean; onClose
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/90 md:backdrop-blur-sm"
       />
       <motion.div 
         initial={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -1028,6 +1152,22 @@ const ShareModal = ({ isOpen, onClose, profileName }: { isOpen: boolean; onClose
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
+  
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+      setIsMobile(mobile);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile, { passive: true });
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const handleNavigate = useCallback((path: string) => {
+    navigate(path);
+  }, [navigate]);
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [activeTab, setActiveTab] = useState("shop");
   const [loginData, setLoginData] = useState({ username: "", password: "" });
@@ -1128,7 +1268,7 @@ export default function App() {
   const handleGoogleLogin = async () => {
     try {
       await signInWithGoogle();
-      navigate("/");
+      handleNavigate("/");
     } catch (error) {
       console.error("Login failed:", error);
       setLoginError("Login failed. Please try again.");
@@ -1468,7 +1608,7 @@ export default function App() {
     if (loginData.username === "renufashionhub" && loginData.password === "gh12mn909") {
       setIsAdminUser(true);
       localStorage.setItem("rfh_admin_session", "true");
-      navigate("/admin");
+      handleNavigate("/admin");
       setLoginError("");
     } else {
       setLoginError("Invalid username or password");
@@ -1477,7 +1617,7 @@ export default function App() {
 
   return (
     <>
-      <CustomCursor theme={theme} />
+      <CustomCursor theme={theme} isMobile={isMobile} />
       <AnimatePresence mode="wait">
         {showSplash ? (
         <motion.div
@@ -1539,7 +1679,7 @@ export default function App() {
               You do not have administrator privileges. Please log in with the correct credentials.
             </p>
             <button 
-              onClick={() => navigate("/login")}
+              onClick={() => handleNavigate("/login")}
               className="w-full py-4 rounded-xl bg-purple-600 text-white font-bold transition-all"
             >
               Back to Login
@@ -1549,7 +1689,7 @@ export default function App() {
       ) : (
           <div className="pb-32">
         {/* Admin Header */}
-        <div className={`sticky top-0 z-50 ${theme === "dark" ? "bg-[#0a0a0a]/80 border-white/10" : "bg-white/80 border-black/10"} backdrop-blur-xl border-b px-6 py-4`}>
+        <div className={`sticky top-0 z-50 ${theme === "dark" ? "bg-[#0a0a0a]/90 border-white/10" : "bg-white/90 border-black/10"} md:backdrop-blur-xl border-b px-6 py-4`}>
           <div className="max-w-2xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/20">
@@ -1566,7 +1706,7 @@ export default function App() {
                   setIsAdminUser(false);
                   localStorage.removeItem("rfh_admin_session");
                   await logout();
-                  navigate("/");
+                  handleNavigate("/");
                 }}
                 className={`p-2 rounded-xl ${theme === "dark" ? "bg-red-500/10 border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white" : "bg-red-500/5 border-red-500/10 text-red-500 hover:bg-red-500 hover:text-white"} transition-all border`}
                 title="Logout"
@@ -1574,7 +1714,7 @@ export default function App() {
                 <LogOut className="w-5 h-5" />
               </button>
               <button 
-                onClick={() => navigate("/")}
+                onClick={() => handleNavigate("/")}
                 className={`p-2 rounded-xl ${theme === "dark" ? "bg-white/5 hover:bg-white/10 border-white/10" : "bg-black/5 hover:bg-black/10 border-black/10"} transition-colors border`}
               >
                 <X className={`w-5 h-5 ${theme === "dark" ? "text-white/70" : "text-black/70"}`} />
@@ -1591,7 +1731,7 @@ export default function App() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                className="absolute inset-0 bg-black/90 md:backdrop-blur-sm"
                 onClick={() => setItemToDelete(null)}
               />
               <motion.div 
@@ -1647,7 +1787,7 @@ export default function App() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                className="absolute inset-0 bg-black/90 md:backdrop-blur-sm"
                 onClick={() => setEditingProduct(null)}
               />
               <motion.div 
@@ -2145,7 +2285,7 @@ export default function App() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex items-center justify-center p-6"
+                  className="fixed inset-0 bg-black/90 md:backdrop-blur-md z-[100] flex items-center justify-center p-6"
                 >
                   <motion.div 
                     initial={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -2216,7 +2356,7 @@ export default function App() {
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className={`w-full max-w-sm p-8 rounded-3xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border backdrop-blur-xl`}
+          className={`w-full max-w-sm p-8 rounded-3xl ${theme === "dark" ? "bg-white/10 border-white/10" : "bg-black/10 border-black/10"} border md:backdrop-blur-xl`}
         >
           <div className="flex flex-col items-center mb-8">
             <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20 mb-4">
@@ -2302,7 +2442,7 @@ export default function App() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`p-8 rounded-3xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border backdrop-blur-xl`}
+            className={`p-8 rounded-3xl ${theme === "dark" ? "bg-white/10 border-white/10" : "bg-black/10 border-black/10"} border md:backdrop-blur-xl`}
           >
             <AnimatePresence mode="wait">
               {messageSent ? (
@@ -2540,7 +2680,7 @@ export default function App() {
         {/* Contact Button */}
         <div className="mb-12">
           <PremiumButton
-            onClick={() => navigate("/contact")}
+            onClick={() => handleNavigate("/contact")}
             className="w-full"
             variant={theme === "dark" ? "secondary" : "primary"}
           >
@@ -2554,7 +2694,7 @@ export default function App() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className={`flex p-1.5 rounded-2xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border backdrop-blur-2xl mb-8`}
+          className={`flex p-1.5 rounded-2xl ${theme === "dark" ? "bg-white/10 border-white/10" : "bg-black/10 border-black/10"} border md:backdrop-blur-2xl mb-8`}
         >
           {INITIAL_TABS.map((tab) => (
             <button
@@ -2587,15 +2727,15 @@ export default function App() {
         </motion.div>
 
         {/* Tab Content */}
-        <div className="min-h-[400px] will-change-[transform,opacity]">
-          <AnimatePresence mode="wait">
+        <div className="min-h-[400px] will-change-contents">
+          <AnimatePresence mode="wait" initial={false}>
             {activeTab === "shop" && (
               <motion.div
                 key="shop"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
                 className="grid grid-cols-2 gap-3"
               >
                 {posts.length === 0 && products.length === 0 ? (
@@ -2606,10 +2746,10 @@ export default function App() {
                   shopItems.map((_, index) => (
                     <React.Fragment key={index}>
                       {posts[index] && (
-                        <ShopPostCard post={posts[index]} navigate={navigate} />
+                        <ShopPostCard post={posts[index]} navigate={handleNavigate} isMobile={isMobile} />
                       )}
                       {products[index] && (
-                        <ProductCard product={products[index]} navigate={navigate} />
+                        <ProductCard product={products[index]} navigate={handleNavigate} isMobile={isMobile} />
                       )}
                     </React.Fragment>
                   ))
@@ -2620,10 +2760,10 @@ export default function App() {
             {activeTab === "post" && (
               <motion.div
                 key="post"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
                 className="grid grid-cols-2 gap-3"
               >
                 {posts.length === 0 ? (
@@ -2632,31 +2772,7 @@ export default function App() {
                   </div>
                 ) : (
                   posts.map((post: any) => (
-                    <div 
-                      key={post.id}
-                      onClick={() => navigate(`/post/${post.id}`)}
-                      className="group cursor-pointer flex flex-col"
-                    >
-                      <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-white/5 border border-white/10 mb-2 relative">
-                        {post.type === "video" ? (
-                          <div className="w-full h-full">
-                            <VideoEmbed url={post.url} minimal={true} />
-                            <div className="absolute top-3 right-3 p-1.5 rounded-lg bg-black/40 backdrop-blur-md z-10">
-                              <Play className="w-3 h-3 text-white fill-white" />
-                            </div>
-                          </div>
-                        ) : (
-                          <MediaImage 
-                            url={post.url} 
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                            loading="lazy"
-                          />
-                        )}
-                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <div className="px-4 py-2 rounded-full bg-white text-black text-[10px] font-bold shadow-xl">View Post</div>
-                        </div>
-                      </div>
-                    </div>
+                    <ShopPostCard key={post.id} post={post} navigate={handleNavigate} isMobile={isMobile} />
                   ))
                 )}
               </motion.div>
@@ -2665,10 +2781,10 @@ export default function App() {
             {activeTab === "products" && (
               <motion.div
                 key="products"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
                 className="grid grid-cols-2 gap-4"
               >
                 {products.length === 0 ? (
@@ -2677,7 +2793,7 @@ export default function App() {
                   </div>
                 ) : (
                   products.map((product: any) => (
-                    <ProductCard key={product.id} product={product} navigate={navigate} />
+                    <ProductCard key={product.id} product={product} navigate={handleNavigate} isMobile={isMobile} />
                   ))
                 )}
               </motion.div>
@@ -2697,7 +2813,7 @@ export default function App() {
               {/* Close Button */}
               <button 
                 onClick={() => setSelectedPost(null)}
-                className="absolute top-6 right-6 z-[210] p-3 rounded-full bg-black/40 backdrop-blur-xl text-white border border-white/10 hover:bg-black/60 transition-all"
+                className="absolute top-6 right-6 z-[210] p-3 rounded-full bg-black/80 md:backdrop-blur-xl text-white border border-white/10 hover:bg-black/60 transition-all"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -2720,7 +2836,7 @@ export default function App() {
                     whileTap={{ scale: 0.8 }}
                     whileHover={{ scale: 1.15 }}
                     onClick={() => setIsMuted(!isMuted)}
-                    className="p-4 rounded-full bg-black/50 backdrop-blur-2xl text-white hover:bg-black/70 transition-all border border-white/20 shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
+                    className="p-4 rounded-full bg-black/50 md:backdrop-blur-2xl text-white hover:bg-black/70 transition-all border border-white/20 shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
                   >
                     <AnimatePresence mode="wait">
                       <motion.div
@@ -2766,7 +2882,7 @@ export default function App() {
                           <div 
                             key={productId} 
                             onClick={() => product.buyUrl && window.open(product.buyUrl, "_blank")}
-                            className="flex-shrink-0 w-64 p-2 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/20 transition-all cursor-pointer group/item flex gap-3 snap-center"
+                            className="flex-shrink-0 w-64 p-2 rounded-2xl bg-white/10 md:backdrop-blur-xl border border-white/20 hover:bg-white/20 transition-all cursor-pointer group/item flex gap-3 snap-center"
                           >
                             <MediaImage url={product.url} className="w-20 h-20 object-cover rounded-xl" />
                             <div className="flex-1 min-w-0 flex flex-col justify-center">
@@ -2829,8 +2945,8 @@ export default function App() {
       </div>
         </motion.div>
           } />
-          <Route path="/product/:id" element={<ProductDetailPage products={products} theme={theme} navigate={navigate} db={db} />} />
-          <Route path="/post/:id" element={<PostDetailPage posts={posts} products={products} profile={profile} theme={theme} navigate={navigate} isMuted={isMuted} setIsMuted={setIsMuted} />} />
+          <Route path="/product/:id" element={<ProductDetailPage products={products} theme={theme} navigate={handleNavigate} db={db} />} />
+          <Route path="/post/:id" element={<PostDetailPage posts={posts} products={products} profile={profile} theme={theme} navigate={handleNavigate} isMuted={isMuted} setIsMuted={setIsMuted} />} />
         </Routes>
       )}
     </AnimatePresence>
