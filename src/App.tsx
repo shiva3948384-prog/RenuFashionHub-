@@ -84,7 +84,7 @@ const INITIAL_TABS = [
   { id: "products", label: "Products", icon: Tag },
 ];
 
-const MediaImage = React.memo(({ url, className, alt, fallback, ...props }: { url: string | File | Blob; className?: string; alt?: string; fallback?: React.ReactNode; [key: string]: any }) => {
+const MediaImage = React.memo(({ url, className, alt, fallback, onReady, ...props }: { url: string | File | Blob; className?: string; alt?: string; fallback?: React.ReactNode; onReady?: () => void; [key: string]: any }) => {
   const [mediaUrl, setMediaUrl] = React.useState<string | null>(null);
   const [error, setError] = React.useState(false);
 
@@ -92,6 +92,7 @@ const MediaImage = React.memo(({ url, className, alt, fallback, ...props }: { ur
     setError(false);
     if (!url) {
       setMediaUrl(null);
+      onReady?.();
       return;
     }
 
@@ -107,20 +108,24 @@ const MediaImage = React.memo(({ url, className, alt, fallback, ...props }: { ur
     }
   }, [url]);
 
-  if (!mediaUrl || error) return <>{fallback || null}</>;
+  if (!mediaUrl || error) {
+    if (error) onReady?.();
+    return <>{fallback || null}</>;
+  }
   return (
     <img 
       src={mediaUrl} 
       className={className} 
       alt={alt} 
       referrerPolicy="no-referrer" 
-      onError={() => setError(true)}
+      onError={() => { setError(true); onReady?.(); }}
+      onLoad={() => onReady?.()}
       {...props} 
     />
   );
 });
 
-const VideoEmbed = React.memo(({ url, isMuted = true, minimal = false, isPlaying = true }: { url: string | File | Blob; isMuted?: boolean; minimal?: boolean; isPlaying?: boolean }) => {
+const VideoEmbed = React.memo(({ url, isMuted = true, minimal = false, isPlaying = true, onReady }: { url: string | File | Blob; isMuted?: boolean; minimal?: boolean; isPlaying?: boolean; onReady?: () => void }) => {
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [isInView, setIsInView] = React.useState(false);
@@ -129,6 +134,7 @@ const VideoEmbed = React.memo(({ url, isMuted = true, minimal = false, isPlaying
   React.useEffect(() => {
     if (!url) {
       setMediaUrl(null);
+      onReady?.();
       return;
     }
 
@@ -291,6 +297,9 @@ const VideoEmbed = React.memo(({ url, isMuted = true, minimal = false, isPlaying
             disablePictureInPicture
             onMouseDown={handleRipple}
             onTouchStart={handleRipple}
+            onLoadedData={() => onReady?.()}
+            onCanPlay={() => onReady?.()}
+            onError={() => onReady?.()}
           />
         )}
         {/* Subtle Watermark */}
@@ -311,7 +320,7 @@ const VideoEmbed = React.memo(({ url, isMuted = true, minimal = false, isPlaying
 
   if (isProfile) {
     return (
-      <div className="w-full h-full bg-white/5 flex flex-col items-center justify-center p-6 text-center" ref={containerRef}>
+      <div className="w-full h-full bg-white/5 flex flex-col items-center justify-center p-6 text-center" ref={(el) => { if (el) { containerRef.current = el; onReady?.(); } }}>
         <div className="p-4 rounded-full bg-white/5 border border-white/10 mb-4">
           <Globe className="w-8 h-8 text-white/20" />
         </div>
@@ -1149,11 +1158,41 @@ const ShareModal = ({ isOpen, onClose, profileName }: { isOpen: boolean; onClose
   );
 };
 
+const PageLoader = ({ theme }: { theme: string }) => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    className={`fixed inset-0 z-[150] flex flex-col items-center justify-center ${theme === "dark" ? "bg-[#0a0a0a]" : "bg-white"}`}
+  >
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3 }}
+      className="relative"
+    >
+      <div className="w-20 h-20 rounded-full border-4 border-purple-500/20 border-t-purple-500 animate-spin" />
+      <div className="absolute inset-0 flex items-center justify-center">
+        <ShoppingBag className="w-7 h-7 text-purple-500" />
+      </div>
+    </motion.div>
+    <div className="mt-6 text-center">
+      <h1 className="text-sm font-black tracking-[0.2em] uppercase mb-3 opacity-80">Renu Fashion Hub</h1>
+      <div className="flex items-center justify-center gap-1.5">
+        <div className="w-1 h-1 rounded-full bg-purple-500 animate-bounce [animation-delay:-0.3s]" />
+        <div className="w-1 h-1 rounded-full bg-purple-500 animate-bounce [animation-delay:-0.15s]" />
+        <div className="w-1 h-1 rounded-full bg-purple-500 animate-bounce" />
+      </div>
+    </div>
+  </motion.div>
+);
+
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
   
   const [isMobile, setIsMobile] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -1166,7 +1205,14 @@ export default function App() {
   }, []);
 
   const handleNavigate = useCallback((path: string) => {
-    navigate(path);
+    setIsNavigating(true);
+    // Reverting to randomized delay as requested
+    const delay = 400 + Math.random() * 600;
+    setTimeout(() => {
+      navigate(path);
+      setIsNavigating(false);
+      window.scrollTo(0, 0);
+    }, delay);
   }, [navigate]);
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [activeTab, setActiveTab] = useState("shop");
@@ -1292,7 +1338,13 @@ export default function App() {
   }, []);
 
   const handleSetActiveTab = useCallback((tab: string) => {
-    setActiveTab(tab);
+    setIsNavigating(true);
+    const delay = 300 + Math.random() * 400;
+    setTimeout(() => {
+      setActiveTab(tab);
+      setIsNavigating(false);
+      window.scrollTo(0, 0);
+    }, delay);
   }, []);
 
   // Memoize the combined shop list to prevent recalculation on every render
@@ -1490,6 +1542,7 @@ export default function App() {
   const handleSaveAll = async () => {
     if (isSaving || !isAdminUser) return;
     setIsSaving(true);
+    setIsNavigating(true);
     
     // Helper to clean data for Firestore (remove docId)
     const cleanData = (item: any) => {
@@ -1563,6 +1616,7 @@ export default function App() {
       handleFirestoreError(error, OperationType.WRITE, "multiple");
     } finally {
       setIsSaving(false);
+      setIsNavigating(false);
     }
   };
 
@@ -1571,6 +1625,7 @@ export default function App() {
     if (isSendingMessage) return;
     
     setIsSendingMessage(true);
+    setIsNavigating(true);
     try {
       const newMessage = {
         ...contactData,
@@ -1582,11 +1637,13 @@ export default function App() {
       
       setMessageSent(true);
       setContactData({ name: "", email: "", mobile: "", message: "" });
+      setIsNavigating(false);
     } catch (error) {
       console.error("Failed to send message:", error);
       handleFirestoreError(error, OperationType.CREATE, "messages");
     } finally {
       setIsSendingMessage(false);
+      setIsNavigating(false);
     }
   };
 
@@ -1615,50 +1672,63 @@ export default function App() {
     }
   };
 
+  // Prevent body scroll when loader is active
+  useEffect(() => {
+    if (isNavigating || showSplash) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+  }, [isNavigating, showSplash]);
+
   return (
     <>
       <CustomCursor theme={theme} isMobile={isMobile} />
+      <AnimatePresence>
+        {isNavigating && <PageLoader theme={theme} />}
+      </AnimatePresence>
       <AnimatePresence mode="wait">
         {showSplash ? (
-        <motion.div
-          key="splash"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className={`fixed inset-0 z-[100] flex flex-col items-center justify-center ${theme === "dark" ? "bg-[#0a0a0a]" : "bg-white"}`}
-        >
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="relative"
-        >
-          <div className="w-24 h-24 rounded-full border-4 border-purple-500/20 border-t-purple-500 animate-spin" />
-          <div className="absolute inset-0 flex items-center justify-center">
+          <motion.div
+            key="splash"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className={`fixed inset-0 z-[100] flex flex-col items-center justify-center ${theme === "dark" ? "bg-[#0a0a0a]" : "bg-white"}`}
+          >
             <motion.div
-              animate={{ opacity: [0.4, 1, 0.4] }}
-              transition={{ duration: 2, repeat: Infinity }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className="relative"
             >
-              <ShoppingBag className="w-8 h-8 text-purple-500" />
+              <div className="w-24 h-24 rounded-full border-4 border-purple-500/20 border-t-purple-500 animate-spin" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <motion.div
+                  animate={{ opacity: [0.4, 1, 0.4] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <ShoppingBag className="w-8 h-8 text-purple-500" />
+                </motion.div>
+              </div>
             </motion.div>
-          </div>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="mt-8 text-center"
-        >
-          <h1 className="text-xl font-black tracking-[0.2em] uppercase mb-2">Renu Fashion Hub</h1>
-          <div className="flex items-center justify-center gap-2">
-            <div className="w-1 h-1 rounded-full bg-purple-500 animate-bounce [animation-delay:-0.3s]" />
-            <div className="w-1 h-1 rounded-full bg-purple-500 animate-bounce [animation-delay:-0.15s]" />
-            <div className="w-1 h-1 rounded-full bg-purple-500 animate-bounce" />
-          </div>
-        </motion.div>
-      </motion.div>
-      ) : (
-        <Routes location={location}>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="mt-8 text-center"
+            >
+              <h1 className="text-xl font-black tracking-[0.2em] uppercase mb-2">Renu Fashion Hub</h1>
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-1 h-1 rounded-full bg-purple-500 animate-bounce [animation-delay:-0.3s]" />
+                <div className="w-1 h-1 rounded-full bg-purple-500 animate-bounce [animation-delay:-0.15s]" />
+                <div className="w-1 h-1 rounded-full bg-purple-500 animate-bounce" />
+              </div>
+            </motion.div>
+          </motion.div>
+        ) : (
+          <div className="min-h-screen">
+            <Routes location={location}>
           <Route path="/admin" element={
         <motion.div
           key="admin"
@@ -2407,7 +2477,7 @@ export default function App() {
             </button>
             <button 
               type="button"
-              onClick={() => navigate("/")}
+              onClick={() => handleNavigate("/")}
               className={`w-full py-2 ${theme === "dark" ? "text-white/40 hover:text-white" : "text-black/40 hover:text-black"} text-sm transition-colors`}
             >
               Cancel
@@ -2428,7 +2498,7 @@ export default function App() {
         <div className="max-w-md mx-auto pt-12">
           <button 
             onClick={() => {
-              navigate("/");
+              handleNavigate("/");
               setMessageSent(false);
             }}
             className={`flex items-center gap-2 ${theme === "dark" ? "text-white/60 hover:text-white" : "text-black/60 hover:text-black"} transition-colors mb-8 group`}
@@ -2565,7 +2635,7 @@ export default function App() {
         {/* Header Actions */}
         <div className="absolute top-6 left-6 flex gap-3">
           <button 
-            onClick={() => navigate("/login")}
+            onClick={() => handleNavigate("/login")}
             className={`p-2 rounded-full ${theme === "dark" ? "bg-white/5 hover:bg-white/10 border-white/10" : "bg-black/5 hover:bg-black/10 border-black/10"} transition-colors border group`}
             title="Admin Access"
           >
@@ -2948,8 +3018,9 @@ export default function App() {
           <Route path="/product/:id" element={<ProductDetailPage products={products} theme={theme} navigate={handleNavigate} db={db} />} />
           <Route path="/post/:id" element={<PostDetailPage posts={posts} products={products} profile={profile} theme={theme} navigate={handleNavigate} isMuted={isMuted} setIsMuted={setIsMuted} />} />
         </Routes>
-      )}
-    </AnimatePresence>
+          </div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
