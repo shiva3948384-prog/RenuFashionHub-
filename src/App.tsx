@@ -1225,7 +1225,7 @@ export default function App() {
   
   const [profile, setProfile] = useState({
     name: "Renu Fashion Hub",
-    bio: "Loading...",
+    bio: "Premium Fashion • Latest Trends • Style Hub\nElevating your style every day ✨",
     avatar: "",
   });
 
