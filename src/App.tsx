@@ -73,7 +73,7 @@ import {
 
 // Initial Mock Data
 const INITIAL_SOCIAL_LINKS = [
-  { icon: Instagram, href: "https://www.instagram.com/renufashionhub_?igsh=MTFmbGdlanNwenU0MQ==", label: "Instagram", followers: "1.2M", handle: "@renu_agarwal_vlogs", color: "text-pink-500" },
+  { icon: Instagram, href: "https://www.instagram.com/renufashionhub_?igsh=MTFmbGdlanNwenU0MQ==", label: "Instagram", followers: "1.2M", handle: "@renufashionhub_", color: "text-pink-500" },
   { icon: Youtube, href: "https://youtube.com/@renuagarwalvlogs?si=wX0iLDVP5O_in8z8", label: "YouTube", followers: "666K", handle: "@renuagarwalvlogs", color: "text-red-500" },
   { icon: Facebook, href: "https://www.facebook.com/share/17YfgJkGda/", label: "Facebook", followers: "50K", handle: "Renu Fashion Hub", color: "text-blue-500" },
 ];
