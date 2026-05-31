@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useRef, FormEvent, ChangeEvent, useEffect, useMemo, useCallback } from "react";
-import { Routes, Route, Link, useNavigate, useParams, useLocation } from "react-router-dom";
+import { Routes, Route, Link, useNavigate, useParams, useLocation, Navigate } from "react-router-dom";
 import { get, set } from "idb-keyval";
 import { motion, AnimatePresence } from "motion/react";
 import { 
@@ -68,12 +68,15 @@ import {
   Moon,
   Eye,
   EyeOff,
-  Star
+  Star,
+  Search,
+  Sparkles,
+  ArrowUpDown
 } from "lucide-react";
 
 // Initial Mock Data
 const INITIAL_SOCIAL_LINKS = [
-  { icon: Instagram, href: "https://www.instagram.com/renufashionhub_?igsh=MTFmbGdlanNwenU0MQ==", label: "Instagram", followers: "1.2M", handle: "@renufashionhub_", color: "text-pink-500" },
+  { icon: Instagram, href: "https://www.instagram.com/renu_agarwal_vlogs?igsh=djdnMGZ2dGY4d3Y3", label: "Instagram", followers: "1.2M", handle: "@renu_agarwal_vlogs", color: "text-pink-500" },
   { icon: Youtube, href: "https://youtube.com/@renuagarwalvlogs?si=wX0iLDVP5O_in8z8", label: "YouTube", followers: "666K", handle: "@renuagarwalvlogs", color: "text-red-500" },
   { icon: Facebook, href: "https://www.facebook.com/share/17YfgJkGda/", label: "Facebook", followers: "50K", handle: "Renu Fashion Hub", color: "text-blue-500" },
 ];
@@ -372,35 +375,107 @@ const VideoEmbed = React.memo(({ url, isMuted = true, minimal = false, isPlaying
 });
 
 const CustomCursor = ({ theme, isMobile }: { theme: string, isMobile: boolean }) => {
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [isPointer, setIsPointer] = useState(false);
-  const [isClicking, setIsClicking] = useState(false);
   const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
-  const [isVisible, setIsVisible] = useState(false);
+  const dotRef = useRef<HTMLDivElement>(null);
+  const ringRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (isMobile) return;
+
+    let requestRef: number;
+    let targetX = 0;
+    let targetY = 0;
+    let dotX = 0;
+    let dotY = 0;
+    let ringX = 0;
+    let ringY = 0;
+
     const handleMouseMove = (e: MouseEvent) => {
-      if (isMobile) return;
-      setMousePos({ x: e.clientX, y: e.clientY });
-      setIsVisible(true);
+      targetX = e.clientX;
+      targetY = e.clientY;
+      
       const target = e.target as HTMLElement;
-      setIsPointer(window.getComputedStyle(target).cursor === "pointer" || target.tagName === "BUTTON" || target.tagName === "A");
+      const isPointer = window.getComputedStyle(target).cursor === "pointer" || 
+                        target.tagName === "BUTTON" || 
+                        target.tagName === "A" ||
+                        !!target.closest("button") || 
+                        !!target.closest("a");
+
+      if (dotRef.current && ringRef.current) {
+        dotRef.current.style.opacity = "1";
+        ringRef.current.style.opacity = "1";
+        if (isPointer) {
+          dotRef.current.style.transform = `translate3d(${dotX - 6}px, ${dotY - 6}px, 0) scale(1.3)`;
+          ringRef.current.style.transform = `translate3d(${ringX - 20}px, ${ringY - 20}px, 0) scale(1.6)`;
+          ringRef.current.style.borderWidth = "1px";
+        } else {
+          dotRef.current.style.transform = `translate3d(${dotX - 6}px, ${dotY - 6}px, 0) scale(1)`;
+          ringRef.current.style.transform = `translate3d(${ringX - 20}px, ${ringY - 20}px, 0) scale(1)`;
+          ringRef.current.style.borderWidth = "2px";
+        }
+      }
     };
 
-    const handleMouseDown = (e: MouseEvent) => {
-      setIsClicking(true);
+    const handleMouseDown = () => {
+      if (dotRef.current && ringRef.current) {
+        dotRef.current.style.transform = `translate3d(${dotX - 6}px, ${dotY - 6}px, 0) scale(0.6)`;
+        ringRef.current.style.transform = `translate3d(${ringX - 20}px, ${ringY - 20}px, 0) scale(1.4)`;
+      }
+    };
+
+    const handleMouseUp = () => {
+      if (dotRef.current && ringRef.current) {
+        dotRef.current.style.transform = `translate3d(${dotX - 6}px, ${dotY - 6}px, 0) scale(1)`;
+        ringRef.current.style.transform = `translate3d(${ringX - 20}px, ${ringY - 20}px, 0) scale(1)`;
+      }
+    };
+
+    const tick = () => {
+      const dotEase = 0.25;
+      const ringEase = 0.12;
+      
+      dotX += (targetX - dotX) * dotEase;
+      dotY += (targetY - dotY) * dotEase;
+      
+      ringX += (targetX - ringX) * ringEase;
+      ringY += (targetY - ringY) * ringEase;
+
+      if (dotRef.current) {
+        dotRef.current.style.transform = `translate3d(${dotX - 6}px, ${dotY - 6}px, 0)`;
+      }
+      if (ringRef.current) {
+        ringRef.current.style.transform = `translate3d(${ringX - 20}px, ${ringY - 20}px, 0)`;
+      }
+
+      requestRef = requestAnimationFrame(tick);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    window.addEventListener("mousedown", handleMouseDown, { passive: true });
+    window.addEventListener("mouseup", handleMouseUp, { passive: true });
+    
+    requestRef = requestAnimationFrame(tick);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mouseup", handleMouseUp);
+      cancelAnimationFrame(requestRef);
+    };
+  }, [isMobile]);
+
+  useEffect(() => {
+    const handleMouseDownGlobal = (e: MouseEvent) => {
       addRipple(e.clientX, e.clientY);
     };
 
-    const handleTouchStart = (e: TouchEvent) => {
+    const handleTouchStartGlobal = (e: TouchEvent) => {
       if (e.touches.length > 0) {
         addRipple(e.touches[0].clientX, e.touches[0].clientY);
       }
     };
 
-    const handleMouseUp = () => setIsClicking(false);
-
-    const handleCustomRipple = (e: any) => {
+    const handleCustomRippleGlobal = (e: any) => {
       if (e.detail) {
         addRipple(e.detail.x, e.detail.y);
       }
@@ -414,54 +489,36 @@ const CustomCursor = ({ theme, isMobile }: { theme: string, isMobile: boolean })
       }, 600);
     };
 
-    window.addEventListener("mousemove", handleMouseMove, { passive: true });
-    window.addEventListener("mousedown", handleMouseDown, { passive: true });
-    window.addEventListener("mouseup", handleMouseUp, { passive: true });
-    window.addEventListener("touchstart", handleTouchStart, { passive: true });
-    window.addEventListener("custom-ripple", handleCustomRipple);
+    window.addEventListener("mousedown", handleMouseDownGlobal, { passive: true });
+    window.addEventListener("touchstart", handleTouchStartGlobal, { passive: true });
+    window.addEventListener("custom-ripple", handleCustomRippleGlobal);
 
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mousedown", handleMouseDown);
-      window.removeEventListener("mouseup", handleMouseUp);
-      window.removeEventListener("touchstart", handleTouchStart);
-      window.removeEventListener("custom-ripple", handleCustomRipple);
+      window.removeEventListener("mousedown", handleMouseDownGlobal);
+      window.removeEventListener("touchstart", handleTouchStartGlobal);
+      window.removeEventListener("custom-ripple", handleCustomRippleGlobal);
     };
-  }, [isMobile]);
+  }, []);
 
   return (
     <>
-      {/* Desktop Trailing Cursor */}
       {!isMobile && (
-        <div className="hidden md:block pointer-events-none fixed inset-0 z-[9999]">
-          {/* Main Dot */}
-          <motion.div
-            className="fixed top-0 left-0 w-3 h-3 bg-purple-500 rounded-full shadow-[0_0_15px_rgba(168,85,247,0.5)]"
-            animate={{
-              x: mousePos.x - 6,
-              y: mousePos.y - 6,
-              scale: isClicking ? 0.6 : isPointer ? 1.2 : 1,
-              opacity: isVisible ? 1 : 0
-            }}
-            transition={{ type: "spring", damping: 30, stiffness: 1000, mass: 0.1 }}
+        <div className="hidden md:block pointer-events-none fixed inset-0 z-[100000]">
+          <div
+            ref={dotRef}
+            style={{ opacity: 0, position: 'fixed', width: '12px', height: '12px' }}
+            className="bg-amber-500 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.5)] transition-[opacity] duration-150 ease-out"
           />
-          {/* Trailing Ring */}
-          <motion.div
-            className="fixed top-0 left-0 w-10 h-10 border-2 border-purple-500/40 rounded-full"
-            animate={{
-              x: mousePos.x - 20,
-              y: mousePos.y - 20,
-              scale: isClicking ? 1.4 : isPointer ? 1.8 : 1,
-              opacity: isVisible ? 1 : 0,
-              borderWidth: isPointer ? "1px" : "2px"
-            }}
-            transition={{ type: "spring", damping: 25, stiffness: 250, mass: 0.5 }}
+          <div
+            ref={ringRef}
+            style={{ opacity: 0, position: 'fixed', width: '40px', height: '40px' }}
+            className="border-2 border-amber-500/40 rounded-full transition-[opacity] duration-200 ease-out"
           />
         </div>
       )}
 
       {/* Ripple Effect (Desktop & Mobile) */}
-      <div className="fixed inset-0 pointer-events-none z-[9998] overflow-hidden">
+      <div className="fixed inset-0 pointer-events-none z-[99999] overflow-hidden">
         <AnimatePresence>
           {ripples.map((ripple) => (
             <motion.div
@@ -470,7 +527,7 @@ const CustomCursor = ({ theme, isMobile }: { theme: string, isMobile: boolean })
               animate={{ opacity: 0, scale: isMobile ? 4 : 6 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5, ease: "easeOut" }}
-              className="absolute w-12 h-12 border-4 border-purple-500 rounded-full shadow-[0_0_30px_rgba(168,85,247,0.6)]"
+              className="absolute w-12 h-12 border-4 border-amber-500 rounded-full shadow-[0_0_30px_rgba(245,158,11,0.6)]"
               style={{ left: ripple.x - 24, top: ripple.y - 24 }}
             />
           ))}
@@ -489,7 +546,7 @@ const PremiumButton = ({ children, onClick, className = "", variant = "primary",
       initial="initial"
       className={`group relative overflow-hidden px-6 py-4 rounded-2xl font-black text-sm transition-all duration-500 will-change-transform ${className} ${
         variant === "primary" 
-          ? "border-2 border-purple-500 text-purple-500" 
+          ? "border-2 border-amber-500 text-amber-500" 
           : "border-2 border-white/20 text-white"
       }`}
     >
@@ -500,12 +557,12 @@ const PremiumButton = ({ children, onClick, className = "", variant = "primary",
           tap: { scale: 0.95 }
         }}
         transition={{ type: "tween", ease: [0.22, 1, 0.36, 1], duration: 0.4 }}
-        className={`absolute inset-0 -z-10 ${variant === "primary" ? "bg-purple-500" : "bg-white"}`}
+        className={`absolute inset-0 -z-10 ${variant === "primary" ? "bg-amber-500" : "bg-white"}`}
       />
       <motion.div
         variants={{
-          initial: { color: variant === "primary" ? "#a855f7" : "#ffffff" },
-          hover: { color: variant === "primary" ? "#ffffff" : "#000000" }
+          initial: { color: variant === "primary" ? "#f59e0b" : "#ffffff" },
+          hover: { color: variant === "primary" ? "#0b1512" : "#000000" }
         }}
         transition={{ duration: 0.3 }}
         className="relative z-10 flex items-center justify-center gap-3"
@@ -517,7 +574,7 @@ const PremiumButton = ({ children, onClick, className = "", variant = "primary",
   );
 };
 
-const InteractiveStarRating = ({ rating, onChange, theme }: { rating: number; onChange: (rating: number) => void; theme: string }) => {
+const InteractiveStarRating = ({ rating, onChange, theme, triggerSuccess }: { rating: number; onChange: (rating: number) => void; theme: string; triggerSuccess?: boolean }) => {
   const [activeRating, setActiveRating] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -557,19 +614,27 @@ const InteractiveStarRating = ({ rating, onChange, theme }: { rating: number; on
         setActiveRating(null);
       }}
     >
-      {[1, 2, 3, 4, 5].map((star) => {
+      {[1, 2, 3, 4, 5].map((star, idx) => {
         const isActive = star <= (activeRating ?? rating);
         const isCurrentActive = star === activeRating;
         
         return (
           <motion.div
             key={star}
-            animate={{ 
+            animate={triggerSuccess ? {
+              scale: [1, 1.4, 1.1, 1],
+              rotate: [0, 15, -15, 0],
+              color: "#eab308"
+            } : { 
               scale: isCurrentActive ? 1.8 : 1,
               y: isCurrentActive ? -12 : 0,
               color: isActive ? "#eab308" : (theme === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)")
             }}
-            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+            transition={triggerSuccess ? {
+              duration: 0.5,
+              delay: idx * 0.05,
+              ease: "easeInOut"
+            } : { type: "spring", stiffness: 500, damping: 30 }}
             className="relative"
           >
             <Star 
@@ -588,15 +653,22 @@ const InteractiveStarRating = ({ rating, onChange, theme }: { rating: number; on
   );
 };
 
-const ProductDetailPage = ({ products, theme, navigate, db }: { products: any[]; theme: string; navigate: any; db: any }) => {
+const ProductDetailPage = ({ products, theme, navigate, db, isLoaded }: { products: any[]; theme: string; navigate: any; db: any; isLoaded: boolean }) => {
   const { id } = useParams();
   const product = products.find(p => p.id.toString() === id || p.docId === id);
   const [newReview, setNewReview] = useState({ user: "", rating: 5, comment: "" });
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [triggerSuccessStars, setTriggerSuccessStars] = useState(false);
+  const [showCopiedToast, setShowCopiedToast] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const reviewsContainerRef = useRef<HTMLDivElement>(null);
 
   if (!product) {
+    if (!isLoaded) {
+      return <PageLoader theme={theme} />;
+    }
     return (
-      <div className={`min-h-screen ${theme === "dark" ? "bg-[#0a0a0a] text-white" : "bg-white text-black"} flex items-center justify-center p-6`}>
+      <div className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-amber-50" : "bg-[#FDFBF7] text-[#1C1B18]"} flex items-center justify-center p-6`}>
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Product Not Found</h1>
           <button onClick={() => navigate("/")} className="px-6 py-2 bg-purple-600 rounded-xl text-white">Back to Home</button>
@@ -619,6 +691,18 @@ const ProductDetailPage = ({ products, theme, navigate, db }: { products: any[];
       const productRef = doc(db, "products", product.docId || String(product.id));
       await updateDoc(productRef, { reviews: updatedReviews });
       setNewReview({ user: "", rating: 5, comment: "" });
+
+      // Animate star rating components
+      setTriggerSuccessStars(true);
+      setTimeout(() => {
+        setTriggerSuccessStars(false);
+      }, 1500);
+
+      // Smooth scroll to the top of the reviews section once submitted
+      setTimeout(() => {
+        reviewsContainerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 200);
+
     } catch (error) {
       console.error("Error adding review:", error);
       alert("Failed to add review. Please try again.");
@@ -627,12 +711,26 @@ const ProductDetailPage = ({ products, theme, navigate, db }: { products: any[];
     }
   };
 
+  const handleCopyProductLink = () => {
+    const linkToCopy = product.buyUrl || window.location.href;
+    navigator.clipboard.writeText(linkToCopy)
+      .then(() => {
+        setShowCopiedToast(true);
+        setTimeout(() => {
+          setShowCopiedToast(false);
+        }, 2000);
+      })
+      .catch((err) => {
+        console.error("Failed to copy link: ", err);
+      });
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`min-h-screen ${theme === "dark" ? "bg-[#0a0a0a] text-white" : "bg-white text-black"} p-6 pb-24`}
+      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-amber-50" : "bg-[#FDFBF7] text-[#1C1B18]"} p-6 pb-24`}
     >
       <div className="max-w-md mx-auto">
         <button 
@@ -655,23 +753,45 @@ const ProductDetailPage = ({ products, theme, navigate, db }: { products: any[];
           </div>
         )}
 
-        {product.buyUrl && (
-          <PremiumButton
-            onClick={() => window.open(product.buyUrl, "_blank")}
-            className="w-full mb-12"
-            icon={ShoppingBag}
+        <div className="flex gap-3 mb-12">
+          {product.buyUrl && (
+            <PremiumButton
+              onClick={() => window.open(product.buyUrl, "_blank")}
+              className="flex-[2]"
+              icon={ShoppingBag}
+            >
+              Buy Now
+            </PremiumButton>
+          )}
+          <button
+            onClick={() => setShowShareModal(true)}
+            className={`flex items-center justify-center gap-2 px-5 py-4 rounded-3xl border font-bold text-xs uppercase tracking-wider transition-all duration-300 hover:scale-[1.03] active:scale-95 ${
+              theme === "dark" 
+                ? "bg-white/5 hover:bg-white/10 border-white/10 text-amber-50 hover:border-amber-500/40" 
+                : "bg-black/5 hover:bg-black/10 border-black/10 text-[#1C1B18] hover:border-purple-600/40"
+            } ${product.buyUrl ? 'flex-1' : 'w-full'}`}
+            title="Share & Copy Link"
           >
-            Buy Now
-          </PremiumButton>
-        )}
+            <Share2 className="w-4 h-4" />
+            <span>Copy / Share</span>
+          </button>
+        </div>
 
         {/* Reviews Section */}
-        <div className="space-y-8">
+        <div ref={reviewsContainerRef} className="space-y-8 scroll-mt-24">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-bold">Reviews</h3>
-            <div className="flex items-center gap-1">
-              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-              <span className="text-sm font-bold">
+            <div className="flex items-center gap-1.5 bg-yellow-500/5 px-2.5 py-1 rounded-lg border border-yellow-500/10">
+              <motion.div
+                animate={triggerSuccessStars ? {
+                  scale: [1, 1.5, 1],
+                  rotate: [0, 360],
+                } : {}}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+              >
+                <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+              </motion.div>
+              <span className="text-sm font-bold text-yellow-500">
                 {product.reviews?.length > 0 
                   ? (product.reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / product.reviews.length).toFixed(1)
                   : "0.0"}
@@ -687,6 +807,7 @@ const ProductDetailPage = ({ products, theme, navigate, db }: { products: any[];
               rating={newReview.rating} 
               onChange={(r) => setNewReview({ ...newReview, rating: r })} 
               theme={theme}
+              triggerSuccess={triggerSuccessStars}
             />
             <input 
               type="text"
@@ -713,34 +834,76 @@ const ProductDetailPage = ({ products, theme, navigate, db }: { products: any[];
 
           {/* Reviews List */}
           <div className="space-y-4">
-            {product.reviews?.length > 0 ? (
-              product.reviews.map((review: any) => (
-                <div key={review.id} className={`p-4 rounded-2xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border`}>
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <p className="text-sm font-bold">{review.user}</p>
-                      <div className="flex gap-0.5 mt-0.5">
-                        {[1, 2, 3, 4, 5].map((s) => (
-                          <Star key={s} className={`w-3 h-3 ${s <= review.rating ? "text-yellow-500 fill-yellow-500" : "text-white/10"}`} />
-                        ))}
+            <AnimatePresence initial={false}>
+              {product.reviews?.length > 0 ? (
+                [...product.reviews].reverse().map((review: any, idx: number) => (
+                  <motion.div 
+                    key={review.id || idx} 
+                    initial={{ opacity: 0, y: 15, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.35, ease: "easeOut" }}
+                    className={`p-4 rounded-2xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border`}
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <p className="text-sm font-bold">{review.user}</p>
+                        <div className="flex gap-0.5 mt-0.5">
+                          {[1, 2, 3, 4, 5].map((s) => (
+                            <Star key={s} className={`w-3 h-3 ${s <= review.rating ? "text-yellow-500 fill-yellow-500" : "text-white/10"}`} />
+                          ))}
+                        </div>
                       </div>
+                      <p className="text-[10px] opacity-40">{new Date(review.date).toLocaleDateString()}</p>
                     </div>
-                    <p className="text-[10px] opacity-40">{new Date(review.date).toLocaleDateString()}</p>
-                  </div>
-                  <p className="text-sm opacity-70">{review.comment}</p>
-                </div>
-              ))
-            ) : (
-              <p className="text-center py-8 text-sm opacity-40 italic">No reviews yet. Be the first to review!</p>
-            )}
+                    <p className="text-sm opacity-70">{review.comment}</p>
+                  </motion.div>
+                ))
+              ) : (
+                <p className="text-center py-8 text-sm opacity-40 italic">No reviews yet. Be the first to review!</p>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>
+
+      {/* Copy Link Toast Notification */}
+      <AnimatePresence>
+        {showCopiedToast && (
+          <motion.div 
+            initial={{ opacity: 0, y: 55, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 25, scale: 0.95 }}
+            className={`fixed bottom-24 left-1/2 -translate-x-1/2 z-[150] px-6 py-3.5 rounded-full ${
+              theme === "dark" 
+                ? "bg-amber-500 text-stone-950 shadow-amber-500/20 border border-amber-400/20" 
+                : "bg-stone-900 text-stone-50 shadow-black/20 border border-stone-800"
+            } font-extrabold text-xs tracking-wider uppercase flex items-center gap-2 shadow-2xl transition-all`}
+          >
+            <Check className="w-4 h-4 animate-bounce" />
+            Link Copied!
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Share Modal */}
+      <AnimatePresence>
+        {showShareModal && (
+          <ShareModal
+            isOpen={showShareModal}
+            onClose={() => setShowShareModal(false)}
+            profileName={product.name}
+            customUrl={`http://renufashionhub.in/product/${product.id}`}
+            customTitle={`Renu Fashion Hub - Check out ${product.name}`}
+            theme={theme}
+          />
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };
 
-const PostDetailPage = ({ posts, products, profile, theme, navigate, isMuted, setIsMuted }: { posts: any[]; products: any[]; profile: any; theme: string; navigate: any; isMuted: boolean; setIsMuted: any }) => {
+const PostDetailPage = ({ posts, products, profile, theme, navigate, isMuted, setIsMuted, isLoaded }: { posts: any[]; products: any[]; profile: any; theme: string; navigate: any; isMuted: boolean; setIsMuted: any; isLoaded: boolean }) => {
   const { id } = useParams();
   const currentIndex = posts.findIndex(p => p.id.toString() === id || p.docId === id);
   const post = posts[currentIndex];
@@ -755,8 +918,11 @@ const PostDetailPage = ({ posts, products, profile, theme, navigate, isMuted, se
   }, [showControls]);
 
   if (!post) {
+    if (!isLoaded) {
+      return <PageLoader theme={theme} />;
+    }
     return (
-      <div className={`min-h-screen ${theme === "dark" ? "bg-[#0a0a0a] text-white" : "bg-white text-black"} flex items-center justify-center p-6`}>
+      <div className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-amber-50" : "bg-[#FDFBF7] text-[#1C1B18]"} flex items-center justify-center p-6`}>
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Post Not Found</h1>
           <button onClick={() => navigate("/")} className="px-6 py-2 bg-purple-600 rounded-xl text-white">Back to Home</button>
@@ -891,7 +1057,7 @@ const PostDetailPage = ({ posts, products, profile, theme, navigate, isMuted, se
 
         {post.taggedProducts && post.taggedProducts.length > 0 && (
           <div className="space-y-4">
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x">
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x" onWheel={(e) => { if (e.deltaY !== 0) { e.currentTarget.scrollLeft += e.deltaY; } }}>
               {post.taggedProducts.map((productId: number) => {
                 const product = products.find((p: any) => p.id === productId);
                 if (!product) return null;
@@ -920,6 +1086,574 @@ const PostDetailPage = ({ posts, products, profile, theme, navigate, isMuted, se
     </motion.div>
   );
 };
+
+// ----------------- Premium Designer Sub-components -----------------
+
+const AnnouncementBanner = React.memo(({ theme }: { theme: "light" | "dark" }) => {
+  return (
+    <div className={`w-full py-2.5 overflow-hidden text-center relative z-50 border-b ${
+      theme === "dark" 
+        ? "bg-amber-950/20 text-amber-200 border-amber-500/20" 
+        : "bg-amber-50 text-amber-800 border-amber-100"
+    } text-[11px] font-medium tracking-wide`}>
+      <style>{`
+        @keyframes marquee {
+          0% { transform: translateX(50%); }
+          100% { transform: translateX(-150%); }
+        }
+        .animate-marquee-css {
+          display: inline-block;
+          white-space: nowrap;
+          padding-left: 20px;
+          animation: marquee 26s linear infinite;
+        }
+        .animate-marquee-css:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
+      <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10 flex items-center bg-transparent pointer-events-none">
+        <Sparkles className="w-3.5 h-3.5 text-amber-500 animate-pulse mr-1" />
+      </div>
+      <div className="animate-marquee-css">
+        <span className="mx-6">✨ Premium Handpicked Boutique Styling Recommendations curated by Renu Agarwal ✨</span>
+        <span className="mx-6 opacity-30">•</span>
+        <span className="mx-6">🛍️ Click on any product to directly find best purchases from top trusted affiliate stores 🛍️</span>
+        <span className="mx-6 opacity-30">•</span>
+        <span className="mx-6">🌟 Discover top trending Indian Ethnic wears, sarees & designer suit sets curated daily 🌟</span>
+        <span className="mx-6 opacity-30">•</span>
+        <span className="mx-6">🎯 Verified Direct Links to purchase styles and dresses from top fashion stores online! 🎯</span>
+      </div>
+    </div>
+  );
+});
+
+const autoDetectCategory = (name: string, description: string): string => {
+  const text = `${name || ""} ${description || ""}`.toLowerCase();
+  
+  if (
+    text.includes("saree") || text.includes("sari") || text.includes("zari") || 
+    text.includes("organza") || text.includes("georgette") || text.includes("banarasi") || 
+    text.includes("drape") || text.includes("silk") || text.includes("kanjivaram") || 
+    text.includes("chanderi") || text.includes("patola") || text.includes("bandhani") || 
+    text.includes("chiffon") || text.includes("linen") || text.includes("pallu") || 
+    text.includes("paithani") || text.includes("leheriya") || text.includes("kanchi") || 
+    text.includes("pattu") || text.includes("crepe")
+  ) {
+    return "Sarees";
+  }
+  
+  if (
+    text.includes("kurta") || text.includes("kurti") || text.includes("tunic") || 
+    text.includes("anarkali") || text.includes("suit") || text.includes("salwar") || 
+    text.includes("kameez") || text.includes("sharara") || text.includes("gharara") || 
+    text.includes("palazzo") || text.includes("dupatta") || text.includes("chikankari") || 
+    text.includes("ethnic set") || text.includes("co-ord") || text.includes("kaftan") || 
+    text.includes("angrakha") || text.includes("peplum")
+  ) {
+    return "Kurtas";
+  }
+  
+  if (
+    text.includes("lehenga") || text.includes("choli") || text.includes("ghagra") || 
+    text.includes("lehanga") || text.includes("lacha") || text.includes("crop top skirt")
+  ) {
+    return "Lehengas";
+  }
+  
+  if (
+    text.includes("dress") || text.includes("gown") || text.includes("one-piece") || 
+    text.includes("frock") || text.includes("maxi") || text.includes("skirt") || 
+    text.includes("midi") || text.includes("bodycon") || text.includes("jumpsuit") || 
+    text.includes("western")
+  ) {
+    return "Dresses";
+  }
+  
+  if (
+    text.includes("jewelry") || text.includes("jewellery") || text.includes("earring") || 
+    text.includes("ring") || text.includes("necklace") || text.includes("bangle") || 
+    text.includes("jhumka") || text.includes("payal") || text.includes("chuda") || 
+    text.includes("pendant") || text.includes("choker") || text.includes("nosepin") || 
+    text.includes("anklet") || text.includes("kundan")
+  ) {
+    return "Jewelry";
+  }
+  
+  return "Other";
+};
+
+const getPostCategory = (post: any, products: any[]): string => {
+  if (post.category && post.category.toLowerCase() !== "other") {
+    return post.category;
+  }
+  if (post.taggedProducts && post.taggedProducts.length > 0) {
+    for (const pId of post.taggedProducts) {
+      const prod = products.find((p: any) => p.id === pId);
+      if (prod && prod.category && prod.category.toLowerCase() !== "other") {
+        return prod.category;
+      }
+    }
+  }
+  const text = `${post.name || ""} ${post.caption || ""} ${post.description || ""}`.trim();
+  const detected = autoDetectCategory(text, "");
+  if (detected && detected.toLowerCase() !== "other") {
+    return detected;
+  }
+  if (post.taggedProducts && post.taggedProducts.length > 0) {
+    for (const pId of post.taggedProducts) {
+      const prod = products.find((p: any) => p.id === pId);
+      if (prod) {
+        const detectedProductCat = autoDetectCategory(prod.name, prod.description || "");
+        if (detectedProductCat && detectedProductCat.toLowerCase() !== "other") {
+          return detectedProductCat;
+        }
+      }
+    }
+  }
+  return "Other";
+};
+
+const getQueryCategorySense = (query: string): string | null => {
+  const q = query.toLowerCase().trim();
+  if (!q) return null;
+  
+  if (
+    q.includes("saree") || q.includes("sari") || q.includes("zari") || 
+    q.includes("organza") || q.includes("georgette") || q.includes("banarasi") || 
+    q.includes("drape") || q.includes("silk") || q.includes("kanjivaram") || 
+    q.includes("chanderi") || q.includes("patola") || q.includes("bandhani") || 
+    q.includes("chiffon") || q.includes("linen") || q.includes("pallu") || 
+    q.includes("paithani") || q.includes("leheriya") || q.includes("kanchi") || 
+    q.includes("pattu") || q.includes("crepe")
+  ) {
+    return "Sarees";
+  }
+  
+  if (
+    q.includes("kurta") || q.includes("kurti") || q.includes("tunic") || 
+    q.includes("anarkali") || q.includes("suit") || q.includes("salwar") || 
+    q.includes("kameez") || q.includes("sharara") || q.includes("gharara") || 
+    q.includes("palazzo") || q.includes("dupatta") || q.includes("chikankari") || 
+    q.includes("ethnic") || q.includes("co-ord") || q.includes("kaftan") || 
+    q.includes("angrakha") || q.includes("peplum")
+  ) {
+    return "Kurtas";
+  }
+  
+  if (
+    q.includes("lehenga") || q.includes("choli") || q.includes("ghagra") || 
+    q.includes("lehanga") || q.includes("lacha")
+  ) {
+    return "Lehengas";
+  }
+  
+  if (
+    q.includes("dress") || q.includes("gown") || q.includes("one-piece") || 
+    q.includes("frock") || q.includes("maxi") || q.includes("skirt") || 
+    q.includes("midi") || q.includes("bodycon") || q.includes("jumpsuit") || 
+    q.includes("western")
+  ) {
+    return "Dresses";
+  }
+  
+  if (
+    q.includes("jewelry") || q.includes("jewellery") || q.includes("earring") || 
+    q.includes("ring") || q.includes("necklace") || q.includes("bangle") || 
+    q.includes("jhumka") || q.includes("payal") || q.includes("chuda") || 
+    q.includes("pendant") || q.includes("choker") || q.includes("nosepin") || 
+    q.includes("anklet") || q.includes("kundan")
+  ) {
+    return "Jewelry";
+  }
+  
+  return null;
+};
+
+const checkSemanticMatch = (name: string, description: string, caption: string, category: string, queryText: string): boolean => {
+  const normQuery = queryText.toLowerCase().trim();
+  if (!normQuery) return true;
+
+  const titleLower = (name || "").toLowerCase();
+  const descLower = (description || "").toLowerCase();
+  const capLower = (caption || "").toLowerCase();
+  const catLower = (category || "").toLowerCase();
+
+  // Primary Check: exact substring match
+  if (
+    titleLower.includes(normQuery) || 
+    descLower.includes(normQuery) || 
+    capLower.includes(normQuery) || 
+    catLower.includes(normQuery)
+  ) {
+    return true;
+  }
+
+  // Plurals and Singular mappings: e.g. query "sarees" against item title "saree"
+  const sanitizeStem = (word: string): string => {
+    let stem = word.trim().toLowerCase();
+    if (stem.endsWith("ies")) {
+      return stem.slice(0, -3) + "y"; // kurtis -> kurti
+    }
+    if (stem.endsWith("es") && !stem.endsWith("ss")) {
+      return stem.slice(0, -2); // sarees -> saree, dresses -> dress
+    }
+    if (stem.endsWith("s") && !stem.endsWith("ss")) {
+      return stem.slice(0, -1); // kurtas -> kurta, lehengas -> lehenga, suits -> suit
+    }
+    return stem;
+  };
+
+  const stemmedQueryMsg = sanitizeStem(normQuery);
+  if (
+    titleLower.includes(stemmedQueryMsg) || 
+    descLower.includes(stemmedQueryMsg) || 
+    capLower.includes(stemmedQueryMsg) || 
+    catLower.includes(stemmedQueryMsg)
+  ) {
+    return true;
+  }
+
+  // Tokenized fallback
+  const queryTokens = normQuery.split(/[\s,.\-/#()]+/).filter(t => t.length > 2);
+  const itemTokens = `${titleLower} ${descLower} ${capLower} ${catLower}`.split(/[\s,.\-/#()]+/).filter(t => t.length > 2);
+
+  for (const qToken of queryTokens) {
+    const qStem = sanitizeStem(qToken);
+    for (const iToken of itemTokens) {
+      const iStem = sanitizeStem(iToken);
+      if (qStem === iStem || iToken.includes(qStem) || qStem.includes(iStem)) {
+        return true;
+      }
+    }
+  }
+
+  // Category sense mapping fallback
+  const querySense = getQueryCategorySense(normQuery);
+  if (querySense && category && category.toLowerCase() === querySense.toLowerCase()) {
+    return true;
+  }
+
+  return false;
+};
+
+const BoutiqueHighlights = React.memo(({ theme }: { theme: "light" | "dark" }) => {
+  const highlights = useMemo(() => [
+    { 
+      icon: Sparkles, 
+      title: "Handcrafted Premium Style", 
+      desc: "Curated with finest zari, organza & silk works by Renu Agarwal.",
+      color: "text-amber-500 bg-amber-500/10"
+    },
+    { 
+      icon: Check, 
+      title: "Double-Inspected Sizing", 
+      desc: "Tailored precisely with measurements aligned with your request before shipment.",
+      color: "text-indigo-500 bg-indigo-500/10"
+    },
+    { 
+      icon: Phone, 
+      title: "Direct Style Assistance", 
+      desc: "Call or chat with us for real-time fabric suggestions & live video previews.",
+      color: "text-emerald-500 bg-emerald-500/10"
+    },
+    { 
+      icon: Tag, 
+      title: "Custom Orders & Gifting", 
+      desc: "Order custom sizes or special gift packaging for active Indian festivals.",
+      color: "text-rose-500 bg-rose-500/10"
+    }
+  ], []);
+
+  return (
+    <div className="mb-8 p-1 select-none">
+      <div className="flex items-center gap-1.5 mb-3.5">
+        <Sparkles className="w-4 h-4 text-purple-500" />
+        <h3 className="text-[11px] font-bold uppercase tracking-wider opacity-80">Boutique Specialties</h3>
+      </div>
+      <div className="grid grid-cols-2 gap-3.5">
+        {highlights.map((item, idx) => {
+          const Icon = item.icon;
+          return (
+            <div 
+              key={idx}
+              className={`p-3.5 rounded-2xl border ${
+                theme === "dark" 
+                  ? "bg-white/[0.03] border-white/10 hover:border-purple-500/30" 
+                  : "bg-black/[0.02] border-black/10 hover:border-purple-500/20"
+              } transition-all duration-300 flex flex-col gap-2.5 group transform hover:-translate-y-0.5`}
+            >
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${item.color} transition-transform group-hover:scale-105 duration-300`}>
+                <Icon className="w-4 h-4" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold leading-tight tracking-tight">{item.title}</h4>
+                <p className="text-[9px] opacity-60 mt-0.5 leading-relaxed">{item.desc}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+});
+
+const LatestArrivalsCarousel = React.memo(({ 
+  products, 
+  posts, 
+  theme, 
+  navigate 
+}: { 
+  products: any[]; 
+  posts: any[]; 
+  theme: "light" | "dark"; 
+  navigate: any 
+}) => {
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+
+  const handleWheelScroll = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
+    if (e.deltaY !== 0) {
+      e.currentTarget.scrollLeft += e.deltaY;
+    }
+  }, []);
+
+  const latestItems = useMemo(() => {
+    // Combine newest products and video posts (reels) only
+    const combined = [
+      ...products.map(p => ({ ...p, itemType: "product", originTag: "🎁 New Arrival" })),
+      ...posts.filter(p => p.type === "video").map(p => ({ 
+        ...p, 
+        itemType: "post", 
+        name: p.name || p.caption || "Gallery New Style", 
+        originTag: "🎬 New Reel" 
+      }))
+    ];
+    
+    // Sort descending by id (Unix time/id string length)
+    combined.sort((a, b) => {
+      const idA = typeof a.id === "number" ? a.id : Number(a.id) || 0;
+      const idB = typeof b.id === "number" ? b.id : Number(b.id) || 0;
+      return idB - idA;
+    });
+
+    if (combined.length > 0) {
+      return combined.slice(0, 6);
+    }
+
+    return [
+      { id: "p1", name: "Premium Georgette Zari Saree", price: "2,499", url: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=500&q=80", originTag: "🎁 New Arrival", itemType: "product" },
+      { id: "p2", name: "Designer Organza Floral Saree", price: "1,850", url: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=500&q=80", originTag: "🎁 New Arrival", itemType: "product" },
+      { id: "p3", name: "Pure Silk Banarasi Fest Saree", price: "3,200", url: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=500&q=80", originTag: "🎁 New Arrival", itemType: "product" },
+    ];
+  }, [products, posts]);
+
+  return (
+    <div className="mb-8">
+      <div className="flex justify-between items-center mb-3 px-1 select-none">
+        <div className="flex items-center gap-1.5">
+          <Sparkles className="w-4 h-4 text-purple-500" />
+          <h3 className="text-[11px] font-bold uppercase tracking-wider opacity-80">Latest Arrivals ✨</h3>
+        </div>
+        <span className="text-[9px] opacity-45 font-semibold uppercase tracking-wider">Scroll Wheel or Swipe →</span>
+      </div>
+      
+      <div 
+        ref={scrollRef}
+        onWheel={handleWheelScroll}
+        className="flex gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory px-1 select-none scroll-smooth"
+      >
+        {latestItems.map((item: any) => (
+          <div 
+            key={item.id}
+            onClick={() => {
+              const targetId = item.docId || item.id;
+              if (item.itemType === "product") {
+                navigate(`/product/${targetId}`);
+              } else {
+                navigate(`/post/${targetId}`);
+              }
+            }}
+            className={`flex-none w-52 rounded-2xl overflow-hidden cursor-pointer snap-start border ${
+              theme === "dark" ? "bg-white/[0.03] border-white/10 hover:border-purple-500/35" : "bg-black/[0.02] border-black/10 hover:border-purple-500/25"
+            } relative group transition-all duration-350 transform hover:-translate-y-0.5`}
+          >
+            <div className="aspect-[3/4] overflow-hidden relative">
+              {item.type === "video" ? (
+                <div className="w-full h-full relative">
+                  <VideoEmbed url={item.url} minimal={true} />
+                  <div className="absolute top-2.5 right-2.5 p-1 rounded-md bg-black/70 text-white">
+                    <Play className="w-3 h-3 fill-white text-white" />
+                  </div>
+                </div>
+              ) : (
+                <MediaImage 
+                  url={item.url} 
+                  alt={item.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              )}
+              <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-black/85 text-[8px] font-extrabold text-purple-400 capitalize border border-purple-500/20 shadow-md">
+                {item.originTag}
+              </div>
+            </div>
+            <div className="p-3">
+              <h4 className="text-[11px] font-bold truncate mb-1">{item.name}</h4>
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-black text-purple-550">
+                  {item.price ? `₹${item.price}` : "Fashion Video"}
+                </span>
+                <span className="text-[9px] opacity-40 uppercase tracking-widest font-bold group-hover:text-purple-400 group-hover:translate-x-1 transition-all flex items-center">
+                  View →
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+});
+
+const CustomerTestimonials = React.memo(({ theme }: { theme: "light" | "dark" }) => {
+  const reviews = useMemo(() => [
+    { name: "Pooja Sharma", text: "Ordered a custom designer organza saree from Renu Agarwal. The fabric quality and embroidery are premium class!", stars: 5, date: "Delhi" },
+    { name: "Divya Patel", text: "Brilliant customer support on WhatsApp. Helped me customize sizing smoothly. Exactly as shown in the video!", stars: 5, date: "Gujarat" },
+    { name: "Kajal Goel", text: "Sarees are gorgeous and stitching was flawless. Received fast delivery in proper protective wrap! Will shop again.", stars: 5, date: "Mumbai" }
+  ], []);
+
+  const handleWheelScroll = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
+    if (e.deltaY !== 0) {
+      e.currentTarget.scrollLeft += e.deltaY;
+    }
+  }, []);
+
+  return (
+    <div className="mb-8 mt-4 select-none">
+      <div className="flex items-center gap-1.5 mb-3 px-1">
+        <MessageSquare className="w-4 h-4 text-purple-500" />
+        <h3 className="text-[11px] font-bold uppercase tracking-wider opacity-80">💬 Happy Customers Say</h3>
+      </div>
+      <div 
+        onWheel={handleWheelScroll}
+        className="flex gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory px-1 scroll-smooth"
+      >
+        {reviews.map((rev, index) => (
+          <div 
+            key={index}
+            className={`flex-none w-64 p-4 rounded-2xl border ${
+              theme === "dark" ? "bg-white/[0.03] border-white/10 hover:border-purple-500/20" : "bg-black/[0.02] border-black/10 hover:border-purple-500/15"
+            } snap-start transition-all duration-300`}
+          >
+            <div className="flex gap-0.5 mb-2.5">
+              {Array.from({ length: rev.stars }).map((_, i) => (
+                <Star key={i} className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
+              ))}
+            </div>
+            <p className="text-[11px] leading-relaxed opacity-70 italic mb-3">"{rev.text}"</p>
+            <div className="flex justify-between items-center border-t border-white/5 pt-2">
+              <span className="text-[10px] font-bold">{rev.name}</span>
+              <span className="text-[9px] opacity-40 uppercase tracking-widest font-bold">{rev.date}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+});
+
+const SupportQuickAssist = React.memo(({ theme, handleNavigate }: { theme: "light" | "dark"; handleNavigate: (path: string) => void }) => {
+  return (
+    <div className="fixed bottom-6 right-6 z-50">
+      <motion.button 
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => handleNavigate("/contact")}
+        className="p-3.5 rounded-full bg-emerald-500 text-white shadow-2xl flex items-center justify-center relative overflow-hidden group border border-emerald-400/20"
+        title="Live Support & Custom Queries"
+      >
+        <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+        <Phone className="w-5 h-5 fill-white" />
+        <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
+        <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-red-500" />
+      </motion.button>
+    </div>
+  );
+});
+
+const ProductFilter = React.memo(({ 
+  searchVal, 
+  setSearchVal, 
+  activeCat, 
+  setActiveCat, 
+  categories,
+  theme 
+}: { 
+  searchVal: string; 
+  setSearchVal: (v: string) => void; 
+  activeCat: string; 
+  setActiveCat: (v: string) => void; 
+  categories: string[];
+  theme: "light" | "dark" 
+}) => {
+  const handleWheelScroll = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
+    if (e.deltaY !== 0) {
+      e.currentTarget.scrollLeft += e.deltaY;
+    }
+  }, []);
+
+  return (
+    <div className="mb-6 space-y-3 select-none">
+      <div className="relative">
+        <Search className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${
+          theme === "dark" ? "text-white/40" : "text-black/40"
+        }`} />
+        <input 
+          type="text" 
+          placeholder="Search items, premium sarees, design kurtas..."
+          value={searchVal}
+          onChange={(e) => setSearchVal(e.target.value)}
+          className={`w-full py-3.5 pl-10 pr-10 rounded-2xl text-xs font-semibold border transition-all ${
+            theme === "dark" 
+              ? "bg-white/[0.04] border-white/10 text-white placeholder-white/30 focus:border-purple-500/50 focus:bg-white/10" 
+              : "bg-black/[0.03] border-black/10 text-black placeholder-black/30 focus:border-purple-500/40 focus:bg-black/10"
+          } outline-none`}
+        />
+        {searchVal && (
+          <button 
+            type="button"
+            onClick={() => setSearchVal("")}
+            className={`absolute right-3.5 top-1/2 -translate-y-1/2 p-1 rounded-full ${
+              theme === "dark" ? "bg-white/10 hover:bg-white/20" : "bg-black/15 hover:bg-black/25"
+            } transition-colors`}
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
+
+      <div 
+        onWheel={handleWheelScroll}
+        className="flex gap-2 overflow-x-auto pb-1.5 scrollbar-none px-0.5 scroll-smooth"
+      >
+        {categories.map((cat) => (
+          <button 
+            key={cat}
+            type="button"
+            onClick={() => setActiveCat(cat)}
+            className={`flex-none px-4 py-2.5 rounded-xl text-[11px] font-bold transition-all duration-300 ${
+              activeCat === cat 
+                ? (theme === "dark" ? "bg-purple-500 text-white shadow-lg shadow-purple-500/25" : "bg-purple-600 text-white shadow-lg shadow-purple-600/15") 
+                : (theme === "dark" ? "bg-white/5 border border-white/10 hover:bg-white/10 text-white/70" : "bg-black/5 border border-black/10 hover:bg-black/10 text-black/70")
+            }`}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+});
+
+// -------------------------------------------------------------------
 
 const EmptyState = React.memo(({ icon: Icon, message }: { icon: any; message: string }) => (
   <motion.div 
@@ -1021,7 +1755,7 @@ const PostCard = React.memo(({ post, products, navigate, onTabChange, isMobile }
           <ShoppingBag className="w-4 h-4 text-red-500" />
           <span className="text-[10px] font-bold uppercase tracking-widest text-white/60">Tagged Products ({post.taggedProducts.length})</span>
         </div>
-        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide" onWheel={(e) => { if (e.deltaY !== 0) { e.currentTarget.scrollLeft += e.deltaY; } }}>
           {post.taggedProducts.map((productId: number) => {
             const product = products.find((p: any) => p.id === productId);
             if (!product) return null;
@@ -1063,91 +1797,155 @@ const PostCard = React.memo(({ post, products, navigate, onTabChange, isMobile }
   </motion.div>
 ));
 
-const ShareModal = ({ isOpen, onClose, profileName }: { isOpen: boolean; onClose: () => void; profileName: string }) => {
-  const shareUrl = "https://renufashionhub.in";
+const ShareModal = ({ 
+  isOpen, 
+  onClose, 
+  profileName, 
+  customUrl, 
+  customTitle, 
+  theme = "dark" 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  profileName: string; 
+  customUrl?: string; 
+  customTitle?: string; 
+  theme?: string;
+}) => {
+  const activeUrl = customUrl || "https://renufashionhub.in";
+  const activeTitle = customTitle || `Check out ${profileName}`;
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(shareUrl);
+    navigator.clipboard.writeText(activeUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const shareOptions = [
-    { name: "WhatsApp", icon: MessageSquare, color: "text-green-500", href: `https://wa.me/?text=${encodeURIComponent(`Check out ${profileName} on ${shareUrl}`)}` },
-    { name: "Facebook", icon: Facebook, color: "text-blue-600", href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}` },
-    { name: "Twitter", icon: Twitter, color: "text-sky-500", href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out ${profileName} on ${shareUrl}`)}` },
-    { name: "LinkedIn", icon: Linkedin, color: "text-blue-700", href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}` },
-    { name: "Telegram", icon: Send, color: "text-blue-400", href: `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(`Check out ${profileName}`)}` },
-    { name: "Gmail", icon: Mail, color: "text-red-500", href: `mailto:?subject=${encodeURIComponent(profileName)}&body=${encodeURIComponent(`Check out ${profileName} on ${shareUrl}`)}` },
+    { 
+      name: "WhatsApp", 
+      icon: MessageSquare, 
+      color: "text-green-500 hover:text-green-400", 
+      href: `https://api.whatsapp.com/send?text=${encodeURIComponent(activeTitle + " - " + activeUrl)}` 
+    },
+    { 
+      name: "Telegram", 
+      icon: Send, 
+      color: "text-sky-405 hover:text-sky-305", 
+      href: `https://t.me/share/url?url=${encodeURIComponent(activeUrl)}&text=${encodeURIComponent(activeTitle)}` 
+    },
+    { 
+      name: "Facebook", 
+      icon: Facebook, 
+      color: "text-blue-500 hover:text-blue-400", 
+      href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(activeUrl)}` 
+    },
+    { 
+      name: "Instagram", 
+      icon: Instagram, 
+      color: "text-pink-500 hover:text-pink-400", 
+      href: "https://www.instagram.com",
+      isInsta: true 
+    },
+    { 
+      name: "Twitter", 
+      icon: Twitter, 
+      color: "text-stone-300 hover:text-white", 
+      href: `https://twitter.com/intent/tweet?url=${encodeURIComponent(activeUrl)}&text=${encodeURIComponent(activeTitle)}` 
+    },
+    { 
+      name: "LinkedIn", 
+      icon: Linkedin, 
+      color: "text-blue-600 hover:text-blue-500", 
+      href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(activeUrl)}` 
+    }
   ];
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[10001] flex items-center justify-center p-4">
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-black/90 md:backdrop-blur-sm"
+        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
       />
       <motion.div 
-        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+        initial={{ scale: 0.95, opacity: 0, y: 15 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
-        className="relative w-full max-w-md bg-[#1a1a1a] border border-white/10 rounded-[32px] overflow-hidden shadow-2xl"
+        exit={{ scale: 0.95, opacity: 0, y: 15 }}
+        className={`relative w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl border ${
+          theme === "dark" 
+            ? "bg-[#09100E] border-white/10 text-amber-50" 
+            : "bg-white border-black/10 text-stone-900"
+        }`}
       >
-        <div className="p-6 border-b border-white/5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-white/5">
-              <Share2 className="w-5 h-5 text-white/70" />
+        <div className={`p-5 border-b flex items-center justify-between ${theme === "dark" ? "border-white/5" : "border-black/5"}`}>
+          <div className="flex items-center gap-2.5">
+            <div className={`p-1.5 rounded-xl ${theme === "dark" ? "bg-white/5" : "bg-black/5"}`}>
+              <Share2 className="w-4 h-4 text-purple-500" />
             </div>
-            <h3 className="text-lg font-bold">Share link</h3>
+            <h3 className="text-sm font-bold uppercase tracking-wider">Share Link</h3>
           </div>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-white/5 transition-colors">
-            <X className="w-5 h-5 text-white/40" />
+          <button onClick={onClose} className={`p-1.5 rounded-full transition-all ${theme === "dark" ? "hover:bg-white/5 text-white/40 hover:text-white" : "hover:bg-black/5 text-[#1C1B18]/40 hover:text-[#1C1B18]"}`}>
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="p-6 space-y-8">
-          {/* Link Section */}
-          <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 overflow-hidden">
-              <div className="p-2 rounded-lg bg-white/5 flex-shrink-0">
-                <Globe className="w-4 h-4 text-white/40" />
+        <div className="p-5 space-y-6">
+          {/* Link Copy Section */}
+          <div className={`p-3.5 rounded-2xl border flex items-center justify-between gap-3 ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"}`}>
+            <div className="flex items-center gap-2.5 overflow-hidden">
+              <div className={`p-2 rounded-xl flex-shrink-0 ${theme === "dark" ? "bg-white/5" : "bg-black/5"}`}>
+                <Globe className="w-3.5 h-3.5 opacity-60" />
               </div>
               <div className="overflow-hidden">
-                <p className="text-xs font-bold truncate">{profileName}</p>
-                <p className="text-[10px] text-white/40 truncate">{shareUrl}</p>
+                <p className="text-xs font-bold truncate opacity-85">{activeTitle}</p>
+                <p className="text-[10px] opacity-40 truncate">{activeUrl}</p>
               </div>
             </div>
-            <div className="flex gap-2">
-              <button 
-                onClick={handleCopy}
-                className="p-2 rounded-lg hover:bg-white/5 transition-colors relative"
-              >
-                {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4 text-white/40" />}
-              </button>
-            </div>
+            <button 
+              onClick={handleCopy}
+              className={`p-2.5 rounded-xl transition-all active:scale-95 flex-shrink-0 ${theme === "dark" ? "bg-white/5 hover:bg-white/10" : "bg-black/5 hover:bg-[#1C1B18]/10"}`}
+              title="Copy Link"
+            >
+              {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4 opacity-50" />}
+            </button>
           </div>
 
-          {/* Share Options */}
+          {/* Social Icons Grid */}
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-4">Share using</p>
-            <div className="grid grid-cols-3 gap-4">
+            <p className="text-[9px] font-extrabold uppercase tracking-widest opacity-40 mb-3.5">Share with Apps</p>
+            <div className="grid grid-cols-3 gap-3">
               {shareOptions.map((option, index) => (
                 <a 
                   key={index}
                   href={option.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex flex-col items-center gap-2 group"
+                  onClick={(e) => {
+                    if (option.isInsta) {
+                      e.preventDefault();
+                      handleCopy();
+                      // Redirect after feedback
+                      setTimeout(() => {
+                        window.open(option.href, "_blank");
+                      }, 400);
+                    }
+                  }}
+                  className={`flex flex-col items-center gap-1.5 p-2 rounded-2xl border transition-all duration-300 hover:-translate-y-0.5 ${
+                    theme === "dark" 
+                      ? "bg-white/[0.02] hover:bg-white/[0.06] border-white/5" 
+                      : "bg-black/[0.01] hover:bg-black/[0.04] border-black/5"
+                  }`}
                 >
-                  <div className={`w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition-all group-hover:-translate-y-1`}>
-                    <option.icon className={`w-5 h-5 ${option.color}`} />
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${theme === "dark" ? "bg-white/5" : "bg-black/5"}`}>
+                    <option.icon className={`w-4 h-4 ${option.color}`} />
                   </div>
-                  <span className="text-[10px] font-medium text-white/40 group-hover:text-white transition-colors">{option.name}</span>
+                  <span className="text-[9px] font-bold uppercase opacity-60 transition-colors">{option.name}</span>
                 </a>
               ))}
             </div>
@@ -1163,7 +1961,7 @@ const PageLoader = ({ theme }: { theme: string }) => (
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
     exit={{ opacity: 0 }}
-    className={`fixed inset-0 z-[150] flex flex-col items-center justify-center ${theme === "dark" ? "bg-[#0a0a0a]" : "bg-white"}`}
+    className={`fixed inset-0 left-0 top-0 w-screen h-screen z-[9999] flex flex-col items-center justify-center ${theme === "dark" ? "bg-[#050E0B] gold-grain-dark text-amber-50" : "bg-[#FCFAF6] gold-grain-light text-stone-900"}`}
   >
     <motion.div
       initial={{ opacity: 0, scale: 0.8 }}
@@ -1171,17 +1969,17 @@ const PageLoader = ({ theme }: { theme: string }) => (
       transition={{ duration: 0.3 }}
       className="relative"
     >
-      <div className="w-20 h-20 rounded-full border-4 border-purple-500/20 border-t-purple-500 animate-spin" />
+      <div className="w-20 h-20 rounded-full border-4 border-amber-500/20 border-t-amber-500 animate-spin" />
       <div className="absolute inset-0 flex items-center justify-center">
-        <ShoppingBag className="w-7 h-7 text-purple-500" />
+        <ShoppingBag className="w-7 h-7 text-amber-500" />
       </div>
     </motion.div>
     <div className="mt-6 text-center">
-      <h1 className="text-sm font-black tracking-[0.2em] uppercase mb-3 opacity-80">Renu Fashion Hub</h1>
+      <h1 className="text-sm font-black tracking-[0.2em] text-amber-600 dark:text-amber-400 uppercase mb-3 font-serif">Renu Fashion Hub</h1>
       <div className="flex items-center justify-center gap-1.5">
-        <div className="w-1 h-1 rounded-full bg-purple-500 animate-bounce [animation-delay:-0.3s]" />
-        <div className="w-1 h-1 rounded-full bg-purple-500 animate-bounce [animation-delay:-0.15s]" />
-        <div className="w-1 h-1 rounded-full bg-purple-500 animate-bounce" />
+        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-bounce [animation-delay:-0.3s]" />
+        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-bounce [animation-delay:-0.15s]" />
+        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-bounce" />
       </div>
     </div>
   </motion.div>
@@ -1206,22 +2004,25 @@ export default function App() {
 
   const handleNavigate = useCallback((path: string) => {
     setIsNavigating(true);
-    // Reverting to randomized delay as requested
-    const delay = 400 + Math.random() * 600;
+    navigate(path);
+    window.scrollTo(0, 0);
     setTimeout(() => {
-      navigate(path);
       setIsNavigating(false);
-      window.scrollTo(0, 0);
-    }, delay);
+    }, 550);
   }, [navigate]);
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [activeTab, setActiveTab] = useState("shop");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [sortBy, setSortBy] = useState<"default" | "price-asc" | "price-desc">("default");
   const [loginData, setLoginData] = useState({ username: "", password: "" });
   const [loginError, setLoginError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const [isProductsLoaded, setIsProductsLoaded] = useState(false);
+  const [isPostsLoaded, setIsPostsLoaded] = useState(false);
   
   const [profile, setProfile] = useState({
     name: "Renu Fashion Hub",
@@ -1242,6 +2043,53 @@ export default function App() {
   const [tempProducts, setTempProducts] = useState(products);
   const [deletedPostIds, setDeletedPostIds] = useState<string[]>([]);
   const [deletedProductIds, setDeletedProductIds] = useState<string[]>([]);
+
+  const dynamicCategories = useMemo(() => {
+    const defaultCats = ["All", "Sarees", "Kurtas", "Lehengas", "Dresses", "Jewelry"];
+    const foundCats = new Set<string>();
+    
+    const formatCatName = (catStr: string) => {
+      const clean = (catStr || "").trim();
+      if (!clean) return "";
+      return clean.charAt(0).toUpperCase() + clean.slice(1).toLowerCase();
+    };
+
+    products.forEach((p) => {
+      let cat = p.category;
+      if (!cat || cat.toLowerCase() === "other") {
+        const autoCat = autoDetectCategory(p.name, p.description || "");
+        if (autoCat !== "Other") {
+          cat = autoCat;
+        }
+      }
+      if (cat) {
+        const formatted = formatCatName(cat);
+        if (formatted) foundCats.add(formatted);
+      }
+    });
+
+    posts.forEach((p) => {
+      let cat = p.category;
+      if (!cat || cat.toLowerCase() === "other") {
+        const autoCat = getPostCategory(p, products);
+        if (autoCat !== "Other") {
+          cat = autoCat;
+        }
+      }
+      if (cat) {
+        const formatted = formatCatName(cat);
+        if (formatted) foundCats.add(formatted);
+      }
+    });
+
+    const combined = [...defaultCats];
+    foundCats.forEach((fc) => {
+      if (!combined.some(c => c.toLowerCase() === fc.toLowerCase())) {
+        combined.push(fc);
+      }
+    });
+    return combined;
+  }, [products, posts]);
 
   // Splash Screen Timer
   useEffect(() => {
@@ -1285,13 +2133,21 @@ export default function App() {
     const unsubPosts = onSnapshot(query(collection(db, "posts"), orderBy("id", "desc")), (snapshot) => {
       const data = snapshot.docs.map(doc => ({ ...doc.data(), docId: doc.id }));
       setPosts(data);
-    }, (err) => console.error("Posts sync error:", err));
+      setIsPostsLoaded(true);
+    }, (err) => {
+      console.error("Posts sync error:", err);
+      setIsPostsLoaded(true);
+    });
 
     // Real-time Products
     const unsubProducts = onSnapshot(query(collection(db, "products"), orderBy("id", "desc")), (snapshot) => {
       const data = snapshot.docs.map(doc => ({ ...doc.data(), docId: doc.id }));
       setProducts(data);
-    }, (err) => console.error("Products sync error:", err));
+      setIsProductsLoaded(true);
+    }, (err) => {
+      console.error("Products sync error:", err);
+      setIsProductsLoaded(true);
+    });
 
     // Real-time Messages (Admin only)
     let unsubMessages = () => {};
@@ -1339,19 +2195,117 @@ export default function App() {
 
   const handleSetActiveTab = useCallback((tab: string) => {
     setIsNavigating(true);
-    const delay = 300 + Math.random() * 400;
+    setActiveTab(tab);
+    window.scrollTo(0, 0);
     setTimeout(() => {
-      setActiveTab(tab);
       setIsNavigating(false);
-      window.scrollTo(0, 0);
-    }, delay);
+    }, 550);
   }, []);
+
+  // Filtered lists based on search query and category
+  const filteredPosts = useMemo(() => {
+    return posts.filter(post => {
+      const postCat = getPostCategory(post, products);
+      
+      // If search query exists, ignore category and filter purely by search query
+      if (searchQuery) {
+        return checkSemanticMatch(
+          post.name || "", 
+          post.description || "", 
+          post.caption || "", 
+          postCat, 
+          searchQuery
+        );
+      }
+      
+      // If no search query, respect the selected category filter
+      if (selectedCategory !== "All") {
+        const catLower = selectedCategory.toLowerCase();
+        if (postCat.toLowerCase() === catLower) {
+          return true;
+        } else {
+          // Additional fallback check for safety
+          const searchTerms = catLower === "kurtas" ? ["kurta", "kurti", "tunic", "anarkali", "suit", "salwar", "sharara", "gharara", "palazzo"] : 
+                              catLower === "sarees" ? ["saree", "sari", "zari", "organza", "georgette", "silk"] :
+                              catLower === "lehengas" ? ["lehenga", "choli", "ghagra"] :
+                              catLower === "dresses" ? ["dress", "gown", "frock", "maxi", "one-piece"] :
+                              catLower === "jewelry" ? ["jewelry", "jewellery", "earring", "necklace", "ring", "bangle", "jhumka"] : [catLower];
+          
+          return searchTerms.some(term => 
+            post.name?.toLowerCase().includes(term) || 
+            post.description?.toLowerCase().includes(term) ||
+            post.caption?.toLowerCase().includes(term)
+          );
+        }
+      }
+      return true;
+    });
+  }, [posts, products, searchQuery, selectedCategory]);
+
+  const filteredProducts = useMemo(() => {
+    const parsePrice = (pStr: any): number => {
+      if (pStr === undefined || pStr === null) return 0;
+      const clean = String(pStr).replace(/,/g, '').trim();
+      const val = parseFloat(clean);
+      return isNaN(val) ? 0 : val;
+    };
+
+    const filtered = products.filter(product => {
+      // Dynamically auto-detect category if it's currently empty, "Other", or not loaded yet
+      let productCat = product.category;
+      if (!productCat || productCat.toLowerCase() === "other") {
+        const autoCat = autoDetectCategory(product.name, product.description || "");
+        if (autoCat !== "Other") {
+          productCat = autoCat;
+        }
+      }
+
+      // If search query exists, ignore category and filter purely by search query
+      if (searchQuery) {
+        return checkSemanticMatch(
+          product.name || "", 
+          product.description || "", 
+          "", 
+          productCat || "Other", 
+          searchQuery
+        );
+      }
+
+      // If no search query, respect the selected category filter
+      if (selectedCategory !== "All") {
+        const catLower = selectedCategory.toLowerCase();
+        
+        if (productCat && productCat.toLowerCase() === catLower) {
+          return true;
+        } else {
+          const searchTerms = catLower === "kurtas" ? ["kurta", "kurti", "tunic", "anarkali", "suit", "salwar", "sharara", "gharara", "palazzo"] : 
+                              catLower === "sarees" ? ["saree", "sari", "zari", "organza", "georgette", "silk"] :
+                              catLower === "lehengas" ? ["lehenga", "choli", "ghagra"] :
+                              catLower === "dresses" ? ["dress", "gown", "frock", "maxi", "one-piece"] :
+                              catLower === "jewelry" ? ["jewelry", "jewellery", "earring", "necklace", "ring", "bangle", "jhumka"] : [catLower];
+          
+          return searchTerms.some(term => 
+            product.name?.toLowerCase().includes(term) || 
+            product.description?.toLowerCase().includes(term)
+          );
+        }
+      }
+      return true;
+    });
+
+    if (sortBy === "price-asc") {
+      return [...filtered].sort((a, b) => parsePrice(a.price) - parsePrice(b.price));
+    } else if (sortBy === "price-desc") {
+      return [...filtered].sort((a, b) => parsePrice(b.price) - parsePrice(a.price));
+    }
+    return filtered;
+  }, [products, searchQuery, selectedCategory, sortBy]);
 
   // Memoize the combined shop list to prevent recalculation on every render
   const shopItems = useMemo(() => {
-    const length = Math.max(posts.length, products.length);
+    const length = Math.max(filteredPosts.length, filteredProducts.length);
     return Array.from({ length });
-  }, [posts.length, products.length]);
+  }, [filteredPosts.length, filteredProducts.length]);
 
   const [contactData, setContactData] = useState({ name: "", email: "", mobile: "", message: "" });
   const [messageSent, setMessageSent] = useState(false);
@@ -1535,7 +2489,7 @@ export default function App() {
     if (!newPost.url) return;
     setIsAddingPost(true);
     setTempPosts([{ id: Date.now(), ...newPost }, ...tempPosts]);
-    setNewPost({ type: "image", url: "", taggedProducts: [] });
+    setNewPost({ type: "image", url: "", name: "", description: "", category: "", taggedProducts: [] });
     setIsAddingPost(false);
   };
 
@@ -1694,7 +2648,7 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className={`fixed inset-0 z-[100] flex flex-col items-center justify-center ${theme === "dark" ? "bg-[#0a0a0a]" : "bg-white"}`}
+            className={`fixed inset-0 left-0 top-0 w-screen h-screen z-[9999] flex flex-col items-center justify-center ${theme === "dark" ? "bg-[#050E0B] gold-grain-dark text-amber-50" : "bg-[#FCFAF6] gold-grain-light text-stone-900"}`}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
@@ -1702,13 +2656,13 @@ export default function App() {
               transition={{ duration: 0.5 }}
               className="relative"
             >
-              <div className="w-24 h-24 rounded-full border-4 border-purple-500/20 border-t-purple-500 animate-spin" />
+              <div className="w-24 h-24 rounded-full border-4 border-amber-500/20 border-t-amber-500 animate-spin" />
               <div className="absolute inset-0 flex items-center justify-center">
                 <motion.div
                   animate={{ opacity: [0.4, 1, 0.4] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
-                  <ShoppingBag className="w-8 h-8 text-purple-500" />
+                  <ShoppingBag className="w-8 h-8 text-amber-500" />
                 </motion.div>
               </div>
             </motion.div>
@@ -1718,16 +2672,18 @@ export default function App() {
               transition={{ delay: 0.3 }}
               className="mt-8 text-center"
             >
-              <h1 className="text-xl font-black tracking-[0.2em] uppercase mb-2">Renu Fashion Hub</h1>
+              <h1 className="text-xl font-black tracking-[0.2em] text-amber-600 dark:text-amber-400 uppercase mb-2 font-serif">Renu Fashion Hub</h1>
               <div className="flex items-center justify-center gap-2">
-                <div className="w-1 h-1 rounded-full bg-purple-500 animate-bounce [animation-delay:-0.3s]" />
-                <div className="w-1 h-1 rounded-full bg-purple-500 animate-bounce [animation-delay:-0.15s]" />
-                <div className="w-1 h-1 rounded-full bg-purple-500 animate-bounce" />
+                <div className="w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400 animate-bounce [animation-delay:-0.3s]" />
+                <div className="w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400 animate-bounce [animation-delay:-0.15s]" />
+                <div className="w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400 animate-bounce" />
               </div>
             </motion.div>
           </motion.div>
         ) : (
-          <div className="min-h-screen">
+          <div className="min-h-screen relative">
+            <AnnouncementBanner theme={theme} />
+
             <Routes location={location}>
           <Route path="/admin" element={
         <motion.div
@@ -1736,34 +2692,18 @@ export default function App() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3 }}
-          className={`min-h-screen ${theme === "dark" ? "bg-[#0a0a0a] text-white" : "bg-white text-black"} font-sans transition-colors duration-300`}
+          className={`min-h-screen ${theme === "dark" ? "gold-grain-dark text-amber-50" : "gold-grain-light text-stone-900"} font-sans transition-colors duration-300`}
         >
           {!isAdminUser ? (
-            <div className="flex items-center justify-center min-h-screen p-6">
-          <div className="text-center max-w-sm">
-            <div className="w-20 h-20 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-6">
-              <X className="w-10 h-10 text-red-500" />
-            </div>
-            <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
-            <p className={`${theme === "dark" ? "text-white/40" : "text-black/40"} text-sm mb-8`}>
-              You do not have administrator privileges. Please log in with the correct credentials.
-            </p>
-            <button 
-              onClick={() => handleNavigate("/login")}
-              className="w-full py-4 rounded-xl bg-purple-600 text-white font-bold transition-all"
-            >
-              Back to Login
-            </button>
-          </div>
-        </div>
-      ) : (
+            <Navigate to="/login" replace />
+          ) : (
           <div className="pb-32">
         {/* Admin Header */}
-        <div className={`sticky top-0 z-50 ${theme === "dark" ? "bg-[#0a0a0a]/90 border-white/10" : "bg-white/90 border-black/10"} md:backdrop-blur-xl border-b px-6 py-4`}>
+        <div className={`sticky top-0 z-50 ${theme === "dark" ? "bg-[#0B1512]/90 border-white/10" : "bg-[#FDFBF7]/90 border-black/10"} md:backdrop-blur-xl border-b px-6 py-4`}>
           <div className="max-w-2xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/20">
-                <Settings className="w-5 h-5 text-purple-500" />
+              <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                <Settings className="w-5 h-5 text-amber-500 animate-spin-slow" />
               </div>
               <div>
                 <h1 className="text-lg font-bold">Admin Panel</h1>
@@ -1889,6 +2829,30 @@ export default function App() {
                       placeholder="Enter product description..."
                     />
                   </div>
+
+                  <div>
+                    <label className={`block text-[10px] font-bold uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"} mb-1`}>Category</label>
+                    <div className="flex gap-2">
+                      <input 
+                        type="text" 
+                        value={editingProduct.category || ""}
+                        onChange={(e) => setEditingProduct({...editingProduct, category: e.target.value})}
+                        className={`flex-1 ${theme === "dark" ? "bg-[#222] border-white/10 text-white placeholder-white/30" : "bg-black/5 border-black/10 text-black placeholder-black/40"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-purple-500/50 transition-colors text-sm`}
+                        placeholder="e.g. Sarees, Kurtas, Lehengas..."
+                      />
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          const autoCat = autoDetectCategory(editingProduct.name, editingProduct.description || "");
+                          setEditingProduct({...editingProduct, category: autoCat});
+                        }}
+                        className={`px-3 py-2 text-xs font-bold rounded-xl ${theme === "dark" ? "bg-white/5 hover:bg-white/10 text-white" : "bg-black/5 hover:bg-black/10 text-black"} border ${theme === "dark" ? "border-white/10" : "border-black/10"}`}
+                        title="Auto-detect Category"
+                      >
+                        Detect ✨
+                      </button>
+                    </div>
+                  </div>
                   
                   <div className="flex flex-col sm:flex-row gap-3">
                     <div className="w-full sm:w-1/3">
@@ -1950,7 +2914,7 @@ export default function App() {
 
         <div className="max-w-2xl mx-auto p-6">
           {/* Admin Tabs */}
-          <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+          <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide" onWheel={(e) => { if (e.deltaY !== 0) { e.currentTarget.scrollLeft += e.deltaY; } }}>
             {[
               { id: "profile", label: "Profile", icon: User },
               { id: "posts", label: "Posts", icon: ImageIcon },
@@ -1960,10 +2924,10 @@ export default function App() {
               <button
                 key={tab.id}
                 onClick={() => setAdminTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap border ${
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all whitespace-nowrap border ${
                   adminTab === tab.id 
-                    ? `${theme === "dark" ? "bg-white text-black border-white" : "bg-black text-white border-black"}` 
-                    : `${theme === "dark" ? "bg-white/5 text-white/40 border-white/10 hover:bg-white/10" : "bg-black/5 text-black/40 border-black/10 hover:bg-black/10"}`
+                    ? `${theme === "dark" ? "bg-amber-500 text-stone-950 border-amber-500 shadow-md shadow-amber-500/10" : "bg-amber-950 text-white border-[#1c1b18] shadow-md shadow-amber-950/10"}` 
+                    : `${theme === "dark" ? "bg-stone-900/40 text-stone-400 border-amber-500/10 hover:bg-stone-900/60" : "bg-white/60 text-stone-600 border-amber-500/10 hover:bg-white"}`
                 }`}
               >
                 <tab.icon className="w-4 h-4" />
@@ -1980,8 +2944,8 @@ export default function App() {
           <div className="space-y-8">
             {adminTab === "profile" && (
               <section className={`p-6 rounded-3xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border`}>
-                <h2 className="text-lg font-bold mb-6 flex items-center gap-2">
-                  <User className="w-5 h-5 text-blue-500" />
+                <h2 className="text-lg font-black font-serif text-amber-950 dark:text-amber-100 mb-6 flex items-center gap-2">
+                  <User className="w-5 h-5 text-amber-500" />
                   Edit Profile
                 </h2>
                 <div className="space-y-4">
@@ -2021,7 +2985,7 @@ export default function App() {
                       type="text" 
                       value={tempProfile.name}
                       onChange={(e) => setTempProfile({...tempProfile, name: e.target.value})}
-                      className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500/50 transition-colors text-sm`}
+                      className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500/50 transition-colors text-sm`}
                     />
                   </div>
                   <div>
@@ -2030,7 +2994,7 @@ export default function App() {
                       rows={3}
                       value={tempProfile.bio}
                       onChange={(e) => setTempProfile({...tempProfile, bio: e.target.value})}
-                      className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500/50 transition-colors text-sm resize-none`}
+                      className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500/50 transition-colors text-sm resize-none`}
                     />
                   </div>
                 </div>
@@ -2039,8 +3003,8 @@ export default function App() {
 
             {adminTab === "posts" && (
               <section className={`p-6 rounded-3xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border`}>
-                <h2 className="text-lg font-bold mb-6 flex items-center gap-2">
-                  <ImageIcon className="w-5 h-5 text-purple-500" />
+                <h2 className="text-lg font-black font-serif text-amber-950 dark:text-amber-100 mb-6 flex items-center gap-2">
+                  <ImageIcon className="w-5 h-5 text-amber-500" />
                   Manage Posts (Gallery)
                 </h2>
                 
@@ -2065,7 +3029,7 @@ export default function App() {
                   <div className="flex gap-2">
                     <button 
                       onClick={() => postFileInputRef.current?.click()}
-                      className={`flex-1 py-3 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/20 hover:border-purple-500/50" : "bg-black/5 border-black/20 hover:border-purple-500/50"} border border-dashed transition-all flex items-center justify-center gap-2 text-xs ${theme === "dark" ? "text-white/60" : "text-black/60"}`}
+                      className={`flex-1 py-3 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/20 hover:border-amber-500/50" : "bg-black/5 border-black/20 hover:border-amber-500/50"} border border-dashed transition-all flex items-center justify-center gap-2 text-xs ${theme === "dark" ? "text-white/60" : "text-black/60"}`}
                     >
                       {isUploading ? (
                         <div className={`w-4 h-4 border-2 ${theme === "dark" ? "border-white/30 border-t-white" : "border-black/30 border-t-black"} rounded-full animate-spin`} />
@@ -2081,9 +3045,46 @@ export default function App() {
                     />
                     <button 
                       onClick={() => setNewPost({...newPost, type: "video", url: ""})}
-                      className={`p-3 rounded-xl border transition-all ${newPost.type === "video" ? "bg-purple-500/20 border-purple-500 text-purple-500" : `${theme === "dark" ? "bg-white/5 border-white/10 text-white/40" : "bg-black/5 border-black/10 text-black/40"}`}`}
+                      className={`p-3 rounded-xl border transition-all ${newPost.type === "video" ? "bg-amber-500/20 border-amber-500 text-amber-500" : `${theme === "dark" ? "bg-white/5 border-white/10 text-white/40" : "bg-black/5 border-black/10 text-black/40"}`}`}
                     >
                       <Play className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <input 
+                    type="text" 
+                    placeholder="Post Caption / Title"
+                    value={newPost.name || ""}
+                    onChange={(e) => {
+                      const captionVal = e.target.value;
+                      const detected = autoDetectCategory(captionVal, "");
+                      setNewPost({
+                        ...newPost,
+                        name: captionVal,
+                        category: newPost.category && newPost.category !== autoDetectCategory(newPost.name || "", "") ? newPost.category : detected
+                      });
+                    }}
+                    className={`w-full ${theme === "dark" ? "bg-[#222] border-white/10 text-white placeholder-white/30" : "bg-black/5 border-black/10 text-black placeholder-black/40"} border rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500/50 transition-colors text-sm`}
+                  />
+
+                  <div className="flex gap-2">
+                    <input 
+                      type="text" 
+                      placeholder="Category (e.g. Sarees, Kurtas, Lehengas...)"
+                      value={newPost.category || ""}
+                      onChange={(e) => setNewPost({...newPost, category: e.target.value})}
+                      className={`flex-1 ${theme === "dark" ? "bg-[#222] border-white/10 text-white placeholder-white/30" : "bg-black/5 border-black/10 text-black placeholder-black/40"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-sm`}
+                    />
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        const autoCat = autoDetectCategory(newPost.name || "", "");
+                        setNewPost({...newPost, category: autoCat});
+                      }}
+                      className={`px-3 py-2 text-xs font-bold rounded-xl ${theme === "dark" ? "bg-white/5 hover:bg-white/10 text-white" : "bg-black/5 hover:bg-black/10 text-black"} border ${theme === "dark" ? "border-white/10" : "border-black/10"}`}
+                      title="Auto-detect Category from Caption"
+                    >
+                      Detect ✨
                     </button>
                   </div>
 
@@ -2093,7 +3094,7 @@ export default function App() {
                       placeholder="Paste YT, IG, or FB video link..."
                       value={newPost.url}
                       onChange={(e) => setNewPost({...newPost, url: e.target.value, type: "video"})}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500/50 transition-colors text-sm"
+                      className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500/50 transition-colors text-sm`}
                     />
                   )}
 
@@ -2107,17 +3108,33 @@ export default function App() {
                       {tempProducts.map(product => (
                         <button
                           key={product.id}
+                          type="button"
                           onClick={() => {
                             const isTagged = newPost.taggedProducts.includes(product.id);
+                            let updatedTagged = [] as number[];
                             if (isTagged) {
-                              setNewPost({ ...newPost, taggedProducts: newPost.taggedProducts.filter(id => id !== product.id) });
+                              updatedTagged = newPost.taggedProducts.filter(id => id !== product.id);
                             } else {
-                              setNewPost({ ...newPost, taggedProducts: [...newPost.taggedProducts, product.id] });
+                              updatedTagged = [...newPost.taggedProducts, product.id];
                             }
+                            
+                            let detectedCat = newPost.category;
+                            if (updatedTagged.length > 0) {
+                              const firstTaggedProd = tempProducts.find(p => p.id === updatedTagged[0]);
+                              if (firstTaggedProd && firstTaggedProd.category) {
+                                detectedCat = firstTaggedProd.category;
+                              }
+                            }
+                            
+                            setNewPost({ 
+                              ...newPost, 
+                              taggedProducts: updatedTagged,
+                              category: detectedCat
+                            });
                           }}
                           className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all border ${
                             newPost.taggedProducts.includes(product.id) 
-                              ? "bg-purple-500/20 border-purple-500 text-purple-500" 
+                              ? "bg-amber-500/20 border-amber-500 text-amber-500" 
                               : "bg-white/5 border-white/10 text-white/40 hover:text-white"
                           }`}
                         >
@@ -2130,13 +3147,15 @@ export default function App() {
                   <button 
                     onClick={handleAddPost}
                     disabled={isAddingPost || !newPost.url}
-                    className={`w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
-                      isAddingPost || !newPost.url ? "bg-purple-600/50 cursor-not-allowed" : "bg-purple-600 hover:bg-purple-500 text-white"
+                    className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
+                      isAddingPost || !newPost.url 
+                        ? "bg-amber-650/40 text-stone-500 cursor-not-allowed" 
+                        : "bg-amber-500 hover:bg-amber-400 text-stone-950 font-black uppercase text-xs tracking-wider"
                     }`}
                   >
                     {isAddingPost ? (
                       <>
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <div className="w-4 h-4 border-2 border-stone-950/30 border-t-stone-950 rounded-full animate-spin" />
                         Processing...
                       </>
                     ) : "Add to Gallery"}
@@ -2179,16 +3198,54 @@ export default function App() {
                     type="text" 
                     placeholder="Product Name"
                     value={newProduct.name}
-                    onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
-                    className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-purple-500/50 transition-colors text-sm`}
+                    onChange={(e) => {
+                      const nameVal = e.target.value;
+                      const detected = autoDetectCategory(nameVal, newProduct.description);
+                      setNewProduct({
+                        ...newProduct,
+                        name: nameVal,
+                        category: newProduct.category && newProduct.category !== autoDetectCategory(newProduct.name, newProduct.description) ? newProduct.category : detected
+                      });
+                    }}
+                    className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-sm`}
                   />
                   <textarea 
                     placeholder="Product Description"
                     value={newProduct.description}
-                    onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                    onChange={(e) => {
+                      const descVal = e.target.value;
+                      const detected = autoDetectCategory(newProduct.name, descVal);
+                      setNewProduct({
+                        ...newProduct,
+                        description: descVal,
+                        category: newProduct.category && newProduct.category !== autoDetectCategory(newProduct.name, newProduct.description) ? newProduct.category : detected
+                      });
+                    }}
                     rows={2}
-                    className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-purple-500/50 transition-colors text-sm resize-none`}
+                    className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-sm resize-none`}
                   />
+
+                  <div className="flex gap-2">
+                    <input 
+                      type="text" 
+                      placeholder="Category (e.g. Sarees, Kurtas, Lehengas...)"
+                      value={newProduct.category || ""}
+                      onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
+                      className={`flex-1 ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-sm`}
+                    />
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        const autoCat = autoDetectCategory(newProduct.name, newProduct.description);
+                        setNewProduct({...newProduct, category: autoCat});
+                      }}
+                      className={`px-3 py-2 text-xs font-bold rounded-xl ${theme === "dark" ? "bg-white/5 hover:bg-white/10 text-white" : "bg-black/5 hover:bg-black/10 text-black"} border ${theme === "dark" ? "border-white/10" : "border-black/10"}`}
+                      title="Auto-detect Category from Name/Description"
+                    >
+                      Detect ✨
+                    </button>
+                  </div>
+
                   <div className="space-y-3">
                     <div className="flex flex-col sm:flex-row gap-2">
                       <input 
@@ -2196,7 +3253,7 @@ export default function App() {
                         placeholder="Price"
                         value={newProduct.price}
                         onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
-                        className={`w-full sm:w-24 ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-purple-500/50 transition-colors text-sm`}
+                        className={`w-full sm:w-24 ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-sm`}
                       />
                       <div className="flex gap-2 flex-1">
                         <input 
@@ -2209,12 +3266,12 @@ export default function App() {
                               fetchProductDetails();
                             }
                           }}
-                          className={`flex-1 min-w-0 ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-purple-500/50 transition-colors text-sm`}
+                          className={`flex-1 min-w-0 ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-sm`}
                         />
                         <button 
                           onClick={fetchProductDetails}
                           disabled={isFetchingProduct || !newProduct.buyUrl}
-                          className={`px-4 py-2.5 rounded-xl ${theme === "dark" ? "bg-purple-500/10 border-purple-500/20" : "bg-purple-500/5 border-purple-500/10"} border text-purple-500 hover:bg-purple-500/20 transition-all disabled:opacity-50 flex items-center justify-center flex-shrink-0`}
+                          className={`px-4 py-2.5 rounded-xl ${theme === "dark" ? "bg-amber-500/10 border-amber-500/20" : "bg-amber-500/5 border-amber-500/10"} border text-amber-500 hover:bg-amber-500/20 transition-all disabled:opacity-50 flex items-center justify-center flex-shrink-0`}
                           title="Fetch Product Details"
                         >
                           {isFetchingProduct ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
@@ -2249,7 +3306,7 @@ export default function App() {
                     onClick={() => {
                       if (!newProduct.name || !newProduct.url) return;
                       setTempProducts([{ id: Date.now(), ...newProduct, reviews: [] }, ...tempProducts]);
-                      setNewProduct({ name: "", price: "", url: "", buyUrl: "", description: "" });
+                      setNewProduct({ name: "", price: "", url: "", buyUrl: "", description: "", category: "" });
                     }}
                     className="w-full py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-sm transition-all"
                   >
@@ -2337,12 +3394,12 @@ export default function App() {
             )}
 
             {adminTab !== "messages" && (
-              <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-full max-w-2xl px-6 z-40">
+              <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-full max-w-xl px-6 z-40">
                 <button 
                   onClick={() => setShowSaveConfirm(true)}
-                  className="w-full py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all flex items-center justify-center gap-2 shadow-2xl shadow-blue-600/40 border border-white/10 active:scale-[0.98]"
+                  className="w-full py-4 rounded-2xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black uppercase text-xs tracking-wider transition-all flex items-center justify-center gap-2 shadow-2xl shadow-amber-500/20 border border-amber-400/20 active:scale-[0.98]"
                 >
-                  <Save className="w-5 h-5" />
+                  <Save className="w-4 h-4" />
                   Save All Changes
                 </button>
               </div>
@@ -2363,17 +3420,17 @@ export default function App() {
                     exit={{ scale: 0.9, opacity: 0, y: 20 }}
                     className="w-full max-w-sm bg-[#1a1a1a] border border-white/10 rounded-[2.5rem] p-8 text-center"
                   >
-                    <div className="w-20 h-20 rounded-full bg-blue-500/10 flex items-center justify-center mx-auto mb-6">
-                      <Save className="w-10 h-10 text-blue-500" />
+                    <div className="w-20 h-20 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto mb-6 border border-amber-500/20">
+                      <Save className="w-9 h-9 text-amber-500" />
                     </div>
-                    <h3 className="text-2xl font-bold mb-2">Save Changes?</h3>
-                    <p className="text-white/40 text-sm mb-8">This will update your profile, posts, and products across the entire app.</p>
+                    <h3 className="text-2xl font-serif font-black mb-2 text-stone-100">Save Changes?</h3>
+                    <p className="text-stone-400 text-xs mb-8">This will update your profile, posts, and products across the entire app.</p>
                     
                     <div className="flex flex-col gap-3">
                       <button 
                         onClick={handleSaveAll}
                         disabled={isSaving}
-                        className="w-full py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all flex items-center justify-center gap-2"
+                        className="w-full py-4 rounded-2xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black uppercase text-xs tracking-wider transition-all flex items-center justify-center gap-2"
                       >
                         {isSaving ? (
                           <>
@@ -2384,7 +3441,7 @@ export default function App() {
                       </button>
                       <button 
                         onClick={() => setShowSaveConfirm(false)}
-                        className="w-full py-4 rounded-2xl bg-white/5 hover:bg-white/10 text-white font-bold transition-all"
+                        className="w-full py-4 rounded-2xl bg-white/5 hover:bg-white/10 text-stone-200 hover:text-white border border-white/5 font-black uppercase text-xs tracking-wider transition-all"
                       >
                         Cancel
                       </button>
@@ -2401,9 +3458,9 @@ export default function App() {
                   initial={{ opacity: 0, y: 50 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 50 }}
-                  className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[110] px-6 py-3 rounded-full bg-green-500 text-white font-bold text-sm flex items-center gap-2 shadow-2xl shadow-green-500/40"
+                  className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[110] px-6 py-3.5 rounded-full bg-emerald-500 text-stone-950 font-black text-xs tracking-wider uppercase flex items-center gap-2 shadow-2xl shadow-emerald-500/20 border border-emerald-400/20"
                 >
-                  <CheckCircle2 className="w-4 h-4" />
+                  <CheckCircle2 className="w-4 h-4 text-stone-950 animate-bounce" />
                   Changes Saved Successfully!
                 </motion.div>
               )}
@@ -2421,42 +3478,42 @@ export default function App() {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 1.05 }}
           transition={{ duration: 0.3 }}
-          className={`min-h-screen ${theme === "dark" ? "bg-[#0a0a0a] text-white" : "bg-white text-black"} font-sans flex items-center justify-center p-6 transition-colors duration-300`}
+          className={`min-h-screen ${theme === "dark" ? "gold-grain-dark text-amber-50" : "gold-grain-light text-[#1C1B18]"} font-sans flex items-center justify-center p-6 transition-colors duration-300`}
         >
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className={`w-full max-w-sm p-8 rounded-3xl ${theme === "dark" ? "bg-white/10 border-white/10" : "bg-black/10 border-black/10"} border md:backdrop-blur-xl`}
+          className={`w-full max-w-sm p-8 rounded-3xl ${theme === "dark" ? "bg-stone-900/40 border-amber-500/20" : "bg-white/80 border-amber-500/15 shadow-xl"} border md:backdrop-blur-xl`}
         >
           <div className="flex flex-col items-center mb-8">
-            <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20 mb-4">
-              <Settings className="w-8 h-8 text-purple-500" />
+            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 mb-4">
+              <Settings className="w-8 h-8 text-amber-500 animate-spin-slow" />
             </div>
-            <h1 className="text-2xl font-bold">Admin Login</h1>
-            <p className={`${theme === "dark" ? "text-white/40" : "text-black/40"} text-sm mt-1`}>Enter your credentials to continue</p>
+            <h1 className="text-2xl font-serif font-black tracking-tight text-amber-950 dark:text-amber-100">Admin Login</h1>
+            <p className={`${theme === "dark" ? "text-stone-400" : "text-stone-500"} text-xs mt-1 tracking-wide`}>Enter your credentials to continue</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className={`block text-xs font-bold uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"} mb-2`}>Username</label>
+              <label className={`block text-[11px] font-black uppercase tracking-widest ${theme === "dark" ? "text-amber-500" : "text-[#1c1b18]"} mb-2`}>Username</label>
               <input 
                 type="text" 
                 required
                 value={loginData.username}
                 onChange={(e) => setLoginData({...loginData, username: e.target.value})}
-                className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500/50 transition-colors`}
+                className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-stone-50 border-stone-200 text-stone-900"} border rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500/50 transition-colors text-sm`}
                 placeholder="Username"
               />
             </div>
             <div>
-              <label className={`block text-xs font-bold uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"} mb-2`}>Password</label>
+              <label className={`block text-[11px] font-black uppercase tracking-widest ${theme === "dark" ? "text-amber-500" : "text-[#1c1b18]"} mb-2`}>Password</label>
               <div className="relative">
                 <input 
                   type={showPassword ? "text" : "password"} 
                   required
                   value={loginData.password}
                   onChange={(e) => setLoginData({...loginData, password: e.target.value})}
-                  className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border rounded-xl px-4 py-3 pr-12 focus:outline-none focus:border-purple-500/50 transition-colors`}
+                  className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-stone-50 border-stone-200 text-stone-900"} border rounded-xl px-4 py-3 pr-12 focus:outline-none focus:border-amber-500/50 transition-colors text-sm`}
                   placeholder="••••••••"
                 />
                 <button
@@ -2468,17 +3525,17 @@ export default function App() {
                 </button>
               </div>
             </div>
-            {loginError && <p className="text-red-500 text-xs font-medium text-center">{loginError}</p>}
+            {loginError && <p className="text-red-500 text-xs font-semibold text-center">{loginError}</p>}
             <button 
               type="submit"
-              className="w-full py-4 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold transition-all mt-4"
+              className="w-full py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black tracking-widest uppercase text-xs transition-all mt-4 shadow-lg shadow-amber-500/10 active:scale-98"
             >
-              Login
+              Sign In
             </button>
             <button 
               type="button"
               onClick={() => handleNavigate("/")}
-              className={`w-full py-2 ${theme === "dark" ? "text-white/40 hover:text-white" : "text-black/40 hover:text-black"} text-sm transition-colors`}
+              className={`w-full py-2 ${theme === "dark" ? "text-stone-400 hover:text-white" : "text-stone-500 hover:text-stone-900"} text-xs font-bold transition-colors`}
             >
               Cancel
             </button>
@@ -2489,132 +3546,208 @@ export default function App() {
           <Route path="/contact" element={
         <motion.div
           key="contact"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.3 }}
-          className={`min-h-screen ${theme === "dark" ? "bg-[#0a0a0a] text-white" : "bg-white text-black"} font-sans p-6 transition-colors duration-300`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.4 }}
+          className={`min-h-screen ${theme === "dark" ? "gold-grain-dark text-amber-50" : "gold-grain-light text-[#1C1B18]"} font-sans p-6 md:p-12 transition-colors duration-300`}
         >
-        <div className="max-w-md mx-auto pt-12">
-          <button 
-            onClick={() => {
-              handleNavigate("/");
-              setMessageSent(false);
-            }}
-            className={`flex items-center gap-2 ${theme === "dark" ? "text-white/60 hover:text-white" : "text-black/60 hover:text-black"} transition-colors mb-8 group`}
-          >
-            <div className={`p-2 rounded-full ${theme === "dark" ? "bg-white/5 group-hover:bg-white/10" : "bg-black/5 group-hover:bg-black/10"} transition-colors`}>
-              <Play className="w-4 h-4 rotate-180" />
+          {/* Subtle glow filter on top */}
+          <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-amber-500/5 to-transparent pointer-events-none" />
+
+          <div className="max-w-4xl mx-auto relative z-10">
+            {/* Elegant Header with Back Action */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10 pb-6 border-b border-dashed border-amber-500/25">
+              <div>
+                <span className="text-[10px] uppercase tracking-[0.25em] font-semibold text-amber-600 dark:text-amber-400 block mb-1">
+                  Styling Consultant Lounge
+                </span>
+                <h1 className="text-3xl font-serif font-semibold tracking-tight text-amber-950 dark:text-amber-100 flex items-center gap-2">
+                  Renu Agarwal Studio <Sparkles className="w-5 h-5 text-amber-500 animate-pulse" />
+                </h1>
+              </div>
+              <button 
+                onClick={() => {
+                  handleNavigate("/");
+                  setMessageSent(false);
+                }}
+                className={`flex items-center gap-2 self-start py-2.5 px-5 rounded-full text-xs font-semibold ${
+                  theme === "dark" 
+                    ? "bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border-amber-500/30" 
+                    : "bg-amber-100 hover:bg-amber-200 text-amber-950 border-amber-200"
+                } border transition-all active:scale-95`}
+              >
+                <ChevronLeft className="w-4 h-4" />
+                <span>Return to Showcase</span>
+              </button>
             </div>
-            <span className="font-semibold">Back to Profile</span>
-          </button>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`p-8 rounded-3xl ${theme === "dark" ? "bg-white/10 border-white/10" : "bg-black/10 border-black/10"} border md:backdrop-blur-xl`}
-          >
-            <AnimatePresence mode="wait">
-              {messageSent ? (
+            <div className="max-w-xl mx-auto w-full">
+              
+              {/* Form Column */}
+              <div>
                 <motion.div
-                  key="success"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  className="text-center py-8"
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className={`p-6 sm:p-8 rounded-3xl ${
+                    theme === "dark" 
+                      ? "bg-white/[0.04] border-white/10 text-white" 
+                      : "bg-white border-amber-500/15 shadow-sm text-stone-900"
+                  } border md:backdrop-blur-xl`}
                 >
-                  <div className="w-20 h-20 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center mx-auto mb-6">
-                    <Check className="w-10 h-10 text-green-500" />
-                  </div>
-                  <h2 className="text-2xl font-bold mb-2">Message Sent Successfully!</h2>
-                  <p className={`${theme === "dark" ? "text-white/40" : "text-black/40"} text-sm mb-8 leading-relaxed`}>
-                    Thank You For Messaging Us Our Dedicated Team Will Respond On Your Provided Details Within 24 Hours
-                  </p>
-                  <button 
-                    onClick={() => setMessageSent(false)}
-                    className="text-blue-500 text-xs font-bold hover:text-blue-400 transition-colors"
-                  >
-                    Send another message
-                  </button>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="form"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <h1 className="text-3xl font-bold mb-2">Contact Us</h1>
-                  <p className={`${theme === "dark" ? "text-white/40" : "text-black/40"} text-sm mb-8`}>We'd love to hear from you. Send us a message!</p>
+                  <AnimatePresence mode="wait">
+                    {messageSent ? (
+                      <motion.div
+                        key="success"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="text-center py-12"
+                      >
+                        <div className="w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto mb-6">
+                          <Check className="w-9 h-9 text-emerald-500" />
+                        </div>
+                        <h2 className="text-2xl font-serif font-black text-amber-950 dark:text-amber-100 mb-2">
+                          Message Sent!
+                        </h2>
+                        <p className={`text-stone-500 dark:text-stone-400 text-xs mb-8 max-w-sm mx-auto leading-relaxed`}>
+                          First of all, we have successfully received your message. Our design and styling coordinators will review your custom requests and reach out on your provided details within 12 to 24 hours.
+                        </p>
+                        <button 
+                          onClick={() => setMessageSent(false)}
+                          className="px-6 py-2.5 rounded-full border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-black hover:bg-amber-500/10 transition-colors"
+                        >
+                          Send another message
+                        </button>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="form"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                      >
+                        <h2 className="text-xl font-serif font-black text-amber-950 dark:text-amber-100 mb-1">
+                          Send Direct Message to Admin
+                        </h2>
+                        <p className="text-xs text-stone-400 mb-6">
+                          Fill out the form below to register custom inquiries under Renu Fashion Hub.
+                        </p>
 
-                  <form className="space-y-6" onSubmit={handleContactSubmit}>
-                    <div>
-                      <label className={`block text-xs font-bold uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"} mb-2`}>Your Name</label>
-                      <input 
-                        type="text" 
-                        required
-                        value={contactData.name}
-                        onChange={(e) => setContactData({...contactData, name: e.target.value})}
-                        className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500/50 transition-colors`}
-                        placeholder="John Doe"
-                      />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className={`block text-xs font-bold uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"} mb-2`}>Email Address</label>
-                        <input 
-                          type="email" 
-                          required
-                          value={contactData.email}
-                          onChange={(e) => setContactData({...contactData, email: e.target.value})}
-                          className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500/50 transition-colors`}
-                          placeholder="john@example.com"
-                        />
-                      </div>
-                      <div>
-                        <label className={`block text-xs font-bold uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"} mb-2`}>Mobile Number</label>
-                        <input 
-                          type="tel" 
-                          required
-                          value={contactData.mobile}
-                          onChange={(e) => setContactData({...contactData, mobile: e.target.value})}
-                          className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500/50 transition-colors`}
-                          placeholder="+91 00000 00000"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className={`block text-xs font-bold uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"} mb-2`}>Message</label>
-                      <textarea 
-                        rows={4}
-                        required
-                        value={contactData.message}
-                        onChange={(e) => setContactData({...contactData, message: e.target.value})}
-                        className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500/50 transition-colors resize-none`}
-                        placeholder="Tell us what's on your mind..."
-                      />
-                    </div>
-                    <button 
-                      type="submit"
-                      disabled={isSendingMessage}
-                      className={`w-full py-4 rounded-xl ${theme === "dark" ? "bg-white text-black" : "bg-black text-white"} font-bold transition-all hover:opacity-90 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2`}
-                    >
-                      {isSendingMessage ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          Sending...
-                        </>
-                      ) : (
-                        "Send Message"
-                      )}
-                    </button>
-                  </form>
+                        <form className="space-y-5" onSubmit={handleContactSubmit}>
+                          <div>
+                            <label className={`block text-[11px] font-black uppercase tracking-widest ${
+                              theme === "dark" ? "text-amber-500" : "text-[#1c1b18]"
+                            } mb-2`}>
+                              Your Full Name
+                            </label>
+                            <input 
+                              type="text" 
+                              required
+                              value={contactData.name}
+                              onChange={(e) => setContactData({...contactData, name: e.target.value})}
+                              className={`w-full text-xs xs:text-sm ${
+                                theme === "dark" 
+                                  ? "bg-white/5 border-white/10 text-white focus:border-amber-500/60" 
+                                  : "bg-stone-50 border-stone-200 text-stone-900 focus:border-amber-500/60"
+                              } border rounded-xl px-4 py-3 placeholder-stone-400 transition-all outline-none focus:ring-1 focus:ring-amber-500/25`}
+                              placeholder="e.g. Priyanjali Sen"
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className={`block text-[11px] font-black uppercase tracking-widest ${
+                                theme === "dark" ? "text-amber-500" : "text-[#1c1b18]"
+                              } mb-2`}>
+                                Email Address
+                              </label>
+                              <input 
+                                type="email" 
+                                required
+                                value={contactData.email}
+                                onChange={(e) => setContactData({...contactData, email: e.target.value})}
+                                className={`w-full text-xs xs:text-sm ${
+                                  theme === "dark" 
+                                    ? "bg-white/5 border-white/10 text-white focus:border-amber-500/60" 
+                                    : "bg-stone-50 border-stone-200 text-stone-900 focus:border-amber-500/60"
+                                } border rounded-xl px-4 py-3 placeholder-stone-400 transition-all outline-none focus:ring-1 focus:ring-amber-500/25`}
+                                placeholder="name@domain.com"
+                              />
+                            </div>
+                            <div>
+                              <label className={`block text-[11px] font-black uppercase tracking-widest ${
+                                theme === "dark" ? "text-amber-500" : "text-[#1c1b18]"
+                              } mb-2`}>
+                                Mobile Number
+                              </label>
+                              <input 
+                                type="tel" 
+                                required
+                                value={contactData.mobile}
+                                onChange={(e) => setContactData({...contactData, mobile: e.target.value})}
+                                className={`w-full text-xs xs:text-sm ${
+                                  theme === "dark" 
+                                    ? "bg-white/5 border-white/10 text-white focus:border-amber-500/60" 
+                                    : "bg-stone-50 border-stone-200 text-stone-900 focus:border-amber-500/60"
+                                } border rounded-xl px-4 py-3 placeholder-stone-400 transition-all outline-none focus:ring-1 focus:ring-amber-500/25`}
+                                placeholder="+91 XXXXX XXXXX"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className={`block text-[11px] font-black uppercase tracking-widest ${
+                              theme === "dark" ? "text-amber-500" : "text-[#1c1b18]"
+                            } mb-2`}>
+                              Message Details
+                            </label>
+                            <textarea 
+                              rows={4}
+                              required
+                              value={contactData.message}
+                              onChange={(e) => setContactData({...contactData, message: e.target.value})}
+                              className={`w-full text-xs xs:text-sm ${
+                                theme === "dark" 
+                                  ? "bg-white/5 border-white/10 text-white focus:border-amber-500/60" 
+                                  : "bg-stone-50 border-stone-200 text-stone-900 focus:border-amber-500/60"
+                              } border rounded-xl px-4 py-3 placeholder-stone-400 transition-all outline-none focus:ring-1 focus:ring-amber-500/25 resize-none`}
+                              placeholder="Tell us what you are looking for, including specific colors or collections..."
+                            />
+                          </div>
+
+                          <button 
+                            type="submit"
+                            disabled={isSendingMessage}
+                            className={`w-full py-4 rounded-xl ${
+                              theme === "dark" 
+                                ? "bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold" 
+                                : "bg-amber-950 hover:bg-amber-900 text-white font-semibold"
+                            } transition-all duration-300 shadow-md flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50`}
+                          >
+                            {isSendingMessage ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <span>Verifying Connection...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Send className="w-3.5 h-3.5" />
+                                <span>Send Inquire Message</span>
+                              </>
+                            )}
+                          </button>
+                        </form>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        </div>
-      </motion.div>
+              </div>
+
+            </div>
+          </div>
+        </motion.div>
           } />
           <Route path="/" element={
         <motion.div
@@ -2623,24 +3756,18 @@ export default function App() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
-          className={`min-h-screen ${theme === "dark" ? "bg-[#0a0a0a] text-white" : "bg-white text-black"} font-sans selection:bg-purple-500/30 transition-colors duration-300`}
+          className={`min-h-screen ${theme === "dark" ? "gold-grain-dark text-amber-50" : "gold-grain-light text-[#1C1B18]"} font-sans selection:bg-amber-500/30 transition-colors duration-300`}
         >
+
       {/* Background Gradient */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className={`absolute top-[-10%] left-[-10%] w-[40%] h-[40%] ${theme === "dark" ? "bg-purple-900/20" : "bg-purple-100/40"} blur-[120px] rounded-full`} />
-        <div className={`absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] ${theme === "dark" ? "bg-blue-900/20" : "bg-blue-100/40"} blur-[120px] rounded-full`} />
+        <div className={`absolute top-[-10%] left-[-10%] w-[40%] h-[40%] ${theme === "dark" ? "bg-emerald-900/15" : "bg-amber-100/30"} blur-[120px] rounded-full`} />
+        <div className={`absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] ${theme === "dark" ? "bg-amber-900/10" : "bg-amber-100/10"} blur-[120px] rounded-full`} />
       </div>
 
       <div className="relative max-w-md mx-auto px-6 pt-16 pb-24">
         {/* Header Actions */}
         <div className="absolute top-6 left-6 flex gap-3">
-          <button 
-            onClick={() => handleNavigate("/login")}
-            className={`p-2 rounded-full ${theme === "dark" ? "bg-white/5 hover:bg-white/10 border-white/10" : "bg-black/5 hover:bg-black/10 border-black/10"} transition-colors border group`}
-            title="Admin Access"
-          >
-            <Settings className={`w-5 h-5 ${theme === "dark" ? "text-white/30 group-hover:text-white/70" : "text-black/30 group-hover:text-black/70"} transition-colors`} />
-          </button>
           <button 
             onClick={toggleTheme}
             className={`p-2 rounded-full ${theme === "dark" ? "bg-white/5 hover:bg-white/10 border-white/10" : "bg-black/5 hover:bg-black/10 border-black/10"} transition-colors border group`}
@@ -2672,13 +3799,13 @@ export default function App() {
           className="flex flex-col items-center text-center mb-10"
         >
           <div className="relative mb-4">
-            <div className="w-28 h-28 rounded-full p-1 bg-gradient-to-tr from-purple-500 via-pink-500 to-orange-500">
+            <div className="w-28 h-28 rounded-full p-1 bg-gradient-to-tr from-amber-600 via-amber-400 to-yellow-300">
               <MediaImage 
                 url={profile.avatar} 
                 alt={profile.name} 
-                className={`w-full h-full rounded-full object-cover border-4 ${theme === "dark" ? "border-[#0a0a0a]" : "border-white"}`}
+                className={`w-full h-full rounded-full object-cover border-4 ${theme === "dark" ? "border-[#0B1512]" : "border-white"}`}
                 fallback={
-                  <div className={`w-full h-full rounded-full ${theme === "dark" ? "bg-[#0a0a0a]" : "bg-white"} flex items-center justify-center`}>
+                  <div className={`w-full h-full rounded-full ${theme === "dark" ? "bg-[#0B1512]" : "bg-[#FDFBF7]"} flex items-center justify-center`}>
                     <User className={`w-12 h-12 ${theme === "dark" ? "text-white/20" : "text-black/20"}`} />
                   </div>
                 }
@@ -2743,12 +3870,12 @@ export default function App() {
               <div className="relative z-10 flex items-center gap-2">
                 <ExternalLink className={`w-4 h-4 ${theme === "dark" ? "text-white/20 group-hover:text-white/40" : "text-black/20 group-hover:text-black/40"} transition-colors`} />
               </div>
-            </motion.a>
+             </motion.a>
           ))}
         </div>
 
         {/* Contact Button */}
-        <div className="mb-12">
+        <div className="mb-8">
           <PremiumButton
             onClick={() => handleNavigate("/contact")}
             className="w-full"
@@ -2758,13 +3885,16 @@ export default function App() {
           </PremiumButton>
         </div>
 
+        {/* Weekly Best Sellers Carousel */}
+        <LatestArrivalsCarousel products={products} posts={posts} theme={theme} navigate={handleNavigate} />
+
         {/* Tabs Navigation */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className={`flex p-1.5 rounded-2xl ${theme === "dark" ? "bg-white/10 border-white/10" : "bg-black/10 border-black/10"} border md:backdrop-blur-2xl mb-8`}
+          className={`flex p-1.5 rounded-2xl ${theme === "dark" ? "bg-white/10 border-white/10" : "bg-black/10 border-black/10"} border md:backdrop-blur-2xl mb-6`}
         >
           {INITIAL_TABS.map((tab) => (
             <button
@@ -2796,6 +3926,16 @@ export default function App() {
           ))}
         </motion.div>
 
+        {/* Search Bar & Categories Horizontal Slider */}
+        <ProductFilter 
+          searchVal={searchQuery} 
+          setSearchVal={setSearchQuery} 
+          activeCat={selectedCategory} 
+          setActiveCat={setSelectedCategory} 
+          categories={dynamicCategories}
+          theme={theme} 
+        />
+
         {/* Tab Content */}
         <div className="min-h-[400px] will-change-contents">
           <AnimatePresence mode="wait" initial={false}>
@@ -2808,18 +3948,18 @@ export default function App() {
                 transition={{ duration: 0.2, ease: "easeOut" }}
                 className="grid grid-cols-2 gap-3"
               >
-                {posts.length === 0 && products.length === 0 ? (
+                {filteredPosts.length === 0 && filteredProducts.length === 0 ? (
                   <div className="col-span-2">
-                    <EmptyState icon={ShoppingBag} message="No any products yet" />
+                    <EmptyState icon={ShoppingBag} message={searchQuery || selectedCategory !== "All" ? "No items match your search" : "No any products yet"} />
                   </div>
                 ) : (
                   shopItems.map((_, index) => (
                     <React.Fragment key={index}>
-                      {posts[index] && (
-                        <ShopPostCard post={posts[index]} navigate={handleNavigate} isMobile={isMobile} />
+                      {filteredPosts[index] && (
+                        <ShopPostCard post={filteredPosts[index]} navigate={handleNavigate} isMobile={isMobile} />
                       )}
-                      {products[index] && (
-                        <ProductCard product={products[index]} navigate={handleNavigate} isMobile={isMobile} />
+                      {filteredProducts[index] && (
+                        <ProductCard product={filteredProducts[index]} navigate={handleNavigate} isMobile={isMobile} />
                       )}
                     </React.Fragment>
                   ))
@@ -2836,12 +3976,12 @@ export default function App() {
                 transition={{ duration: 0.2, ease: "easeOut" }}
                 className="grid grid-cols-2 gap-3"
               >
-                {posts.length === 0 ? (
+                {filteredPosts.length === 0 ? (
                   <div className="col-span-2">
-                    <EmptyState icon={ImageIcon} message="No posts yet" />
+                    <EmptyState icon={ImageIcon} message={searchQuery || selectedCategory !== "All" ? "No posts match your search" : "No posts yet"} />
                   </div>
                 ) : (
-                  posts.map((post: any) => (
+                  filteredPosts.map((post: any) => (
                     <ShopPostCard key={post.id} post={post} navigate={handleNavigate} isMobile={isMobile} />
                   ))
                 )}
@@ -2855,17 +3995,62 @@ export default function App() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
-                className="grid grid-cols-2 gap-4"
+                className="space-y-4"
               >
-                {products.length === 0 ? (
-                  <div className="col-span-2">
-                    <EmptyState icon={Tag} message="No any products yet" />
+                {/* Price Sort Selector Bar */}
+                <div className={`flex items-center justify-between gap-1.5 p-2 rounded-2xl border ${
+                  theme === "dark" 
+                    ? "bg-[#141B19]/40 border-white/10" 
+                    : "bg-[#1C1B18]/5 border-[#1C1B18]/10"
+                }`}>
+                  <span className={`text-[8.5px] font-black uppercase tracking-wider ${theme === "dark" ? "text-amber-100/90" : "text-[#1C1B18]"} flex items-center gap-1 flex-shrink-0`}>
+                    <ArrowUpDown className="w-3 h-3 text-purple-500" /> Price:
+                  </span>
+                  <div className="flex items-center gap-1.5 flex-1 justify-end min-w-0">
+                    <button
+                      onClick={() => setSortBy("default")}
+                      className={`px-2 py-1.5 rounded-xl text-[8.5px] font-black uppercase tracking-tight transition-all duration-300 flex-shrink-0 ${
+                        sortBy === "default"
+                          ? (theme === "dark" ? "bg-amber-500 text-stone-950 shadow-md shadow-amber-500/20" : "bg-stone-900 text-stone-50 shadow-md shadow-black/10")
+                          : (theme === "dark" ? "bg-white/5 border border-white/5 hover:bg-white/15 text-stone-300 shadow-sm" : "bg-black/5 border border-transparent hover:bg-black/10 text-stone-700")
+                      }`}
+                    >
+                      Featured
+                    </button>
+                    <button
+                      onClick={() => setSortBy("price-asc")}
+                      className={`px-2 py-1.5 rounded-xl text-[8.5px] font-black uppercase tracking-tight transition-all duration-300 flex-shrink-0 ${
+                        sortBy === "price-asc"
+                          ? (theme === "dark" ? "bg-amber-500 text-stone-950 shadow-md shadow-amber-500/20" : "bg-stone-900 text-stone-50 shadow-md shadow-black/10")
+                          : (theme === "dark" ? "bg-white/5 border border-white/5 hover:bg-white/15 text-stone-300 shadow-sm" : "bg-black/5 border border-transparent hover:bg-black/10 text-stone-700")
+                      }`}
+                    >
+                      Low to High
+                    </button>
+                    <button
+                      onClick={() => setSortBy("price-desc")}
+                      className={`px-2 py-1.5 rounded-xl text-[8.5px] font-black uppercase tracking-tight transition-all duration-300 flex-shrink-0 ${
+                        sortBy === "price-desc"
+                          ? (theme === "dark" ? "bg-amber-500 text-stone-950 shadow-md shadow-amber-500/20" : "bg-stone-900 text-stone-50 shadow-md shadow-black/10")
+                          : (theme === "dark" ? "bg-white/5 border border-white/5 hover:bg-white/15 text-stone-300 shadow-sm" : "bg-black/5 border border-transparent hover:bg-black/10 text-stone-700")
+                      }`}
+                    >
+                      High to Low
+                    </button>
                   </div>
-                ) : (
-                  products.map((product: any) => (
-                    <ProductCard key={product.id} product={product} navigate={handleNavigate} isMobile={isMobile} />
-                  ))
-                )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  {filteredProducts.length === 0 ? (
+                    <div className="col-span-2">
+                      <EmptyState icon={Tag} message={searchQuery || selectedCategory !== "All" ? "No products match your search" : "No any products yet"} />
+                    </div>
+                  ) : (
+                    filteredProducts.map((product: any) => (
+                      <ProductCard key={product.id} product={product} navigate={handleNavigate} isMobile={isMobile} />
+                    ))
+                  )}
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -2944,7 +4129,7 @@ export default function App() {
                 {/* Tagged Products Section */}
                 {selectedPost.taggedProducts && selectedPost.taggedProducts.length > 0 && (
                   <div className="space-y-4">
-                    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x">
+                    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x" onWheel={(e) => { if (e.deltaY !== 0) { e.currentTarget.scrollLeft += e.deltaY; } }}>
                       {selectedPost.taggedProducts.map((productId: number) => {
                         const product = products.find((p: any) => p.id === productId);
                         if (!product) return null;
@@ -2987,19 +4172,88 @@ export default function App() {
           )}
         </AnimatePresence>
 
+
+
         {/* Footer */}
         <motion.footer 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1, duration: 1 }}
-          className="mt-8 text-center"
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8, duration: 1, ease: "easeOut" }}
+          className="mt-16 mb-12 px-4"
         >
-          <p className="text-white/20 text-[10px] uppercase tracking-[0.2em]">
-            &copy; 2026 Renu Fashion Hub. All Rights Reserved.
-          </p>
-          <p className="text-white/30 text-[9px] mt-2 font-medium tracking-widest">
-            Designed by Shiva <a href="https://wa.me/917248763036" target="_blank" rel="noopener noreferrer" className="hover:text-white/60 transition-colors">+91 (72487 63036)</a>
-          </p>
+          {/* Elegant Divider with Center Badge */}
+          <div className="relative flex items-center justify-center my-10">
+            <div className={`absolute left-0 right-0 h-[1px] ${
+              theme === "dark" 
+                ? "bg-gradient-to-r from-transparent via-white/10 to-transparent" 
+                : "bg-gradient-to-r from-transparent via-black/10 to-transparent"
+            }`} />
+            <div 
+              className={`relative z-10 px-4 py-1.5 rounded-full border text-[9px] font-black uppercase tracking-widest flex items-center gap-2 shadow-sm ${
+                theme === "dark" 
+                  ? "bg-[#09100E] border-white/10 text-amber-500/80" 
+                  : "bg-white border-black/10 text-purple-600/80"
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 animate-pulse text-amber-500" />
+              <span>Premium Experience</span>
+            </div>
+          </div>
+
+          <div className="max-w-md mx-auto flex flex-col items-center gap-6">
+            {/* Top Side: Exquisite Designer Card */}
+            <motion.div 
+              whileHover={{ y: -2 }}
+              transition={{ duration: 0.2 }}
+              className={`flex items-center gap-3.5 p-3.5 rounded-2xl border transition-all ${
+                theme === "dark" 
+                  ? "bg-white/[0.02] hover:bg-white/[0.04] border-white/10 text-amber-50 shadow-[0_4px_24px_rgba(0,0,0,0.4)]" 
+                  : "bg-[#1C1B18]/[0.01] hover:bg-[#1C1B18]/[0.03] border-black/10 text-[#1C1B18] shadow-[0_4px_24px_rgba(0,0,0,0.02)]"
+              }`}
+            >
+              <div className={`p-2 rounded-xl ${
+                theme === "dark" 
+                  ? "bg-gradient-to-br from-amber-500/10 to-purple-500/10 border border-white/5" 
+                  : "bg-gradient-to-br from-amber-500/5 to-purple-500/5 border border-black/5"
+              }`}>
+                <Phone className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
+              </div>
+              <div className="text-left leading-tight">
+                <span className={`block text-[8px] font-extrabold uppercase tracking-widest ${
+                  theme === "dark" ? "text-white/40" : "text-black/40"
+                }`}>
+                  Designed by
+                </span>
+                <span className="block text-[11px] font-black uppercase tracking-wider mt-0.5">
+                  Shiva
+                </span>
+              </div>
+              <a 
+                href="https://wa.me/917248763036" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[9px] font-black uppercase tracking-wider ml-1.5 hover:scale-105 active:scale-95 transition-all shadow-md ${
+                  theme === "dark" 
+                    ? "bg-amber-500 hover:bg-amber-400 text-stone-950 border-amber-400 shadow-amber-500/10" 
+                    : "bg-stone-900 hover:bg-stone-800 text-stone-50 border-stone-800 shadow-black/10"
+                }`}
+              >
+                <span>+91 72487 63036</span>
+                <ExternalLink className="w-2.5 h-2.5" />
+              </a>
+            </motion.div>
+
+            {/* Bottom Side: Brand Statement and Copyright in a Single Line inside a Box */}
+            <div 
+              className={`w-full max-w-sm flex items-center justify-center p-3 rounded-xl border text-[8.5px] font-black uppercase tracking-[0.18em] transition-all whitespace-nowrap overflow-x-hidden ${
+                theme === "dark" 
+                  ? "bg-[#09100E] border-white/5 text-amber-500/60 shadow-[0_2px_12px_rgba(0,0,0,0.2)]" 
+                  : "bg-stone-50 border-black/5 text-[#1C1B18]/60 shadow-[0_2px_12px_rgba(0,0,0,0.01)]"
+              }`}
+            >
+              &copy; 2026 Renu Fashion Hub. All Rights Reserved.
+            </div>
+          </div>
         </motion.footer>
 
         {/* Share Modal */}
@@ -3009,18 +4263,24 @@ export default function App() {
               isOpen={showShareModal} 
               onClose={() => setShowShareModal(false)} 
               profileName={profile.name}
+              customUrl="http://renufashionhub.in"
+              customTitle="Renu Fashion Hub"
+              theme={theme}
             />
           )}
         </AnimatePresence>
       </div>
         </motion.div>
           } />
-          <Route path="/product/:id" element={<ProductDetailPage products={products} theme={theme} navigate={handleNavigate} db={db} />} />
-          <Route path="/post/:id" element={<PostDetailPage posts={posts} products={products} profile={profile} theme={theme} navigate={handleNavigate} isMuted={isMuted} setIsMuted={setIsMuted} />} />
+          <Route path="/product/:id" element={<ProductDetailPage products={products} theme={theme} navigate={handleNavigate} db={db} isLoaded={isProductsLoaded} />} />
+          <Route path="/post/:id" element={<PostDetailPage posts={posts} products={products} profile={profile} theme={theme} navigate={handleNavigate} isMuted={isMuted} setIsMuted={setIsMuted} isLoaded={isPostsLoaded} />} />
         </Routes>
           </div>
         )}
       </AnimatePresence>
+
+      {/* Global Contact Assistant - Support Quick Assist */}
+      <SupportQuickAssist theme={theme} handleNavigate={handleNavigate} />
     </>
   );
 }
