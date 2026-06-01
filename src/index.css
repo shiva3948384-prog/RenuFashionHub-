@@ -1,23 +1,43 @@
-  @import "tailwindcss";
+@import "tailwindcss";
 
-  @theme {
-    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-    --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer base {
+  body {
+    @apply bg-[#0B1512] text-amber-50;
   }
 
-  @layer base {
-    body {
-      @apply bg-[#0a0a0a] text-white;
-    }
-
+  * {
+    cursor: none !important;
+  }
+  
+  /* Show cursor on mobile/touch devices where custom cursor might be weird */
+  @media (hover: none) and (pointer: coarse) {
     * {
-      cursor: none !important;
-    }
-    
-    /* Show cursor on mobile/touch devices where custom cursor might be weird */
-    @media (hover: none) and (pointer: coarse) {
-      * {
-        cursor: auto !important;
-      }
+      cursor: auto !important;
     }
   }
+}
+
+.gold-grain-dark {
+  background-color: #050E0B !important;
+  background-image: 
+    radial-gradient(rgba(212, 175, 55, 0.04) 1.5px, transparent 1.5px),
+    radial-gradient(rgba(212, 175, 55, 0.015) 1px, transparent 1px);
+  background-size: 32px 32px, 16px 16px;
+  background-position: 0 0, 16px 16px;
+  position: relative;
+}
+
+.gold-grain-light {
+  background-color: #FCFAF6 !important;
+  background-image: 
+    radial-gradient(rgba(180, 130, 20, 0.03) 1.5px, transparent 1.5px),
+    radial-gradient(rgba(180, 130, 20, 0.01) 1px, transparent 1px);
+  background-size: 32px 32px, 16px 16px;
+  background-position: 0 0, 16px 16px;
+  position: relative;
+}
