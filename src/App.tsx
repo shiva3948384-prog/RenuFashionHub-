@@ -2002,6 +2002,17 @@ export default function App() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Track page views dynamically across all virtual pages in Google Analytics
+  useEffect(() => {
+    if (typeof window !== "undefined" && (window as any).gtag) {
+      (window as any).gtag("config", "G-7L132HKM3C", {
+        page_path: location.pathname + location.search,
+        page_location: window.location.href,
+        page_title: document.title,
+      });
+    }
+  }, [location.pathname, location.search]);
+
   const handleNavigate = useCallback((path: string) => {
     setIsNavigating(true);
     navigate(path);
