@@ -2002,17 +2002,6 @@ export default function App() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Track page views dynamically across all virtual pages in Google Analytics
-  useEffect(() => {
-    if (typeof window !== "undefined" && (window as any).gtag) {
-      (window as any).gtag("config", "G-7L132HKM3C", {
-        page_path: location.pathname + location.search,
-        page_location: window.location.href,
-        page_title: document.title,
-      });
-    }
-  }, [location.pathname, location.search]);
-
   const handleNavigate = useCallback((path: string) => {
     setIsNavigating(true);
     navigate(path);
@@ -2054,6 +2043,46 @@ export default function App() {
   const [tempProducts, setTempProducts] = useState(products);
   const [deletedPostIds, setDeletedPostIds] = useState<string[]>([]);
   const [deletedProductIds, setDeletedProductIds] = useState<string[]>([]);
+
+  // Set page titles dynamically based on current route/path and track page views in Google Analytics
+  useEffect(() => {
+    let currentTitle = "Renu Fashion Hub";
+
+    if (location.pathname === "/contact") {
+      currentTitle = "Contact - Renu Fashion Hub";
+    } else if (location.pathname === "/admin") {
+      currentTitle = "Admin Panel - Renu Fashion Hub";
+    } else if (location.pathname === "/login") {
+      currentTitle = "Login - Renu Fashion Hub";
+    } else if (location.pathname.startsWith("/product/")) {
+      const idStr = location.pathname.split("/product/")[1];
+      const product = products.find(p => p.id.toString() === idStr || p.docId === idStr);
+      if (product) {
+        currentTitle = `Product - ${product.name}`;
+      } else {
+        currentTitle = "Product - Renu Fashion Hub";
+      }
+    } else if (location.pathname.startsWith("/post/")) {
+      const idStr = location.pathname.split("/post/")[1];
+      const post = posts.find(p => p.id.toString() === idStr || p.docId === idStr);
+      if (post) {
+        const postName = post.name || post.caption || post.title || 'Studio Post';
+        currentTitle = `Post - ${postName}`;
+      } else {
+        currentTitle = "Post - Renu Fashion Hub";
+      }
+    }
+
+    document.title = currentTitle;
+
+    if (typeof window !== "undefined" && (window as any).gtag) {
+      (window as any).gtag("config", "G-7L132HKM3C", {
+        page_path: location.pathname + location.search,
+        page_location: window.location.href,
+        page_title: currentTitle,
+      });
+    }
+  }, [location.pathname, location.search, products, posts]);
 
   const dynamicCategories = useMemo(() => {
     const defaultCats = ["All", "Sarees", "Kurtas", "Lehengas", "Dresses", "Jewelry"];
@@ -3569,12 +3598,18 @@ export default function App() {
           <div className="max-w-4xl mx-auto relative z-10">
             {/* Elegant Header with Back Action */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10 pb-6 border-b border-dashed border-amber-500/25">
-              <div>
-                <span className="text-[10px] uppercase tracking-[0.25em] font-semibold text-amber-600 dark:text-amber-400 block mb-1">
+              <div 
+                onClick={() => {
+                  handleNavigate("/");
+                  setMessageSent(false);
+                }}
+                className="cursor-pointer group select-none transition-all duration-300"
+              >
+                <span className="text-[10px] uppercase tracking-[0.25em] font-semibold text-amber-600 dark:text-amber-400 block mb-1 group-hover:text-amber-500 transition-colors">
                   Styling Consultant Lounge
                 </span>
-                <h1 className="text-3xl font-serif font-semibold tracking-tight text-amber-950 dark:text-amber-100 flex items-center gap-2">
-                  Renu Agarwal Studio <Sparkles className="w-5 h-5 text-amber-500 animate-pulse" />
+                <h1 className="text-3xl font-serif font-semibold tracking-tight text-amber-950 dark:text-amber-100 flex items-center gap-2 group-hover:opacity-85 transition-opacity">
+                  Renu Agarwal Studio <Sparkles className="w-5 h-5 text-amber-500 animate-pulse group-hover:scale-110 transition-transform" />
                 </h1>
               </div>
               <button 
