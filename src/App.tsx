@@ -79,7 +79,10 @@ import {
   ArrowUpDown,
   HelpCircle,
   ChevronDown,
-  ShieldCheck
+  ShieldCheck,
+  Clock,
+  MapPin,
+  Edit
 } from "lucide-react";
 
 // Initial Mock Data
@@ -924,147 +927,186 @@ const ProductDetailPage = ({ products, theme, navigate, db, isLoaded }: { produc
       .catch((err) => {
         console.error("Failed to copy link: ", err);
       });
-  };
-
-  return (
+  };  return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-amber-50" : "bg-[#FDFBF7] text-[#1C1B18]"} p-6 pb-24`}
+      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-amber-50" : "bg-[#FDFBF7] text-[#1C1B18]"} p-4 sm:p-6 pb-24`}
     >
-      <div className="max-w-md mx-auto">
+      <div className="max-w-4xl lg:max-w-6xl mx-auto">
         <button 
           onClick={() => navigate("/")} 
-          className={`mb-6 p-3 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border flex items-center gap-2 group transition-all hover:bg-amber-500/10 hover:border-amber-500/50`}
+          className={`mb-6 p-2.5 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border flex items-center gap-2 group transition-all hover:bg-amber-500/10 hover:border-amber-500/50 w-fit cursor-pointer`}
         >
-          <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" /> 
-          <span className="text-sm font-bold">Back</span>
+          <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> 
+          <span className="text-xs font-bold uppercase tracking-wider">Back to Showcase</span>
         </button>
-        <div className="aspect-[3/4] rounded-3xl overflow-hidden mb-6 border border-white/10 shadow-2xl">
-          <MediaImage url={product.url} className="w-full h-full object-cover" />
-        </div>
-        <h1 className="text-2xl font-bold mb-2 tracking-tight">{product.name}</h1>
-        <p className="text-xl font-bold text-amber-500 dark:text-amber-400 mb-4">₹{product.price}</p>
-        
-        {product.description && (
-          <div className="mb-8">
-            <h3 className="text-xs font-bold uppercase tracking-widest opacity-40 mb-2">Description</h3>
-            <p className="text-sm opacity-80 leading-relaxed whitespace-pre-wrap">{product.description}</p>
-          </div>
-        )}
 
-        <div className="flex gap-3 mb-12">
-          {product.buyUrl && (
-            <PremiumButton
-              onClick={() => window.open(product.buyUrl, "_blank")}
-              className="flex-[2]"
-              icon={ShoppingBag}
-            >
-              Buy Now
-            </PremiumButton>
-          )}
-          <button
-            onClick={() => setShowShareModal(true)}
-            className={`flex items-center justify-center gap-2 px-5 py-4 rounded-3xl border font-bold text-xs uppercase tracking-wider transition-all duration-300 hover:scale-[1.03] active:scale-95 ${
-              theme === "dark" 
-                ? "bg-white/5 hover:bg-white/10 border-white/10 text-amber-50 hover:border-amber-500/40" 
-                : "bg-black/5 hover:bg-black/10 border-black/10 text-[#1C1B18] hover:border-amber-500/40"
-            } ${product.buyUrl ? 'flex-1' : 'w-full'}`}
-            title="Share & Copy Link"
-          >
-            <Share2 className="w-4 h-4" />
-            <span>Copy / Share</span>
-          </button>
-        </div>
-
-        {/* Reviews Section */}
-        <div ref={reviewsContainerRef} className="space-y-8 scroll-mt-24">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold">Reviews</h3>
-            <div className="flex items-center gap-1.5 bg-yellow-500/5 px-2.5 py-1 rounded-lg border border-yellow-500/10">
-              <motion.div
-                animate={triggerSuccessStars ? {
-                  scale: [1, 1.5, 1],
-                  rotate: [0, 360],
-                } : {}}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-              >
-                <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-              </motion.div>
-              <span className="text-sm font-bold text-yellow-500">
-                {product.reviews?.length > 0 
-                  ? (product.reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / product.reviews.length).toFixed(1)
-                  : "0.0"}
-              </span>
-              <span className="text-xs opacity-40">({product.reviews?.length || 0})</span>
+        {/* Responsive Layout Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-10 items-start">
+          
+          {/* Image Left Column - sticky on desktop to prevent visual emptiness */}
+          <div className="md:col-span-5 md:sticky md:top-6">
+            <div className="aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 shadow-xl relative group">
+              <MediaImage url={product.url} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
             </div>
           </div>
 
-          {/* Add Review Form */}
-          <form onSubmit={handleReviewSubmit} className={`p-6 rounded-2xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border space-y-4`}>
-            <p className="text-xs font-bold uppercase tracking-widest opacity-40">Write a Review</p>
-            <InteractiveStarRating 
-              rating={newReview.rating} 
-              onChange={(r) => setNewReview({ ...newReview, rating: r })} 
-              theme={theme}
-              triggerSuccess={triggerSuccessStars}
-            />
-            <input 
-              type="text"
-              placeholder="Your Name"
-              value={newReview.user}
-              onChange={(e) => setNewReview({ ...newReview, user: e.target.value })}
-              className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-amber-500/50`}
-            />
-            <textarea 
-              placeholder="Your Comment"
-              value={newReview.comment}
-              onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
-              rows={2}
-              className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-amber-500/50 resize-none`}
-            />
-            <button 
-              type="submit"
-              disabled={isSubmittingReview || !newReview.user || !newReview.comment}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-50 hover:to-amber-400 text-stone-950 font-black text-sm transition-all disabled:opacity-50 cursor-pointer"
-            >
-              {isSubmittingReview ? "Submitting..." : "Submit Review"}
-            </button>
-          </form>
+          {/* Details Right Column */}
+          <div className="md:col-span-7 space-y-6">
+            
+            {/* Header info */}
+            <div className={`p-6 rounded-2xl ${theme === "dark" ? "bg-white/[0.02] border-white/5" : "bg-white border-stone-150"} border shadow-sm space-y-2`}>
+              <span className="text-[9px] font-black uppercase tracking-[0.25em] text-amber-600 dark:text-amber-400">
+                Premium Apparel Curation
+              </span>
+              <h1 className="text-2xl sm:text-3xl font-black font-serif tracking-tight leading-tight">{product.name}</h1>
+              <div className="flex items-center gap-3 pt-2">
+                <p className="text-2xl font-black text-amber-600 dark:text-amber-400">₹{product.price}</p>
+                <span className="text-[10px] font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-500 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                  In stock
+                </span>
+              </div>
+            </div>
 
-          {/* Reviews List */}
-          <div className="space-y-4">
-            <AnimatePresence initial={false}>
-              {product.reviews?.length > 0 ? (
-                [...product.reviews].reverse().map((review: any, idx: number) => (
-                  <motion.div 
-                    key={review.id || idx} 
-                    initial={{ opacity: 0, y: 15, scale: 0.98 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.35, ease: "easeOut" }}
-                    className={`p-4 rounded-2xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border`}
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <p className="text-sm font-bold">{review.user}</p>
-                        <div className="flex gap-0.5 mt-0.5">
-                          {[1, 2, 3, 4, 5].map((s) => (
-                            <Star key={s} className={`w-3 h-3 ${s <= review.rating ? "text-yellow-500 fill-yellow-500" : "text-white/10"}`} />
-                          ))}
-                        </div>
-                      </div>
-                      <p className="text-[10px] opacity-40">{new Date(review.date).toLocaleDateString()}</p>
-                    </div>
-                    <p className="text-sm opacity-70">{review.comment}</p>
-                  </motion.div>
-                ))
-              ) : (
-                <p className="text-center py-8 text-sm opacity-40 italic">No reviews yet. Be the first to review!</p>
+            {/* Description Card */}
+            {product.description && (
+              <div className={`p-6 rounded-2xl ${theme === "dark" ? "bg-white/[0.02] border-white/5" : "bg-white border-stone-150"} border shadow-sm`}>
+                <h3 className="text-[10px] font-bold uppercase tracking-widest opacity-40 mb-2">Editor's Note</h3>
+                <p className={`text-xs sm:text-sm leading-relaxed ${theme === "dark" ? "text-stone-300" : "text-stone-700"} whitespace-pre-wrap`}>
+                  {product.description}
+                </p>
+              </div>
+            )}
+
+            {/* CTA action card */}
+            <div className={`p-4 rounded-2xl ${theme === "dark" ? "bg-amber-500/[0.01] border-amber-500/10" : "bg-amber-500/[0.03] border-amber-500/15"} border shadow-sm flex flex-col sm:flex-row gap-3`}>
+              {product.buyUrl && (
+                <PremiumButton
+                  onClick={() => window.open(product.buyUrl, "_blank")}
+                  className="flex-[2] py-3.5"
+                  icon={ShoppingBag}
+                >
+                  Buy Now
+                </PremiumButton>
               )}
-            </AnimatePresence>
+              <button
+                onClick={() => setShowShareModal(true)}
+                className={`flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl border font-bold text-xs uppercase tracking-wider transition-all duration-300 hover:scale-[1.02] active:scale-95 ${
+                  theme === "dark" 
+                    ? "bg-white/5 hover:bg-white/10 border-white/10 text-amber-50" 
+                    : "bg-black/5 hover:bg-black/10 border-black/10 text-[#1C1B18]"
+                } ${product.buyUrl ? 'flex-1' : 'w-full'} cursor-pointer`}
+                title="Share & Copy Link"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                <span>Copy Link</span>
+              </button>
+            </div>
+
+            {/* Reviews Block */}
+            <div ref={reviewsContainerRef} className="space-y-6 pt-2 scroll-mt-24">
+              <div className="flex items-center justify-between border-b border-amber-500/10 pb-3">
+                <h3 className="text-base font-black uppercase tracking-wider font-serif">Customer Reviews</h3>
+                <div className="flex items-center gap-1.5 bg-yellow-500/5 px-2.5 py-1 rounded-lg border border-yellow-500/10">
+                  <motion.div
+                    animate={triggerSuccessStars ? {
+                      scale: [1, 1.5, 1],
+                      rotate: [0, 360],
+                    } : {}}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                  >
+                    <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
+                  </motion.div>
+                  <span className="text-sm font-bold text-yellow-500">
+                    {product.reviews?.length > 0 
+                      ? (product.reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / product.reviews.length).toFixed(1)
+                      : "0.0"}
+                  </span>
+                  <span className="text-xs opacity-40">({product.reviews?.length || 0})</span>
+                </div>
+              </div>
+
+              {/* Grid layout for Reviews content to optimize space usage */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                
+                {/* Write a layout block (card 1) */}
+                <form onSubmit={handleReviewSubmit} className={`p-5 rounded-2xl ${theme === "dark" ? "bg-white/[0.01] border-white/5" : "bg-stone-50/50 border-stone-150"} border space-y-3.5 h-fit`}>
+                  <p className="text-[9px] font-bold uppercase tracking-widest opacity-40">Post Feedback</p>
+                  <InteractiveStarRating 
+                    rating={newReview.rating} 
+                    onChange={(r) => setNewReview({ ...newReview, rating: r })} 
+                    theme={theme}
+                    triggerSuccess={triggerSuccessStars}
+                  />
+                  <input 
+                    type="text"
+                    placeholder="Your Name"
+                    required
+                    value={newReview.user}
+                    onChange={(e) => setNewReview({ ...newReview, user: e.target.value })}
+                    className={`w-full text-xs ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-white border-stone-200"} border rounded-xl px-3 py-2.5 focus:outline-none focus:border-amber-500/50`}
+                  />
+                  <textarea 
+                    placeholder="Describe your styling experience..."
+                    required
+                    value={newReview.comment}
+                    onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+                    rows={2}
+                    className={`w-full text-xs ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-white border-stone-200"} border rounded-xl px-3 py-2.5 focus:outline-none focus:border-amber-500/50 resize-none`}
+                  />
+                  <button 
+                    type="submit"
+                    disabled={isSubmittingReview || !newReview.user || !newReview.comment}
+                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-[#09100E] font-black text-xs uppercase tracking-widest transition-all disabled:opacity-50 cursor-pointer"
+                  >
+                    {isSubmittingReview ? "Submitting..." : "Submit"}
+                  </button>
+                </form>
+
+                {/* Reviews list scrollable container (card 2) */}
+                <div className="space-y-3 max-h-[350px] overflow-y-auto pr-1">
+                  <AnimatePresence initial={false}>
+                    {product.reviews?.length > 0 ? (
+                      [...product.reviews].reverse().map((review: any, idx: number) => (
+                        <motion.div 
+                          key={review.id || idx} 
+                          initial={{ opacity: 0, y: 15, scale: 0.98 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.35, ease: "easeOut" }}
+                          className={`p-4 rounded-xl ${theme === "dark" ? "bg-white/[0.02] border-white/5" : "bg-white border-stone-150"} border shadow-sm`}
+                        >
+                          <div className="flex justify-between items-start mb-1.5">
+                            <div>
+                              <p className="text-xs font-bold text-stone-900 dark:text-amber-50 leading-none">{review.user}</p>
+                              <div className="flex gap-0.5 mt-1">
+                                {[1, 2, 3, 4, 5].map((s) => (
+                                  <Star key={s} className={`w-2.5 h-2.5 ${s <= review.rating ? "text-yellow-500 fill-yellow-500" : "text-white/10"}`} />
+                                ))}
+                              </div>
+                            </div>
+                            <p className="text-[9px] opacity-40">{new Date(review.date).toLocaleDateString()}</p>
+                          </div>
+                          <p className={`text-xs leading-relaxed ${theme === "dark" ? "text-stone-300" : "text-stone-600"}`}>{review.comment}</p>
+                        </motion.div>
+                      ))
+                    ) : (
+                      <div className={`p-8 text-center rounded-xl border ${theme === "dark" ? "bg-white/[0.01] border-white/5" : "bg-stone-50 border-stone-150"} border-dashed flex flex-col items-center justify-center`}>
+                        <Star className="w-8 h-8 text-yellow-500/20 mb-2" />
+                        <p className="text-xs opacity-45 italic">No reviews yet. Be the first to share your thoughts!</p>
+                      </div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+              </div>
+            </div>
+
           </div>
+
         </div>
       </div>
 
@@ -1700,14 +1742,14 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-amber-50" : "bg-[#FDFBF7] text-[#1C1B18]"} p-4 sm:p-6 pb-24 font-sans selection:bg-amber-500/30 overflow-x-hidden`}
+      className={`h-screen overflow-y-scroll snap-y snap-proximity scroll-smooth ${theme === "dark" ? "bg-[#0B1512] text-amber-50" : "bg-[#FDFBF7] text-[#1C1B18]"} p-4 sm:p-6 pb-24 font-sans selection:bg-amber-500/30 overflow-x-hidden`}
     >
       {/* Insert JSON-LD Schema dynamically inside the document */}
       <script type="application/ld+json">
         {JSON.stringify(schemaData)}
       </script>
 
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-5xl lg:max-w-6xl mx-auto">
         {/* Back button and App Title */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10 border-b border-amber-500/10 pb-6">
           <button 
@@ -1729,7 +1771,7 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
         </div>
 
         {/* 1. HERO SECTION */}
-        <section className="text-center mb-16 relative">
+        <section className="text-center mb-16 relative snap-start scroll-mt-10 md:scroll-mt-16">
           <div className="absolute inset-0 -z-10 flex items-center justify-center opacity-10">
             <Sparkles className="w-48 h-48 text-amber-500 blur-sm animate-pulse" />
           </div>
@@ -1751,7 +1793,7 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
             <div className="pt-4">
               <button
                 onClick={() => navigate("/blog")}
-                className="px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-550 hover:to-amber-440 text-stone-950 font-black text-xs uppercase tracking-widest transition-all shadow-[0_10px_25px_rgba(217,119,6,0.25)] hover:shadow-[0_15px_30px_rgba(217,119,6,0.35)] active:scale-95 flex items-center gap-2 mx-auto cursor-pointer"
+                className="px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-stone-950 font-black text-xs uppercase tracking-widest transition-all shadow-[0_10px_25px_rgba(217,119,6,0.25)] hover:shadow-[0_15px_30px_rgba(217,119,6,0.35)] active:scale-95 flex items-center gap-2 mx-auto cursor-pointer"
               >
                 <BookOpen className="w-4 h-4" />
                 Explore Fashion Trends
@@ -1761,10 +1803,16 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
         </section>
 
         {/* 2. OUR STORY SECTION */}
-        <section className={`p-8 md:p-12 rounded-3xl ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-white border-stone-200"} border shadow-xl mb-12`}>
+        <motion.section 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className={`snap-start scroll-mt-6 md:scroll-mt-10 p-8 md:p-12 rounded-3xl ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-white border-stone-200"} border shadow-xl mb-12`}
+        >
           <div className="flex items-center gap-3 border-b border-amber-500/25 pb-6 mb-8">
             <div className={`p-3 rounded-2xl ${theme === "dark" ? "bg-amber-500/10 text-amber-400" : "bg-amber-500/5 text-amber-600"} border border-amber-500/20`}>
-              <Sparkles className="w-6 h-6 text-amber-550" />
+              <Sparkles className="w-6 h-6 text-amber-600" />
             </div>
             <div>
               <h3 className="text-xl font-black font-serif text-stone-900 dark:text-stone-100 uppercase tracking-tight">
@@ -1786,10 +1834,16 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
               By aligning lifestyle trends with user-focused clarity, Renu Fashion Hub is proud to serve as your daily digital stylist, fostering confidence and clarity with every single article published.
             </p>
           </div>
-        </section>
+        </motion.section>
 
         {/* 3 & 4. MISSION & VISION SECTION */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+        <motion.section 
+          initial={{ opacity: 0, y: 35 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.8, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
+          className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 snap-start scroll-mt-6 md:scroll-mt-10"
+        >
           {/* Mission */}
           <div className={`p-8 rounded-3xl ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-white border-stone-200"} border shadow-md flex flex-col justify-between`}>
             <div className="space-y-4">
@@ -1838,16 +1892,22 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
               </p>
             </div>
           </div>
-        </section>
+        </motion.section>
 
         {/* 5. WHAT WE OFFER */}
-        <section className="mb-12">
+        <motion.section 
+          initial={{ opacity: 0, scale: 0.98 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="mb-12 snap-start scroll-mt-6 md:scroll-mt-10"
+        >
           <div className="text-center mb-8">
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-550">Dynamic Deliverables</span>
-            <h3 className="text-2xl font-black font-serif uppercase tracking-tight text-stone-900 dark:text-stone-550 mt-1">
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-600">Dynamic Deliverables</span>
+            <h3 className="text-2xl font-black font-serif uppercase tracking-tight text-stone-900 dark:text-stone-200 mt-1">
               What We Offer
             </h3>
-            <p className={`text-xs max-w-md mx-auto ${theme === "dark" ? "text-stone-400" : "text-stone-550"} mt-1`}>
+            <p className={`text-xs max-w-md mx-auto ${theme === "dark" ? "text-stone-400" : "text-stone-600"} mt-1`}>
               Every piece of our publishing framework is designed to elevate your fashion intelligence.
             </p>
           </div>
@@ -1863,9 +1923,11 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
               { title: "Fashion News", text: "Delivering important highlights of global trends, capsule releases, and luxury releases.", icon: Layers },
               { title: "Styling Tips", text: "Essential styling tips on accessorizing, color coordinates, and smart tailoring hacks.", icon: CheckCircle2 }
             ].map((offer, idx) => (
-              <div 
+              <motion.div 
+                whileHover={{ y: -4, scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 400, damping: 15 }}
                 key={idx} 
-                className={`p-5 rounded-2xl border transition-all hover:-translate-y-1 hover:shadow-lg ${
+                className={`p-5 rounded-2xl border transition-all hover:shadow-lg ${
                   theme === "dark" ? "bg-white/[0.01] hover:bg-white/[0.03] border-white/5" : "bg-white hover:bg-stone-50/50 border-stone-200"
                 }`}
               >
@@ -1873,14 +1935,20 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
                   <offer.icon className="w-4 h-4" />
                 </div>
                 <h4 className="text-sm font-black uppercase text-stone-900 dark:text-stone-200 tracking-tight mb-1.5">{offer.title}</h4>
-                <p className={`text-xs leading-relaxed ${theme === "dark" ? "text-stone-400" : "text-stone-550"}`}>{offer.text}</p>
-              </div>
+                <p className={`text-xs leading-relaxed ${theme === "dark" ? "text-stone-400" : "text-stone-600"}`}>{offer.text}</p>
+              </motion.div>
             ))}
           </div>
-        </section>
+        </motion.section>
 
         {/* 6 & 9. WHY TRUST US & EDITORIAL STANDARDS (E-E-A-T) */}
-        <section className={`p-8 md:p-12 rounded-3xl ${theme === "dark" ? "bg-gradient-to-br from-emerald-950/10 via-[#0B1512] to-amber-950/10 border-white/10" : "bg-white border-stone-200"} border shadow-xl mb-12`}>
+        <motion.section 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className={`snap-start scroll-mt-6 md:scroll-mt-10 p-8 md:p-12 rounded-3xl ${theme === "dark" ? "bg-gradient-to-br from-emerald-950/10 via-[#0B1512] to-amber-950/10 border-white/10" : "bg-white border-stone-200"} border shadow-xl mb-12`}
+        >
           <div className="flex items-center gap-3 border-b border-amber-500/25 pb-6 mb-8">
             <div className={`p-3 rounded-2xl ${theme === "dark" ? "bg-amber-500/10 text-amber-400" : "bg-amber-500/5 text-amber-600"} border border-amber-500/20`}>
               <ShieldCheck className="w-6 h-6 text-amber-500 animate-pulse" />
@@ -1895,7 +1963,7 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm leading-relaxed text-stone-550 dark:text-stone-300">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm leading-relaxed text-stone-600 dark:text-stone-300">
             <div className="space-y-4">
               <h4 className="text-xs font-bold uppercase tracking-widest text-amber-500">Why Trust Us?</h4>
               <p className="text-xs sm:text-sm">
@@ -1945,30 +2013,50 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
               </div>
             </div>
           </div>
-        </section>
+        </motion.section>
 
         {/* 7. OUR VALUES */}
-        <section className="mb-12">
-          <div className="text-center mb-8">
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-550">Core Foundations</span>
-            <h3 className="text-xl font-black font-serif uppercase text-stone-900 dark:text-stone-300">Our Core Values</h3>
+        <section className="mb-12 snap-start scroll-mt-6 md:scroll-mt-10">
+          <div className="text-center mb-10">
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400">Core Foundations</span>
+            <h3 className="text-2xl font-black font-serif uppercase text-stone-900 dark:text-stone-100">Our Core Values</h3>
+            <p className={`text-xs ${theme === "dark" ? "text-stone-400" : "text-stone-500"} mt-1 max-w-md mx-auto`}>
+              The underlying pillars that govern our fashion research curation, trend reviews, and editorial excellence.
+            </p>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            {["Transparency", "Trust", "Quality", "User Satisfaction", "Fashion Education", "Continuous Improvement", "Authenticity"].map((val, i) => (
-              <span 
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+            {[
+              { val: "Transparency", desc: "We provide explicit disclosures and clear pricing details, empowering you to navigate choices with total clarity and confidence." },
+              { val: "Trust & Authenticity", desc: "Every product critique and styling advice stands objective, resisting brand compensation or marketing pressure." },
+              { val: "Quality over Volume", desc: "We curating only clothing items presenting superior fabric materials, robust stitching, and excellent silhouette design." },
+              { val: "Fashion Education", desc: "We aim to teach readers about textile composition, layering coordinates, capsule structures, and styling mathematics." },
+              { val: "Aesthetic Relevance", desc: "Sourcing contemporary runway insights and street silhouettes to keep your custom lookbooks updated ahead of seasons." },
+              { val: "Reader Centricity", desc: "Every blog published aims to address real lifestyle questions, helping you look impeccable with zero purchase force." }
+            ].map((item, i) => (
+              <div 
                 key={i} 
-                className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider border shadow-sm ${
-                  theme === "dark" ? "bg-white/[0.02] border-white/10 text-stone-300" : "bg-stone-50 border-stone-200 text-stone-700"
+                className={`p-5 rounded-2xl border shadow-sm flex flex-col justify-between transition-all duration-300 hover:scale-[1.02] ${
+                  theme === "dark" 
+                    ? "bg-white/[0.01] hover:bg-white/[0.03] border-white/5 text-stone-300" 
+                    : "bg-white hover:bg-stone-50/50 border-stone-150 text-stone-700"
                 }`}
               >
-                ✦ {val}
-              </span>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-amber-500 font-bold text-sm tracking-tight">
+                    <span>✦</span>
+                    <h4 className="font-serif font-bold text-stone-900 dark:text-amber-50 uppercase tracking-wide">{item.val}</h4>
+                  </div>
+                  <p className={`text-xs leading-relaxed ${theme === "dark" ? "text-stone-400" : "text-stone-600"}`}>
+                    {item.desc}
+                  </p>
+                </div>
+              </div>
             ))}
           </div>
         </section>
 
         {/* 8. AFFILIATE TRANSPARENCY SECTION */}
-        <section className={`p-8 rounded-3xl ${theme === "dark" ? "bg-amber-500/[0.02] border-amber-500/10 text-amber-100" : "bg-amber-500/5 border-amber-550/15 text-[#1C1B18]"} border shadow-inner mb-12`}>
+        <section className={`snap-start scroll-mt-6 md:scroll-mt-10 p-8 rounded-3xl ${theme === "dark" ? "bg-amber-500/[0.02] border-amber-500/10 text-amber-100" : "bg-amber-500/5 border-amber-500/15 text-[#1C1B18]"} border shadow-inner mb-12`}>
           <div className="flex items-center gap-2.5 text-amber-500 mb-4">
             <ShieldCheck className="w-5 h-5 flex-shrink-0" />
             <h3 className="text-xs font-bold uppercase tracking-[0.2em]">Affiliate Curation & Disclaimer</h3>
@@ -1995,7 +2083,7 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
         </section>
 
         {/* 10. MEET OUR FOUNDER */}
-        <section className={`p-8 md:p-12 rounded-3xl ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-white border-stone-200"} border shadow-xl mb-12`}>
+        <section className={`snap-start scroll-mt-6 md:scroll-mt-10 p-8 md:p-12 rounded-3xl ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-white border-stone-200"} border shadow-xl mb-12`}>
           <div className="flex flex-col md:flex-row gap-8 items-center">
             <div className="relative flex-shrink-0">
               <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-full p-1 bg-gradient-to-tr from-amber-600 via-amber-400 to-yellow-300 shadow-xl overflow-hidden">
@@ -2026,7 +2114,7 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
         </section>
 
         {/* 11. COMPANY STATISTICS */}
-        <section className="mb-16 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <section className="mb-16 grid grid-cols-2 md:grid-cols-4 gap-4 snap-start scroll-mt-6 md:scroll-mt-10">
           {[
             { stat: "100+", label: "Fashion Articles Published" },
             { stat: "50+", label: "Detailed Style Guides" },
@@ -2047,9 +2135,9 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
         </section>
 
         {/* 12. FAQ SECTION */}
-        <section className="mb-12">
+        <section className="mb-12 snap-start scroll-mt-6 md:scroll-mt-10">
           <div className="text-center mb-8">
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-550">Frequently Asked Inquiries</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-600">Frequently Asked Inquiries</span>
             <h3 className="text-2xl font-black font-serif uppercase tracking-tight text-stone-900 dark:text-stone-200 mt-1">
               Questions & Answers
             </h3>
@@ -2106,7 +2194,7 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.25 }}
-                        className={`px-5 pb-5 text-xs sm:text-sm leading-relaxed border-t border-amber-550/5 pt-4 ${
+                        className={`px-5 pb-5 text-xs sm:text-sm leading-relaxed border-t border-amber-500/10 pt-4 ${
                           theme === "dark"
                             ? "text-stone-300 bg-[#07100D]/30"
                             : "text-stone-600 bg-stone-50/30"
@@ -2128,7 +2216,7 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
             <Mail className="w-5 h-5" />
           </div>
           <h3 className="text-xl font-bold font-serif text-stone-900 dark:text-stone-50 mb-1">Get In Touch With Renu Fashion Hub</h3>
-          <p className={`text-xs max-w-sm mx-auto leading-relaxed ${theme === "dark" ? "text-stone-400" : "text-stone-605"} mb-6`}>
+          <p className={`text-xs max-w-sm mx-auto leading-relaxed ${theme === "dark" ? "text-stone-400" : "text-stone-600"} mb-6`}>
             Have styling questions? Do you want to submit clothing reviews, seek fashion tips, or provide feedback? Write directly to us and our support team will reply inside 24 hours.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md mx-auto">
@@ -2140,7 +2228,7 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
             </div>
             <div className={`p-4 rounded-2xl border ${theme === "dark" ? "bg-black/20 border-white/5" : "bg-stone-50 border-stone-150"} space-y-1`}>
               <span className={`block text-[8px] font-black uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"}`}>General Information</span>
-              <a href="mailto:info@renufashionhub.in" className="block text-xs sm:text-sm font-bold text-amber-600 dark:text-amber-400 hover:underline">
+              <a href="mailto:info@renufashionhub.in" className="block text-xs sm:text-sm font-bold text-[#b45309] dark:text-amber-400 hover:underline">
                 info@renufashionhub.in
               </a>
             </div>
@@ -2152,7 +2240,7 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
           <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight font-serif text-stone-900 dark:text-stone-50 uppercase">
             Start Exploring Fashion With Confidence
           </h3>
-          <p className={`text-xs max-w-sm mx-auto leading-normal ${theme === "dark" ? "text-stone-400" : "text-stone-550"}`}>
+          <p className={`text-xs max-w-sm mx-auto leading-normal ${theme === "dark" ? "text-stone-400" : "text-stone-600"}`}>
             Unleash your aesthetic flair. Discover daily look-books, compare pricing with our buying guides, and accessorize utilizing tailored clothing reviews.
           </p>
           <div className="flex justify-center gap-4 pt-2">
@@ -2164,7 +2252,7 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
             </button>
             <button
               onClick={() => navigate("/blog")}
-              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-550 hover:to-amber-440 text-[#09100E] font-black hover:scale-105 active:scale-95 text-xs uppercase tracking-widest transition-all shadow-[0_4px_16px_rgba(217,119,6,0.15)] cursor-pointer"
+              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-[#09100E] font-black hover:scale-105 active:scale-95 text-xs uppercase tracking-widest transition-all shadow-[0_4px_16px_rgba(217,119,6,0.15)] cursor-pointer"
             >
               Browse Style Guides
             </button>
@@ -2175,152 +2263,108 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
   );
 };
 
-const PrivacyPolicyPage = ({ profile, theme, navigate }: { profile: any; theme: string; navigate: any }) => {
-  const policyText = profile.privacyPolicy || DEFAULT_PRIVACY_POLICY;
+const renderLegaleseMarkup = (text: string, theme: string, listItems: string[]) => {
+  const lines = (text || "").split('\n');
+  return lines.map((line, idx) => {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      return <div key={idx} className="h-2" />;
+    }
 
-  const renderFormattedPolicy = (text: string) => {
-    const lines = text.split('\n');
-    return lines.map((line, idx) => {
-      const trimmed = line.trim();
-      if (!trimmed) {
-        return <div key={idx} className="h-2" />;
-      }
+    // Check for Section Headings like "1. General Information"
+    const sectionHeadingRegex = /^\d+\.\s+(.+)$/;
+    if (sectionHeadingRegex.test(trimmed)) {
+      return (
+        <motion.h3 
+          key={idx} 
+          initial={{ opacity: 0, x: -15 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className={`text-base md:text-lg font-black uppercase tracking-wide mt-8 mb-3 pt-6 border-t first:border-0 first:pt-0 ${
+            theme === "dark" ? "text-amber-400 border-white/5" : "text-amber-700 border-black/5"
+          }`}
+        >
+          {trimmed}
+        </motion.h3>
+      );
+    }
 
-      // Check for Section Headings like "1. About Our Website" or "10. External Links"
-      const sectionHeadingRegex = /^\d+\.\s+(.+)$/;
-      if (sectionHeadingRegex.test(trimmed)) {
-        return (
-          <h3 
-            key={idx} 
-            className={`text-base md:text-lg font-black uppercase tracking-wide mt-8 mb-3 pt-6 border-t first:border-0 first:pt-0 ${
-              theme === "dark" ? "text-amber-400 border-white/5" : "text-amber-700 border-black/5"
-            }`}
-          >
-            {trimmed}
-          </h3>
-        );
-      }
+    // Check for "Last Updated:" Line
+    if (trimmed.startsWith("Last Updated:")) {
+      return (
+        <motion.p 
+          key={idx} 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className={`text-xs font-black uppercase tracking-wider mb-4 ${
+            theme === "dark" ? "text-amber-400/80" : "text-amber-600/80"
+          }`}
+        >
+          {trimmed}
+        </motion.p>
+      );
+    }
 
-      // Check for "Last Updated: June 2026"
-      if (trimmed.startsWith("Last Updated:")) {
-        return (
-          <p 
-            key={idx} 
-            className={`text-xs font-black uppercase tracking-wider mb-4 ${
-              theme === "dark" ? "text-amber-400/80" : "text-amber-600/80"
-            }`}
-          >
-            {trimmed}
-          </p>
-        );
-      }
+    // Subheadings and special layout anchors
+    const isSubHeading = trimmed === "Welcome to Renu Fashion Hub" || 
+                         trimmed === "Information You Voluntarily Provide" || 
+                         trimmed === "Automatically Collected Information" ||
+                         trimmed === "Support:" ||
+                         trimmed === "Information:";
+                         
+    if (isSubHeading) {
+      return (
+        <motion.h4 
+          key={idx} 
+          initial={{ opacity: 0, x: -10 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: "-20px" }}
+          transition={{ duration: 0.4 }}
+          className={`text-sm md:text-base font-extrabold tracking-tight mt-5 mb-2 block ${
+            theme === "dark" ? "text-amber-200" : "text-amber-900"
+          }`}
+        >
+          {trimmed}
+        </motion.h4>
+      );
+    }
 
-      // Check for Subheadings/Step Headings like "Information You Voluntarily Provide", etc.
-      const isSubHeading = trimmed === "Welcome to Renu Fashion Hub" || 
-                           trimmed === "Information You Voluntarily Provide" || 
-                           trimmed === "Automatically Collected Information";
+    const isListItem = listItems.includes(trimmed) || trimmed.startsWith("- ") || trimmed.startsWith("• ");
+    const cleanLine = trimmed.replace(/^\s*[-\u2022\u25CF]\s*/, "");
 
-      if (isSubHeading) {
-        return (
-          <h4 
-            key={idx} 
-            className={`text-sm md:text-base font-extrabold tracking-tight mt-5 mb-2 block ${
-              theme === "dark" ? "text-amber-200" : "text-amber-900"
-            }`}
-          >
-            {trimmed}
-          </h4>
-        );
-      }
-
-      // List Items to render as styled bullets
-      const listItems = [
-        "Prices",
-        "Discounts",
-        "Features",
-        "Specifications",
-        "Availability",
-        "Ratings",
-        "Product quality",
-        "Product authenticity",
-        "Delivery delays",
-        "Damaged products",
-        "Seller behavior",
-        "Refund processing",
-        "Return policies",
-        "Warranty claims",
-        "Payment issues",
-        "Improve website performance",
-        "Remember preferences",
-        "Analyze traffic",
-        "Enhance user experience",
-        "Measure marketing effectiveness",
-        "Fashion brands",
-        "Online stores",
-        "Affiliate partners",
-        "Blogs",
-        "Social media platforms",
-        "Third-party websites",
-        "Product recommendations are opinions and informational content.",
-        "You are responsible for your purchasing decisions.",
-        "You should independently verify information before purchasing.",
-        "You assume responsibility for any actions taken based on information found on this website.",
-        "Legal advice",
-        "Financial advice",
-        "Tax advice",
-        "Medical advice",
-        "Professional consulting advice",
-        "Direct damages",
-        "Indirect damages",
-        "Incidental damages",
-        "Consequential damages",
-        "Lost profits",
-        "Data loss",
-        "Purchase-related losses",
-        "Business interruptions",
-        "Name",
-        "Email address",
-        "Contact information",
-        "Messages submitted through forms",
-        "Browser type",
-        "Device type",
-        "IP address",
-        "Pages visited",
-        "Time spent on pages",
-        "Referral sources",
-        "General analytics data"
-      ];
-
-      const isListItem = listItems.includes(trimmed);
-
-      // Link finder
+    // Parse inline bold syntax (**text**) and emails / URLs
+    const boldParts = cleanLine.split('**');
+    const inlineFormatted = boldParts.map((part, index) => {
+      const isBold = index % 2 === 1;
+      
       const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/g;
       const urlRegex = /(https?:\/\/[^\s]+)/g;
-
-      let parts: any[] = [];
-      let lastIndex = 0;
+      
+      let elements: any[] = [];
+      let lastIdx = 0;
       const matches: { index: number; text: string; type: 'email' | 'url' }[] = [];
       let match;
-
+      
       emailRegex.lastIndex = 0;
       urlRegex.lastIndex = 0;
-
-      while ((match = emailRegex.exec(trimmed)) !== null) {
+      
+      while ((match = emailRegex.exec(part)) !== null) {
         matches.push({ index: match.index, text: match[0], type: 'email' });
       }
-      while ((match = urlRegex.exec(trimmed)) !== null) {
+      while ((match = urlRegex.exec(part)) !== null) {
         matches.push({ index: match.index, text: match[0], type: 'url' });
       }
-
       matches.sort((a, b) => a.index - b.index);
-
+      
       for (const m of matches) {
-        if (m.index < lastIndex) continue;
-        if (m.index > lastIndex) {
-          parts.push(trimmed.substring(lastIndex, m.index));
+        if (m.index < lastIdx) continue;
+        if (m.index > lastIdx) {
+          elements.push(part.substring(lastIdx, m.index));
         }
         if (m.type === 'email') {
-          parts.push(
+          elements.push(
             <a 
               key={m.index} 
               href={`mailto:${m.text}`} 
@@ -2330,7 +2374,7 @@ const PrivacyPolicyPage = ({ profile, theme, navigate }: { profile: any; theme: 
             </a>
           );
         } else {
-          parts.push(
+          elements.push(
             <a 
               key={m.index} 
               href={m.text} 
@@ -2342,45 +2386,133 @@ const PrivacyPolicyPage = ({ profile, theme, navigate }: { profile: any; theme: 
             </a>
           );
         }
-        lastIndex = m.index + m.text.length;
+        lastIdx = m.index + m.text.length;
+      }
+      
+      if (lastIdx < part.length) {
+        elements.push(part.substring(lastIdx));
       }
 
-      if (lastIndex < trimmed.length) {
-        parts.push(trimmed.substring(lastIndex));
+      const content = elements.length > 0 ? elements : part;
+      if (isBold) {
+        return <strong key={index} className="font-extrabold text-amber-600 dark:text-amber-400">{content}</strong>;
       }
-
-      const inlineFormattedText = parts.length > 0 ? parts : trimmed;
-
-      if (isListItem) {
-        return (
-          <div key={idx} className="flex items-start gap-2.5 pl-5 py-1">
-            <span className={`text-[12px] mt-1.5 flex-shrink-0 w-1.5 h-1.5 rounded-full ${theme === "dark" ? "bg-amber-400/80" : "bg-amber-600/80"}`} />
-            <span className={`text-sm ${theme === "dark" ? "text-stone-300" : "text-stone-700"} font-medium`}>
-              {inlineFormattedText}
-            </span>
-          </div>
-        );
-      }
-
-      // Default paragraph line
-      return (
-        <p key={idx} className={`text-sm leading-relaxed ${theme === "dark" ? "text-stone-300" : "text-stone-700"} font-medium`}>
-          {inlineFormattedText}
-        </p>
-      );
+      return content;
     });
-  };
+
+    if (isListItem) {
+      return (
+        <motion.div 
+          key={idx} 
+          initial={{ opacity: 0, x: 8 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: "-30px" }}
+          transition={{ duration: 0.4 }}
+          className="flex items-start gap-2.5 pl-5 py-1"
+        >
+          <span className={`text-[12px] mt-1.5 flex-shrink-0 w-1.5 h-1.5 rounded-full ${theme === "dark" ? "bg-amber-400/80" : "bg-amber-600/80"}`} />
+          <span className={`text-sm ${theme === "dark" ? "text-stone-300" : "text-stone-700"} font-medium`}>
+            {inlineFormatted}
+          </span>
+        </motion.div>
+      );
+    }
+
+    return (
+      <motion.p 
+        key={idx} 
+        initial={{ opacity: 0, y: 10 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-30px" }}
+        transition={{ duration: 0.5, delay: 0.05 }}
+        className={`text-sm leading-relaxed ${theme === "dark" ? "text-stone-300" : "text-stone-700"} font-medium`}
+      >
+        {inlineFormatted}
+      </motion.p>
+    );
+  });
+};
+
+export const DEFAULT_ABOUT_STORY = `Renu Fashion Hub was founded by **Renu Agarwal** with a singular, clear vision: to establish an authoritative, transparent, and trusted destination where style seekers can cut through the clutter and discover the actual cream of contemporary fashion insights. In a fast-paced retail ecosystem where thousands of products vie for attention, finding what truly suits your lifestyle can feel overwhelming.
+
+As an expert style curator with a profound passion for aesthetics, **Renu Agarwal** set out to design a comprehensive space that unifies up-to-date fashion trends, structured style guides, and genuine product recommendations. Our fashion blog provides in-depth analysis, helpful styling tips, and transparent buying guides so you are equipped with verified information prior to making any shopping decision.
+
+By aligning lifestyle trends with user-focused clarity, Renu Fashion Hub is proud to serve as your daily digital stylist, fostering confidence and clarity with every single article published.`;
+
+const PrivacyPolicyPage = ({ profile, theme, navigate }: { profile: any; theme: string; navigate: any }) => {
+  const policyText = profile.privacyPolicy || DEFAULT_PRIVACY_POLICY;
+
+  const privacyListItems = [
+    "Prices",
+    "Discounts",
+    "Features",
+    "Specifications",
+    "Availability",
+    "Ratings",
+    "Product quality",
+    "Product authenticity",
+    "Delivery delays",
+    "Damaged products",
+    "Seller behavior",
+    "Refund processing",
+    "Return policies",
+    "Warranty claims",
+    "Payment issues",
+    "Improve website performance",
+    "Remember preferences",
+    "Analyze traffic",
+    "Enhance user experience",
+    "Measure marketing effectiveness",
+    "Fashion brands",
+    "Online stores",
+    "Affiliate partners",
+    "Blogs",
+    "Social media platforms",
+    "Third-party websites",
+    "Product recommendations are opinions and informational content.",
+    "You are responsible for your purchasing decisions.",
+    "You should independently verify information before purchasing.",
+    "You assume responsibility for any actions taken based on information found on this website.",
+    "Legal advice",
+    "Financial advice",
+    "Tax advice",
+    "Medical advice",
+    "Professional consulting advice",
+    "Direct damages",
+    "Indirect damages",
+    "Incidental damages",
+    "Consequential damages",
+    "Lost profits",
+    "Data loss",
+    "Purchase-related losses",
+    "Business interruptions",
+    "Name",
+    "Email address",
+    "Contact information",
+    "Messages submitted through forms",
+    "Browser type",
+    "Device type",
+    "IP address",
+    "Pages visited",
+    "Time spent on pages",
+    "Referral sources",
+    "General analytics data"
+  ];
 
   return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-amber-50" : "bg-[#FDFBF7] text-[#1C1B18]"} p-6 pb-24 font-sans`}
+      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512]" : "bg-[#FDFBF7]"} p-6 pb-24 font-sans`}
     >
       <div className="max-w-4xl mx-auto">
-        {/* Back button and App Title */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8"
+        >
           <button 
             onClick={() => navigate("/")} 
             className={`p-3 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border flex items-center gap-2 group transition-all hover:bg-amber-500/10 hover:border-amber-500/50 w-fit cursor-pointer`}
@@ -2397,10 +2529,14 @@ const PrivacyPolicyPage = ({ profile, theme, navigate }: { profile: any; theme: 
               Official Privacy Policy
             </p>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Dynamic content card with elegant styling */}
-        <div className={`p-8 md:p-12 rounded-3xl ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-white border-stone-200"} border shadow-xl`}>
+        <motion.div 
+          initial={{ opacity: 0, y: 30, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          className={`p-8 md:p-12 rounded-3xl ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-white border-stone-200"} border shadow-xl`}
+        >
           <div className="flex items-center gap-3 border-b border-amber-500/25 pb-6 mb-8">
             <div className={`p-3 rounded-2xl ${theme === "dark" ? "bg-amber-500/10 text-amber-400" : "bg-amber-500/5 text-amber-600"} border border-amber-500/20`}>
               <ShieldCheck className="w-6 h-6 animate-pulse" />
@@ -2416,9 +2552,133 @@ const PrivacyPolicyPage = ({ profile, theme, navigate }: { profile: any; theme: 
           </div>
 
           <div className="space-y-4">
-            {renderFormattedPolicy(policyText)}
+            {renderLegaleseMarkup(policyText, theme, privacyListItems)}
           </div>
-        </div>
+        </motion.div>
+      </div>
+    </motion.div>
+  );
+};
+
+const DisclaimerPage = ({ profile, theme, navigate }: { profile: any; theme: string; navigate: any }) => {
+  const disclaimerText = profile.disclaimer || DEFAULT_DISCLAIMER;
+
+  useEffect(() => {
+    // Dynamically inject/overwrite high-quality SEO meta tags
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (!metaDesc) {
+      metaDesc = document.createElement('meta');
+      metaDesc.setAttribute('name', 'description');
+      document.head.appendChild(metaDesc);
+    }
+    metaDesc.setAttribute('content', 'Official disclaimer policy for Renu Fashion Hub. All content is for informational and educational use only, clarifying purchase choices and affiliate parameters.');
+
+    let canonicalLink = document.querySelector('link[rel="canonical"]');
+    if (!canonicalLink) {
+      canonicalLink = document.createElement('link');
+      canonicalLink.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonicalLink);
+    }
+    canonicalLink.setAttribute('href', 'https://renufashionhub.in/disclaimer');
+  }, []);
+
+  const disclaimerListItems = [
+    "Products",
+    "Services",
+    "Pricing",
+    "Refunds",
+    "Returns",
+    "Delivery",
+    "Product Quality",
+    "Warranty Claims",
+    "Fashion trends",
+    "Style guides",
+    "Product recommendations",
+    "Buying guides",
+    "Fashion inspiration",
+    "Lifestyle content",
+    "Affiliate marketing content",
+    "Legal advice",
+    "Financial advice",
+    "Tax advice",
+    "Medical advice",
+    "Professional consulting advice"
+  ];
+
+  const schemaData = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Disclaimer Policy - Renu Fashion Hub",
+    "description": "Official legal limitations, no purchase obligations statement, and affiliate commission relationships disclosure of Renu Fashion Hub.",
+    "url": "https://renufashionhub.in/disclaimer",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Renu Fashion Hub",
+      "url": "https://renufashionhub.in"
+    }
+  };
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512]" : "bg-[#FDFBF7]"} p-4 sm:p-6 pb-24 font-sans`}
+    >
+      {/* Dynamic structured JSON-LD data for maximum SEO impact */}
+      <script type="application/ld+json">
+        {JSON.stringify(schemaData)}
+      </script>
+
+      <div className="max-w-4xl mx-auto">
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8"
+        >
+          <button 
+            onClick={() => navigate("/")} 
+            className={`p-3 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border flex items-center gap-2 group transition-all hover:bg-amber-500/10 hover:border-amber-500/50 w-fit cursor-pointer`}
+          >
+            <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+            <span className="text-xs font-bold uppercase tracking-wider">Back to Home</span>
+          </button>
+          
+          <div className="text-right">
+            <h1 className="text-xl font-black uppercase tracking-wider font-serif text-amber-500">
+              Renu Fashion Hub
+            </h1>
+            <p className={`text-[10px] uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"} font-bold`}>
+              Official Disclaimer
+            </p>
+          </div>
+        </motion.div>
+
+        <motion.div 
+          initial={{ opacity: 0, y: 30, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          className={`p-8 md:p-12 rounded-3xl ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-white border-stone-200"} border shadow-xl`}
+        >
+          <div className="flex items-center gap-3 border-b border-amber-500/25 pb-6 mb-8">
+            <div className={`p-3 rounded-2xl ${theme === "dark" ? "bg-amber-500/10 text-amber-400" : "bg-amber-500/5 text-amber-600"} border border-amber-500/20`}>
+              <ShieldCheck className="w-6 h-6 animate-pulse" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-black font-serif text-amber-950 dark:text-amber-100 uppercase tracking-tight">
+                Disclaimer
+              </h2>
+              <p className={`text-[10.5px] uppercase tracking-widest font-bold ${theme === "dark" ? "text-amber-400/60" : "text-amber-600/70"}`}>
+                Legal Limitations & Disclosures
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            {renderLegaleseMarkup(disclaimerText, theme, disclaimerListItems)}
+          </div>
+        </motion.div>
       </div>
     </motion.div>
   );
@@ -2427,210 +2687,73 @@ const PrivacyPolicyPage = ({ profile, theme, navigate }: { profile: any; theme: 
 const TermsOfServicePage = ({ profile, theme, navigate }: { profile: any; theme: string; navigate: any }) => {
   const termsText = profile.termsOfService || DEFAULT_TERMS_OF_SERVICE;
 
-  const renderFormattedTerms = (text: string) => {
-    const lines = text.split('\n');
-    return lines.map((line, idx) => {
-      const trimmed = line.trim();
-      if (!trimmed) {
-        return <div key={idx} className="h-2" />;
-      }
-
-      // Check for Section Headings like "1. Acceptance of Terms"
-      const sectionHeadingRegex = /^\d+\.\s+(.+)$/;
-      if (sectionHeadingRegex.test(trimmed)) {
-        return (
-          <h3 
-            key={idx} 
-            className={`text-base md:text-lg font-black uppercase tracking-wide mt-8 mb-3 pt-6 border-t first:border-0 first:pt-0 ${
-              theme === "dark" ? "text-amber-400 border-white/5" : "text-amber-700 border-black/5"
-            }`}
-          >
-            {trimmed}
-          </h3>
-        );
-      }
-
-      // Check for "Last Updated: June 2026"
-      if (trimmed.startsWith("Last Updated:")) {
-        return (
-          <p 
-            key={idx} 
-            className={`text-xs font-black uppercase tracking-wider mb-4 ${
-              theme === "dark" ? "text-amber-400/80" : "text-amber-600/80"
-            }`}
-          >
-            {trimmed}
-          </p>
-        );
-      }
-
-      // List Items to render as styled bullets
-      const tosListItems = [
-        "Fashion trends",
-        "Product recommendations",
-        "Buying guides",
-        "Product reviews",
-        "Fashion news",
-        "Style tips",
-        "Affiliate links",
-        "Promotional content",
-        "You are responsible for your own decisions and actions.",
-        "You will independently evaluate products before making purchases.",
-        "You will not rely solely on information provided on this website.",
-        "You use the website at your own risk.",
-        "Content",
-        "Products",
-        "Services",
-        "Pricing",
-        "Security",
-        "Privacy practices",
-        "Policies",
-        "Transactions",
-        "Product availability",
-        "Product pricing",
-        "Product descriptions",
-        "Product specifications",
-        "Product ratings",
-        "Product images",
-        "Product discounts",
-        "Payments",
-        "Refunds",
-        "Returns",
-        "Exchanges",
-        "Delivery",
-        "Product defects",
-        "Warranty claims",
-        "Text",
-        "Graphics",
-        "Logos",
-        "Branding",
-        "Designs",
-        "Layouts",
-        "Images created by us",
-        "Attempt to hack or disrupt the website",
-        "Upload malicious software",
-        "Abuse website features",
-        "Scrape website content without permission",
-        "Engage in unlawful activities through the website",
-        "Impersonate another person or organization",
-        "You grant us the right to display, moderate, edit, or remove such content.",
-        "You confirm that your content does not violate any laws or third-party rights.",
-        "We reserve the right to remove content at our discretion.",
-        "Accuracy",
-        "Reliability",
-        "Availability",
-        "Performance",
-        "Security",
-        "Error-free operation",
-        "Direct damages",
-        "Indirect damages",
-        "Incidental damages",
-        "Consequential damages",
-        "Financial losses",
-        "Lost profits",
-        "Data loss",
-        "Business interruptions",
-        "Product-related losses",
-        "Your use of the website",
-        "Violation of these Terms",
-        "Violation of any applicable laws",
-        "Infringement of third-party rights",
-        "Modify the website",
-        "Suspend services",
-        "Remove content",
-        "Restrict access",
-        "Discontinue features"
-      ];
-
-      const isListItem = tosListItems.includes(trimmed);
-
-      // Link and email parser
-      const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/g;
-      const urlRegex = /(https?:\/\/[^\s]+)/g;
-
-      let parts: any[] = [];
-      let lastIndex = 0;
-      const matches: { index: number; text: string; type: 'email' | 'url' }[] = [];
-      let match;
-
-      emailRegex.lastIndex = 0;
-      urlRegex.lastIndex = 0;
-
-      while ((match = emailRegex.exec(trimmed)) !== null) {
-        matches.push({ index: match.index, text: match[0], type: 'email' });
-      }
-      while ((match = urlRegex.exec(trimmed)) !== null) {
-        matches.push({ index: match.index, text: match[0], type: 'url' });
-      }
-
-      matches.sort((a, b) => a.index - b.index);
-
-      for (const m of matches) {
-        if (m.index < lastIndex) continue;
-        if (m.index > lastIndex) {
-          parts.push(trimmed.substring(lastIndex, m.index));
-        }
-        if (m.type === 'email') {
-          parts.push(
-            <a 
-              key={m.index} 
-              href={`mailto:${m.text}`} 
-              className="underline font-bold transition-all text-amber-500 hover:text-amber-400"
-            >
-              {m.text}
-            </a>
-          );
-        } else {
-          parts.push(
-            <a 
-              key={m.index} 
-              href={m.text} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="underline font-bold transition-all text-amber-500 hover:text-amber-400"
-            >
-              {m.text}
-            </a>
-          );
-        }
-        lastIndex = m.index + m.text.length;
-      }
-
-      if (lastIndex < trimmed.length) {
-        parts.push(trimmed.substring(lastIndex));
-      }
-
-      const inlineFormattedText = parts.length > 0 ? parts : trimmed;
-
-      if (isListItem) {
-        return (
-          <div key={idx} className="flex items-start gap-2.5 pl-5 py-1">
-            <span className={`text-[12px] mt-1.5 flex-shrink-0 w-1.5 h-1.5 rounded-full ${theme === "dark" ? "bg-amber-400/80" : "bg-amber-600/80"}`} />
-            <span className={`text-sm ${theme === "dark" ? "text-stone-300" : "text-stone-700"} font-medium`}>
-              {inlineFormattedText}
-            </span>
-          </div>
-        );
-      }
-
-      return (
-        <p key={idx} className={`text-sm leading-relaxed ${theme === "dark" ? "text-stone-300" : "text-stone-700"} font-medium`}>
-          {inlineFormattedText}
-        </p>
-      );
-    });
-  };
+  const tosListItems = [
+    "Fashion trends",
+    "Product recommendations",
+    "Buying guides",
+    "Product reviews",
+    "Fashion news",
+    "Style tips",
+    "Affiliate links",
+    "Promotional content",
+    "You are responsible for your own decisions and actions.",
+    "You will independently evaluate products before making purchases.",
+    "You will not rely solely on information provided on this website.",
+    "You use the website at your own risk.",
+    "Content",
+    "Products",
+    "Services",
+    "Pricing",
+    "Security",
+    "Privacy practices",
+    "Policies",
+    "Transactions",
+    "Product availability",
+    "Product pricing",
+    "Quality of third-party products",
+    "Authenticity",
+    "Delivery times",
+    "Damaged shipments",
+    "Sellers' descriptions",
+    "Returns eligibility",
+    "Warranties",
+    "Payment disputes",
+    "Direct damages",
+    "Indirect damages",
+    "Incidental damages",
+    "Consequential damages",
+    "Lost profits",
+    "Business interruption",
+    "Loss of data",
+    "Intellectual property infringement",
+    "Unauthorized account access",
+    "Legal advice",
+    "Financial advice",
+    "Tax advice",
+    "Medical advice",
+    "Professional consulting advice",
+    "The website and all content are provided as is.",
+    "No guarantees of website uptime or performance.",
+    "The admin reserves the right to modify or terminate services without notice.",
+    "The admin of Renu Fashion Hub is not a seller, broker, or agent of the products recommended.",
+    "The admin is not a party to any transaction you enter into with a third-party seller.",
+    "The admin cannot resolve disputes between you and a product seller."
+  ];
 
   return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-amber-50" : "bg-[#FDFBF7] text-[#1C1B18]"} p-6 pb-24 font-sans`}
+      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512]" : "bg-[#FDFBF7]"} p-6 pb-24 font-sans`}
     >
       <div className="max-w-4xl mx-auto">
-        {/* Back button and App Title */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8"
+        >
           <button 
             onClick={() => navigate("/")} 
             className={`p-3 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border flex items-center gap-2 group transition-all hover:bg-amber-500/10 hover:border-amber-500/50 w-fit cursor-pointer`}
@@ -2647,10 +2770,14 @@ const TermsOfServicePage = ({ profile, theme, navigate }: { profile: any; theme:
               Official Terms & Conditions
             </p>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Dynamic content card with elegant styling */}
-        <div className={`p-8 md:p-12 rounded-3xl ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-white border-stone-200"} border shadow-xl`}>
+        <motion.div 
+          initial={{ opacity: 0, y: 30, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          className={`p-8 md:p-12 rounded-3xl ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-white border-stone-200"} border shadow-xl`}
+        >
           <div className="flex items-center gap-3 border-b border-amber-500/25 pb-6 mb-8">
             <div className={`p-3 rounded-2xl ${theme === "dark" ? "bg-amber-500/10 text-amber-400" : "bg-amber-500/5 text-amber-600"} border border-amber-500/20`}>
               <ShieldCheck className="w-6 h-6 animate-pulse" />
@@ -2666,13 +2793,15 @@ const TermsOfServicePage = ({ profile, theme, navigate }: { profile: any; theme:
           </div>
 
           <div className="space-y-4">
-            {renderFormattedTerms(termsText)}
+            {renderLegaleseMarkup(termsText, theme, tosListItems)}
           </div>
-        </div>
+        </motion.div>
       </div>
     </motion.div>
   );
 };
+
+
 
 
 
@@ -2695,7 +2824,7 @@ const BlogListPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; them
       exit={{ opacity: 0 }}
       className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-amber-50" : "bg-[#FDFBF7] text-[#1C1B18]"} p-6 pb-24`}
     >
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-5xl lg:max-w-6xl mx-auto">
         {/* Back button and App Title */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <button 
@@ -2777,7 +2906,7 @@ const BlogListPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; them
 
             {/* Grid of Other Posts */}
             {gridBlogs.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {gridBlogs.map((blog, idx) => (
                   <motion.div 
                     key={blog.id}
@@ -4069,10 +4198,41 @@ export default function App() {
       const post = posts.find(p => p.id.toString() === idStr || p.docId === idStr);
       if (post) {
         const rawName = post.name || post.caption || post.title || 'Studio Post';
-        const cleanedName = cleanTitleString(rawName);
-        currentTitle = `Post - ${cleanedName || "Studio Post"}`;
+        let cleanedName = cleanTitleString(rawName);
+        // Smart auto-shortening for clean aesthetic tab titles
+        if (cleanedName.length > 28) {
+          const words = cleanedName.split(/\s+/);
+          let short = "";
+          for (const word of words) {
+            if ((short + " " + word).trim().length > 24) break;
+            short = (short + " " + word).trim();
+          }
+          if (!short) {
+            short = cleanedName.slice(0, 22);
+          }
+          cleanedName = short.replace(/[,;.:\-\s|]+$/, "") + "...";
+        }
+        currentTitle = `Post - ${cleanedName}`;
       } else {
-        currentTitle = "Post - Renu Fashion Hub";
+        currentTitle = "Post - RFH";
+      }
+    } else if (location.pathname === "/about") {
+      currentTitle = "About Renu Fashion Hub";
+    } else if (location.pathname === "/privacy-policy") {
+      currentTitle = "Privacy Policy";
+    } else if (location.pathname === "/terms-of-service") {
+      currentTitle = "Terms of Service";
+    } else if (location.pathname === "/disclaimer") {
+      currentTitle = "Disclaimer";
+    } else if (location.pathname === "/blog") {
+      currentTitle = "Blog";
+    } else if (location.pathname.startsWith("/blog/")) {
+      const idStr = location.pathname.split("/blog/")[1];
+      const blog = blogs.find(b => b.id.toString() === idStr || b.docId === idStr);
+      if (blog) {
+        currentTitle = `${blog.title} - RFH`;
+      } else {
+        currentTitle = "Blog - RFH";
       }
     } else if (location.pathname === "/") {
       currentTitle = "Home - Renu Fashion Hub";
@@ -4137,6 +4297,25 @@ export default function App() {
     });
     return combined;
   }, [products, posts]);
+
+  // Synchronize theme on mount and change
+  useEffect(() => {
+    get("rfh_theme").then((savedTheme) => {
+      if (savedTheme === "dark" || savedTheme === "light") {
+        setTheme(savedTheme);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.className = theme;
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [theme]);
 
   // Splash Screen Timer
   useEffect(() => {
@@ -4575,6 +4754,7 @@ export default function App() {
     setLinkEditorModal(prev => ({ ...prev, isOpen: false }));
   };
   const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [editingBlog, setEditingBlog] = useState<any>(null);
   const [isFetchingProduct, setIsFetchingProduct] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{ type: "post" | "product" | "message" | "blog", id: any, docId?: string } | null>(null);
 
@@ -5274,6 +5454,139 @@ export default function App() {
           )}
         </AnimatePresence>
 
+        {/* Edit Blog Modal */}
+        <AnimatePresence>
+          {editingBlog !== null && (
+            <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/40 backdrop-blur-xs">
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-black/80"
+                onClick={() => setEditingBlog(null)}
+              />
+              <motion.div 
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                className={`relative w-full max-w-lg p-6 rounded-3xl ${theme === "dark" ? "bg-[#111] border-white/10" : "bg-white border-black/10"} border shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto z-10`}
+              >
+                <div className="flex justify-between items-center pb-2 border-b border-amber-500/10">
+                  <h3 className={`text-lg font-serif font-black uppercase tracking-wide ${theme === "dark" ? "text-amber-100" : "text-amber-950"}`}>Edit Blog Post</h3>
+                  <button 
+                    onClick={() => setEditingBlog(null)}
+                    className={`p-1.5 rounded-full hover:bg-stone-500/10 ${theme === "dark" ? "text-stone-400 hover:text-stone-200" : "text-stone-600 hover:text-stone-850"}`}
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className={`block text-[10px] font-bold uppercase tracking-widest ${theme === "dark" ? "text-stone-400" : "text-stone-500"} mb-1`}>Blog Title</label>
+                    <input 
+                      type="text" 
+                      value={editingBlog.title}
+                      onChange={(e) => setEditingBlog({...editingBlog, title: e.target.value})}
+                      className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-sm font-semibold`}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className={`block text-[10px] font-bold uppercase tracking-widest ${theme === "dark" ? "text-stone-400" : "text-stone-500"} mb-1`}>Category</label>
+                      <input 
+                        type="text" 
+                        value={editingBlog.category || ""}
+                        onChange={(e) => setEditingBlog({...editingBlog, category: e.target.value})}
+                        className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-sm`}
+                        placeholder="e.g. Sarees, Tips..."
+                      />
+                    </div>
+                    <div>
+                      <label className={`block text-[10px] font-bold uppercase tracking-widest ${theme === "dark" ? "text-stone-400" : "text-stone-500"} mb-1`}>Formatted Date</label>
+                      <input 
+                        type="text" 
+                        value={editingBlog.timestamp ? new Date(editingBlog.timestamp).toLocaleDateString() : ""}
+                        disabled
+                        className={`w-full ${theme === "dark" ? "bg-white/2 border-white/5 text-stone-500" : "bg-black/5 border-black/5 text-stone-400"} border rounded-xl px-4 py-2.5 text-sm cursor-not-allowed`}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={`block text-[10px] font-bold uppercase tracking-widest ${theme === "dark" ? "text-stone-400" : "text-stone-500"} mb-1`}>Excerpt / Summary</label>
+                    <textarea 
+                      value={editingBlog.excerpt || ""}
+                      onChange={(e) => setEditingBlog({...editingBlog, excerpt: e.target.value})}
+                      rows={2}
+                      className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-sm resize-none`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={`block text-[10px] font-bold uppercase tracking-widest ${theme === "dark" ? "text-stone-400" : "text-stone-500"} mb-1`}>Content (Editor/HTML)</label>
+                    <textarea 
+                      value={editingBlog.content}
+                      onChange={(e) => setEditingBlog({...editingBlog, content: e.target.value})}
+                      rows={5}
+                      className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white font-mono" : "bg-black/5 border-black/10 text-[#333] font-mono"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-xs`}
+                      placeholder="Enter html content..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className={`block text-[10px] font-bold uppercase tracking-widest ${theme === "dark" ? "text-stone-400" : "text-stone-500"} mb-1`}>Header Image</label>
+                    <div className="flex gap-3 items-center">
+                      <MediaImage url={editingBlog.image} className="w-16 h-12 rounded-xl object-cover border border-white/5" />
+                      <button 
+                        onClick={() => {
+                          const input = document.createElement("input");
+                          input.type = "file";
+                          input.accept = "image/*";
+                          input.onchange = async (e: any) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = () => {
+                                setEditingBlog((prev: any) => ({ ...prev, image: reader.result as string }));
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          };
+                          input.click();
+                        }}
+                        className={`flex-1 py-2.5 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/20 hover:border-amber-500/50 text-white/60" : "bg-black/5 border-black/20 hover:border-amber-500/50 text-black/60"} border border-dashed transition-all flex items-center justify-center gap-2 text-xs`}
+                      >
+                        <ImageIcon className="w-4 h-4" />
+                        Change Header Image
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button 
+                    onClick={() => setEditingBlog(null)}
+                    className={`flex-1 py-3 rounded-xl font-bold text-sm ${theme === "dark" ? "bg-white/5 hover:bg-white/10 text-white" : "bg-black/5 hover:bg-black/10 text-black"} transition-colors`}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setTempBlogs(tempBlogs.map(b => b.id === editingBlog.id ? editingBlog : b));
+                      setEditingBlog(null);
+                    }}
+                    className="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 text-stone-950 font-black uppercase text-xs tracking-wider transition-colors shadow-lg"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
         <div className="max-w-2xl mx-auto p-6">
           {/* Admin Tabs */}
           <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide" onWheel={(e) => { if (e.deltaY !== 0) { e.currentTarget.scrollLeft += e.deltaY; } }}>
@@ -5399,7 +5712,7 @@ export default function App() {
                         <button
                           type="button"
                           onClick={() => setShowSaveConfirm(true)}
-                          className="px-5 py-3 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-550 hover:to-amber-440 text-stone-950 font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 shadow-lg shadow-amber-500/10 cursor-pointer active:scale-95"
+                          className="px-5 py-3 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-stone-950 font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 shadow-lg shadow-amber-500/10 cursor-pointer active:scale-95"
                         >
                           <ShieldCheck className="w-4 h-4" />
                           Update Privacy & Terms
@@ -6070,20 +6383,30 @@ export default function App() {
                               <MediaImage url={b.image} className="w-full h-full object-cover" alt={b.title} />
                             </div>
                           )}
-                          <div className="flex-1 min-w-0 pr-8">
+                          <div className="flex-1 min-w-0 pr-2">
                             <h4 className="font-bold text-sm truncate">{b.title}</h4>
                             <p className="text-[10px] text-amber-500 uppercase font-black tracking-widest">{b.category || "Fashion"}</p>
                             <p className={`text-[9px] ${theme === "dark" ? "text-white/40" : "text-black/40"}`}>{new Date(b.timestamp).toLocaleDateString()}</p>
                           </div>
                           
-                          <button 
-                            type="button"
-                            onClick={() => setItemToDelete({ type: "blog", id: b.id, docId: b.docId })}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity animate-fade-in"
-                            title="Delete Blog"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          <div className="flex gap-1.5 flex-row items-center flex-shrink-0">
+                            <button 
+                              type="button"
+                              onClick={() => setEditingBlog(b)}
+                              className={`p-2 rounded-xl ${theme === "dark" ? "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20" : "bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200"} transition-all cursor-pointer`}
+                              title="Edit Blog"
+                            >
+                              <Edit className="w-3.5 h-3.5" />
+                            </button>
+                            <button 
+                              type="button"
+                              onClick={() => setItemToDelete({ type: "blog", id: b.id, docId: b.docId })}
+                              className={`p-2 rounded-xl ${theme === "dark" ? "bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20" : "bg-red-50 hover:bg-red-100 text-red-600 border border-red-200"} transition-all cursor-pointer`}
+                              title="Delete Blog"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -6254,7 +6577,7 @@ export default function App() {
           {/* Subtle glow filter on top */}
           <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-amber-500/5 to-transparent pointer-events-none" />
 
-          <div className="max-w-4xl mx-auto relative z-10">
+          <div className="max-w-5xl lg:max-w-6xl mx-auto relative z-10">
             {/* Elegant Header with Back Action */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10 pb-6 border-b border-dashed border-amber-500/25">
               <div 
@@ -6287,10 +6610,74 @@ export default function App() {
               </button>
             </div>
 
-            <div className="max-w-xl mx-auto w-full">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start w-full mt-4">
               
+              {/* Studio Coordinates Info Column */}
+              <div className="md:col-span-5 space-y-6">
+                <div 
+                  className={`p-6 sm:p-8 rounded-3xl transition-all duration-300 hover:shadow-lg hover:scale-[1.01] ${
+                    theme === "dark" 
+                      ? "bg-white/[0.04] border-white/10 hover:bg-white/[0.07]" 
+                      : "bg-white border-amber-500/15 shadow-sm text-stone-900 hover:border-amber-500/30"
+                  } border`}
+                  itemScope
+                  itemType="https://schema.org/LocalBusiness"
+                >
+                  <meta itemProp="name" content="Renu Fashion Hub" />
+                  <meta itemProp="email" content="support@renufashionhub.in" />
+                  <meta itemProp="telephone" content="+917248763036" />
+                  
+                  <div className="flex items-center gap-2.5 mb-4 border-b border-amber-500/10 pb-3">
+                    <MapPin className="w-5 h-5 text-amber-500 flex-shrink-0 animate-bounce" />
+                    <h2 className="text-lg font-black uppercase tracking-wider text-amber-500 font-serif">
+                      OFFICE ADDRESS
+                    </h2>
+                  </div>
+                  
+                  <div itemProp="address" itemScope itemType="https://schema.org/PostalAddress">
+                    <p className={`text-base ${theme === "dark" ? "text-stone-100" : "text-stone-900"} font-black tracking-tight mb-1`}>
+                      Renu Fashion Hub Headquarters
+                    </p>
+                    <p className={`text-sm ${theme === "dark" ? "text-stone-300" : "text-stone-700"} leading-relaxed font-semibold`}>
+                      <span itemProp="streetAddress">Peepal Mandi</span><br />
+                      <span itemProp="addressLocality">Agra</span>, <span itemProp="addressRegion">Uttar Pradesh</span><br />
+                      <span itemProp="addressCountry">India</span>
+                    </p>
+                  </div>
+                  
+                  <div className="mt-6 space-y-3 pt-6 border-t border-amber-500/10">
+                    <div className="flex items-center gap-3">
+                      <Phone className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                      <a href="tel:+917248763036" className="text-xs font-bold hover:underline" itemProp="telephone">
+                        +91 72487 63036
+                      </a>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Mail className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                      <a href="mailto:support@renufashionhub.in" className="text-xs font-bold hover:underline" itemProp="email">
+                        support@renufashionhub.in
+                      </a>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Clock className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                      <span className="text-xs font-bold">
+                        Mon - Sat: 11:00 AM - 8:00 PM
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={`p-6 rounded-2xl ${
+                  theme === "dark" ? "bg-amber-500/5 text-amber-300 border-amber-500/10" : "bg-amber-500/5 text-amber-950 border-amber-500/10"
+                } border text-xs`}>
+                  <p className="font-semibold leading-relaxed">
+                    🌟 <strong>Note:</strong> We encourage scheduling appointments before visiting our Agra headquarters to ensure customized curation sessions with Mrs. Renu Agarwal.
+                  </p>
+                </div>
+              </div>
+
               {/* Form Column */}
-              <div>
+              <div className="md:col-span-7">
                 <motion.div
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -6448,10 +6835,12 @@ export default function App() {
                     )}
                   </AnimatePresence>
                 </motion.div>
-
-                <ContactSupportAndFaq theme={theme} />
               </div>
 
+            </div>
+
+            <div className="mt-12">
+              <ContactSupportAndFaq theme={theme} />
             </div>
           </div>
         </motion.div>
@@ -6472,9 +6861,9 @@ export default function App() {
         <div className={`absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] ${theme === "dark" ? "bg-amber-900/10" : "bg-amber-100/10"} blur-[120px] rounded-full`} />
       </div>
 
-      <div className="relative max-w-md mx-auto px-6 pt-16 pb-24">
+      <div className="relative w-full max-w-md md:max-w-3xl lg:max-w-6xl mx-auto px-6 md:px-8 lg:px-12 pt-16 pb-24">
         {/* Header Actions */}
-        <div className="absolute top-6 left-6 flex gap-3">
+        <div className="absolute top-6 left-6 flex gap-3 z-20">
           <button 
             onClick={toggleTheme}
             className={`p-2 rounded-full ${theme === "dark" ? "bg-white/5 hover:bg-white/10 border-white/10" : "bg-black/5 hover:bg-black/10 border-black/10"} transition-colors border group`}
@@ -6488,7 +6877,7 @@ export default function App() {
           </button>
         </div>
 
-        <div className="absolute top-6 right-6 flex gap-3">
+        <div className="absolute top-6 right-6 flex gap-3 z-20">
           <button 
             onClick={() => setShowShareModal(true)}
             className={`p-2 rounded-full ${theme === "dark" ? "bg-white/5 hover:bg-white/10 border-white/10" : "bg-black/5 hover:bg-black/10 border-black/10"} transition-colors border`}
@@ -6497,125 +6886,191 @@ export default function App() {
           </button>
         </div>
 
-        {/* Profile Section */}
-        <motion.div 
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="flex flex-col items-center text-center mb-10"
-        >
-          <div className="relative mb-4">
-            <div className="w-28 h-28 rounded-full p-1 bg-gradient-to-tr from-amber-600 via-amber-400 to-yellow-300">
-              <MediaImage 
-                url={profile.avatar} 
-                alt={profile.name} 
-                className={`w-full h-full rounded-full object-cover border-4 ${theme === "dark" ? "border-[#0B1512]" : "border-white"}`}
-                fallback={
-                  <div className={`w-full h-full rounded-full ${theme === "dark" ? "bg-[#0B1512]" : "bg-[#FDFBF7]"} flex items-center justify-center`}>
-                    <User className={`w-12 h-12 ${theme === "dark" ? "text-white/20" : "text-black/20"}`} />
-                  </div>
-                }
-              />
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-2 mb-1">
-            <h1 className="text-2xl font-bold tracking-tight">{profile.name}</h1>
-            <CheckCircle2 className="w-5 h-5 text-blue-500 fill-blue-500/10" />
-          </div>
-          <div className="flex items-center gap-1.5 mb-2">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded-full">Verified Creator</span>
-          </div>
-          <a 
-            href="https://renufashionhub.in" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className={`${theme === "dark" ? "text-white/40 hover:text-white/60" : "text-black/40 hover:text-black/60"} text-xs mb-4 transition-colors flex items-center gap-1`}
-          >
-            <Globe className="w-3 h-3" />
-            renufashionhub.in
-          </a>
-          
-          <p className={`${theme === "dark" ? "text-white/60" : "text-black/60"} text-sm max-w-[280px] leading-relaxed mb-6 whitespace-pre-line`}>
-            {profile.bio}
-          </p>
-        </motion.div>
-
-        {/* Social Links */}
-        <div className="space-y-3 mb-12">
-          {INITIAL_SOCIAL_LINKS.map((social, index) => (
-            <motion.a 
-              key={index}
-              href={social.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
+        <div className="lg:grid lg:grid-cols-12 lg:gap-12 items-start mt-8">
+          {/* Left Column: Profile & Social Links & Action Buttons */}
+          <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-6">
+            
+            {/* Profile Section */}
+            <motion.div 
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
-              whileHover="hover"
-              className={`relative overflow-hidden flex items-center justify-between p-4 rounded-2xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} transition-all border group`}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              className="flex flex-col items-center lg:items-start text-center lg:text-left"
             >
-              <motion.div
-                variants={{
-                  initial: { y: "100%" },
-                  hover: { y: 0 }
-                }}
-                transition={{ type: "tween", ease: [0.22, 1, 0.36, 1], duration: 0.4 }}
-                className="absolute inset-0 bg-amber-500/10 -z-10"
-              />
-              <div className="relative z-10 flex items-center gap-4">
-                <div className={`p-2 rounded-xl ${theme === "dark" ? "bg-white/5 group-hover:bg-white/10" : "bg-black/5 group-hover:bg-black/10"} transition-colors`}>
-                  <social.icon className={`w-5 h-5 ${social.color}`} />
-                </div>
-                <div>
-                  <p className={`text-sm font-bold ${theme === "dark" ? "text-white/90 group-hover:text-white" : "text-black/90 group-hover:text-black"} transition-colors`}>{social.handle}</p>
-                  <p className={`text-[10px] ${theme === "dark" ? "text-white/40" : "text-black/40"} uppercase tracking-widest`}>{social.label}</p>
+              <div className="relative mb-4">
+                <div className="w-28 h-28 rounded-full p-1 bg-gradient-to-tr from-amber-600 via-amber-400 to-yellow-300">
+                  <MediaImage 
+                    url={profile.avatar} 
+                    alt={profile.name} 
+                    className={`w-full h-full rounded-full object-cover border-4 ${theme === "dark" ? "border-[#0B1512]" : "border-white"}`}
+                    fallback={
+                      <div className={`w-full h-full rounded-full ${theme === "dark" ? "bg-[#0B1512]" : "bg-[#FDFBF7]"} flex items-center justify-center`}>
+                        <User className={`w-12 h-12 ${theme === "dark" ? "text-white/20" : "text-black/20"}`} />
+                      </div>
+                    }
+                  />
                 </div>
               </div>
-              <div className="relative z-10 flex items-center gap-2">
-                <ExternalLink className={`w-4 h-4 ${theme === "dark" ? "text-white/20 group-hover:text-white/40" : "text-black/20 group-hover:text-black/40"} transition-colors`} />
+              
+              <div className="flex items-center justify-center lg:justify-start gap-2 mb-1">
+                <h1 className="text-2xl font-bold tracking-tight">{profile.name}</h1>
+                <CheckCircle2 className="w-5 h-5 text-blue-500 fill-blue-500/10" />
               </div>
-             </motion.a>
-          ))}
-        </div>
+              <div className="flex items-center justify-center lg:justify-start gap-1.5 mb-2">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded-full">Verified Creator</span>
+              </div>
+              <a 
+                href="https://renufashionhub.in" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className={`${theme === "dark" ? "text-white/40 hover:text-white/60" : "text-black/40 hover:text-black/60"} text-xs mb-4 transition-colors flex items-center justify-center lg:justify-start gap-1`}
+              >
+                <Globe className="w-3 h-3" />
+                renufashionhub.in
+              </a>
+              
+              <p className={`${theme === "dark" ? "text-white/60" : "text-black/60"} text-sm leading-relaxed mb-6 whitespace-pre-line max-w-[280px] lg:max-w-none`}>
+                {profile.bio}
+              </p>
+            </motion.div>
 
-        {/* Contact, Blog, and About Buttons */}
-        <div className="space-y-3 mb-8">
-          <div className="grid grid-cols-2 gap-4">
-            <PremiumButton
-              onClick={() => handleNavigate("/contact")}
-              className="w-full"
-              variant={theme === "dark" ? "secondary" : "primary"}
-            >
-              Contact Us
-            </PremiumButton>
-            <PremiumButton
-              onClick={() => handleNavigate("/blog")}
-              className="w-full"
-              variant={theme === "dark" ? "primary" : "secondary"}
-            >
-              <span className="flex items-center justify-center gap-2">
-                <BookOpen className="w-4 h-4 text-amber-500 animate-pulse" />
-                Fashion Blog
-              </span>
-            </PremiumButton>
+            {/* Social Links */}
+            <div className="space-y-3">
+              {INITIAL_SOCIAL_LINKS.map((social, index) => (
+                <motion.a 
+                  key={index}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                  whileHover="hover"
+                  className={`relative overflow-hidden flex items-center justify-between p-4 rounded-2xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} transition-all border group`}
+                >
+                  <motion.div
+                    variants={{
+                      initial: { y: "100%" },
+                      hover: { y: 0 }
+                    }}
+                    transition={{ type: "tween", ease: [0.22, 1, 0.36, 1], duration: 0.4 }}
+                    className="absolute inset-0 bg-amber-500/10 -z-10"
+                  />
+                  <div className="relative z-10 flex items-center gap-4">
+                    <div className={`p-2 rounded-xl ${theme === "dark" ? "bg-white/5 group-hover:bg-white/10" : "bg-black/5 group-hover:bg-black/10"} transition-colors`}>
+                      <social.icon className={`w-5 h-5 ${social.color}`} />
+                    </div>
+                    <div>
+                      <p className={`text-sm font-bold ${theme === "dark" ? "text-white/90 group-hover:text-white" : "text-black/90 group-hover:text-black"} transition-colors`}>{social.handle}</p>
+                      <p className={`text-[10px] ${theme === "dark" ? "text-white/40" : "text-black/40"} uppercase tracking-widest`}>{social.label}</p>
+                    </div>
+                  </div>
+                  <div className="relative z-10 flex items-center gap-2">
+                    <ExternalLink className={`w-4 h-4 ${theme === "dark" ? "text-white/20 group-hover:text-white/40" : "text-black/20 group-hover:text-black/40"} transition-colors`} />
+                  </div>
+                </motion.a>
+              ))}
+            </div>
+
+            {/* Contact, Blog, and About Buttons */}
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-4">
+                <PremiumButton
+                  onClick={() => handleNavigate("/contact")}
+                  className="w-full"
+                  variant={theme === "dark" ? "secondary" : "primary"}
+                >
+                  Contact Us
+                </PremiumButton>
+                <PremiumButton
+                  onClick={() => handleNavigate("/blog")}
+                  className="w-full"
+                  variant={theme === "dark" ? "primary" : "secondary"}
+                >
+                  <span className="flex items-center justify-center gap-2">
+                    <BookOpen className="w-4 h-4 text-amber-500 animate-pulse" />
+                    Fashion Blog
+                  </span>
+                </PremiumButton>
+              </div>
+              <PremiumButton
+                onClick={() => handleNavigate("/about")}
+                className="w-full"
+                variant={theme === "dark" ? "secondary" : "primary"}
+              >
+                <span className="flex items-center justify-center gap-2">
+                  <Sparkles className="w-4 h-4 text-amber-500" />
+                  About Renu Fashion Hub
+                </span>
+              </PremiumButton>
+
+              {/* Added Legal buttons adjacent to About button */}
+              <div className="grid grid-cols-3 gap-2 pt-1 relative z-30">
+                <motion.button
+                  whileHover={{ 
+                    scale: 1.04, 
+                    boxShadow: theme === "dark" ? "0 0 14px rgba(245, 158, 11, 0.35)" : "0 0 10px rgba(245, 158, 11, 0.22)",
+                    borderColor: "rgba(245, 158, 11, 0.45)",
+                    color: theme === "dark" ? "#FBBF24" : "#B45309"
+                  }}
+                  whileTap={{ scale: 0.96 }}
+                  transition={{ type: "spring", stiffness: 420, damping: 17 }}
+                  onClick={() => handleNavigate("/privacy-policy")}
+                  className={`py-3 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider transition-colors border ${
+                    theme === "dark" 
+                      ? "bg-white/[0.03] border-white/10 text-stone-300 hover:bg-white/[0.06]" 
+                      : "bg-white border-stone-200 text-stone-700 hover:bg-stone-50"
+                  } text-center truncate cursor-pointer select-none focus:outline-none`}
+                >
+                  Privacy Policy
+                </motion.button>
+                <motion.button
+                  whileHover={{ 
+                    scale: 1.04, 
+                    boxShadow: theme === "dark" ? "0 0 14px rgba(245, 158, 11, 0.35)" : "0 0 10px rgba(245, 158, 11, 0.22)",
+                    borderColor: "rgba(245, 158, 11, 0.45)",
+                    color: theme === "dark" ? "#FBBF24" : "#B45309"
+                  }}
+                  whileTap={{ scale: 0.96 }}
+                  transition={{ type: "spring", stiffness: 420, damping: 17 }}
+                  onClick={() => handleNavigate("/terms-of-service")}
+                  className={`py-3 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider transition-colors border ${
+                    theme === "dark" 
+                      ? "bg-white/[0.03] border-white/10 text-stone-300 hover:bg-white/[0.06]" 
+                      : "bg-white border-stone-200 text-stone-700 hover:bg-stone-50"
+                  } text-center truncate cursor-pointer select-none focus:outline-none`}
+                >
+                  Terms of Service
+                </motion.button>
+                <motion.button
+                  whileHover={{ 
+                    scale: 1.04, 
+                    boxShadow: theme === "dark" ? "0 0 14px rgba(245, 158, 11, 0.35)" : "0 0 10px rgba(245, 158, 11, 0.22)",
+                    borderColor: "rgba(245, 158, 11, 0.45)",
+                    color: theme === "dark" ? "#FBBF24" : "#B45309"
+                  }}
+                  whileTap={{ scale: 0.96 }}
+                  transition={{ type: "spring", stiffness: 420, damping: 17 }}
+                  onClick={() => handleNavigate("/disclaimer")}
+                  className={`py-3 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider transition-colors border ${
+                    theme === "dark" 
+                      ? "bg-white/[0.03] border-white/10 text-stone-300 hover:bg-white/[0.06]" 
+                      : "bg-white border-stone-200 text-stone-700 hover:bg-stone-50"
+                  } text-center truncate cursor-pointer select-none focus:outline-none`}
+                >
+                  Disclaimer
+                </motion.button>
+              </div>
+            </div>
+
           </div>
-          <PremiumButton
-            onClick={() => handleNavigate("/about")}
-            className="w-full"
-            variant={theme === "dark" ? "secondary" : "primary"}
-          >
-            <span className="flex items-center justify-center gap-2">
-              <Sparkles className="w-4 h-4 text-amber-500" />
-              About Renu Fashion Hub
-            </span>
-          </PremiumButton>
-        </div>
 
-        {/* Weekly Best Sellers Carousel */}
-        <LatestArrivalsCarousel products={products} posts={posts} theme={theme} navigate={handleNavigate} />
+          {/* Right Column: Carousel, Tabs & Dynamic Content List */}
+          <div className="lg:col-span-7 space-y-8 mt-10 lg:mt-0">
+            {/* Weekly Best Sellers Carousel */}
+            <LatestArrivalsCarousel products={products} posts={posts} theme={theme} navigate={handleNavigate} />
 
         {/* Tabs Navigation */}
         <motion.div 
@@ -6675,10 +7130,10 @@ export default function App() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
-                className="grid grid-cols-2 gap-3"
+                className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"
               >
                 {filteredPosts.length === 0 && filteredProducts.length === 0 ? (
-                  <div className="col-span-2">
+                  <div className="col-span-full">
                     <EmptyState icon={ShoppingBag} message={searchQuery || selectedCategory !== "All" ? "No items match your search" : "No any products yet"} />
                   </div>
                 ) : (
@@ -6703,10 +7158,10 @@ export default function App() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
-                className="grid grid-cols-2 gap-3"
+                className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"
               >
                 {filteredPosts.length === 0 ? (
-                  <div className="col-span-2">
+                  <div className="col-span-full">
                     <EmptyState icon={ImageIcon} message={searchQuery || selectedCategory !== "All" ? "No posts match your search" : "No posts yet"} />
                   </div>
                 ) : (
@@ -6769,9 +7224,9 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                   {filteredProducts.length === 0 ? (
-                    <div className="col-span-2">
+                    <div className="col-span-full">
                       <EmptyState icon={Tag} message={searchQuery || selectedCategory !== "All" ? "No products match your search" : "No any products yet"} />
                     </div>
                   ) : (
@@ -6902,6 +7357,8 @@ export default function App() {
         </AnimatePresence>
 
 
+          </div> {/* End of Right Column */}
+        </div> {/* End of lg:grid Grid */}
 
         {/* Footer */}
         <motion.footer 
@@ -6984,50 +7441,65 @@ export default function App() {
                 &copy; 2026 Renu Fashion Hub. All Rights Reserved.
               </div>
               <div className="flex flex-wrap gap-x-3 gap-y-1.5 items-center justify-center max-w-sm">
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.1, color: theme === "dark" ? "#FBBF24" : "#D97706" }}
+                  whileTap={{ scale: 0.93 }}
+                  transition={{ type: "spring", stiffness: 450, damping: 15 }}
                   onClick={() => handleNavigate("/about")}
-                  className={`text-[9px] font-black uppercase tracking-[0.18em] hover:opacity-100 opacity-65 hover:underline transition-all cursor-pointer ${
-                    theme === "dark" ? "text-amber-500 hover:text-amber-400" : "text-[#1C1B18] hover:text-black"
+                  className={`text-[9px] font-black uppercase tracking-[0.18em] transition-colors cursor-pointer outline-none ${
+                    theme === "dark" ? "text-amber-500" : "text-[#1C1B18]/80"
                   }`}
                 >
                   About Us
-                </button>
-                <span className={`text-[8px] ${theme === "dark" ? "text-stone-750" : "text-stone-300"}`}>|</span>
-                <button
+                </motion.button>
+                <span className={`text-[8px] ${theme === "dark" ? "text-stone-700" : "text-stone-300"}`}>|</span>
+                <motion.button
+                  whileHover={{ scale: 1.1, color: theme === "dark" ? "#FBBF24" : "#D97706" }}
+                  whileTap={{ scale: 0.93 }}
+                  transition={{ type: "spring", stiffness: 450, damping: 15 }}
                   onClick={() => handleNavigate("/privacy-policy")}
-                  className={`text-[9px] font-black uppercase tracking-[0.18em] hover:opacity-100 opacity-65 hover:underline transition-all cursor-pointer ${
-                    theme === "dark" ? "text-amber-500 hover:text-amber-400" : "text-[#1C1B18] hover:text-black"
+                  className={`text-[9px] font-black uppercase tracking-[0.18em] transition-colors cursor-pointer outline-none ${
+                    theme === "dark" ? "text-amber-500" : "text-[#1C1B18]/80"
                   }`}
                 >
                   Privacy
-                </button>
+                </motion.button>
                 <span className={`text-[8px] ${theme === "dark" ? "text-stone-700" : "text-stone-300"}`}>|</span>
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.1, color: theme === "dark" ? "#FBBF24" : "#D97706" }}
+                  whileTap={{ scale: 0.93 }}
+                  transition={{ type: "spring", stiffness: 450, damping: 15 }}
                   onClick={() => handleNavigate("/terms-of-service")}
-                  className={`text-[9px] font-black uppercase tracking-[0.18em] hover:opacity-100 opacity-65 hover:underline transition-all cursor-pointer ${
-                    theme === "dark" ? "text-amber-500 hover:text-amber-400" : "text-[#1C1B18] hover:text-black"
+                  className={`text-[9px] font-black uppercase tracking-[0.18em] transition-colors cursor-pointer outline-none ${
+                    theme === "dark" ? "text-amber-500" : "text-[#1C1B18]/80"
                   }`}
                 >
                   Terms
-                </button>
+                </motion.button>
                 <span className={`text-[8px] ${theme === "dark" ? "text-stone-700" : "text-stone-300"}`}>|</span>
-                <button
-                  onClick={() => handleNavigate("/terms-of-service")}
-                  className={`text-[9px] font-black uppercase tracking-[0.18em] hover:opacity-100 opacity-65 hover:underline transition-all cursor-pointer ${
-                    theme === "dark" ? "text-amber-500 hover:text-amber-400" : "text-[#1C1B18] hover:text-black"
+                <motion.button
+                  whileHover={{ scale: 1.1, color: theme === "dark" ? "#FBBF24" : "#D97706" }}
+                  whileTap={{ scale: 0.93 }}
+                  transition={{ type: "spring", stiffness: 450, damping: 15 }}
+                  onClick={() => handleNavigate("/disclaimer")}
+                  className={`text-[9px] font-black uppercase tracking-[0.18em] transition-colors cursor-pointer outline-none ${
+                    theme === "dark" ? "text-amber-500" : "text-[#1C1B18]/80"
                   }`}
                 >
                   Disclaimer
-                </button>
+                </motion.button>
                 <span className={`text-[8px] ${theme === "dark" ? "text-stone-700" : "text-stone-300"}`}>|</span>
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.1, color: theme === "dark" ? "#FBBF24" : "#D97706" }}
+                  whileTap={{ scale: 0.93 }}
+                  transition={{ type: "spring", stiffness: 450, damping: 15 }}
                   onClick={() => handleNavigate("/contact")}
-                  className={`text-[9px] font-black uppercase tracking-[0.18em] hover:opacity-100 opacity-65 hover:underline transition-all cursor-pointer ${
-                    theme === "dark" ? "text-amber-500 hover:text-amber-400" : "text-[#1C1B18] hover:text-black"
+                  className={`text-[9px] font-black uppercase tracking-[0.18em] transition-colors cursor-pointer outline-none ${
+                    theme === "dark" ? "text-amber-500" : "text-[#1C1B18]/80"
                   }`}
                 >
                   Contact
-                </button>
+                </motion.button>
               </div>
             </div>
           </div>
@@ -7053,6 +7525,7 @@ export default function App() {
           <Route path="/about-us" element={<Navigate to="/about" replace />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage profile={profile} theme={theme} navigate={handleNavigate} />} />
           <Route path="/terms-of-service" element={<TermsOfServicePage profile={profile} theme={theme} navigate={handleNavigate} />} />
+          <Route path="/disclaimer" element={<DisclaimerPage profile={profile} theme={theme} navigate={handleNavigate} />} />
           <Route path="/product/:id" element={<ProductDetailPage products={products} theme={theme} navigate={handleNavigate} db={db} isLoaded={isProductsLoaded} />} />
           <Route path="/post/:id" element={<PostDetailPage posts={posts} products={products} profile={profile} theme={theme} navigate={handleNavigate} isMuted={isMuted} setIsMuted={setIsMuted} isLoaded={isPostsLoaded} />} />
           <Route path="/blog" element={<BlogListPage blogs={blogs} theme={theme} navigate={handleNavigate} isLoaded={isBlogsLoaded} />} />
