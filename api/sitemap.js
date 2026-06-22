@@ -1,13 +1,12 @@
-// Dynamic sitemap generator for Vercel Serverless Function
+// Dynamic sitemap generator for Renu Fashion Hub
 export default async function handler(req, res) {
   const projectId = "ai-studio-applet-webapp-644f0";
   const databaseId = "ai-studio-06f9cdf8-bcdb-4985-98dd-f7d34d6cf66c";
   const baseRESTUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/${databaseId}/documents`;
-
   const baseUrl = "https://www.renufashionhub.in";
 
-  // Helper to fetch collection items via Firestore REST API
-  async function fetchCollectionIds(collectionName) {
+  // Helper to fetch collection items via Firestore REST API with full document fields
+  async function fetchCollectionDocs(collectionName) {
     try {
       const url = `${baseRESTUrl}/${collectionName}?pageSize=300`;
       const response = await fetch(url);
@@ -19,9 +18,24 @@ export default async function handler(req, res) {
       if (!data.documents) return [];
       
       return data.documents.map(doc => {
-        // Extract the Firestore document ID (last segment of the document name)
         const nameParts = doc.name.split('/');
-        return nameParts[nameParts.length - 1];
+        const id = nameParts[nameParts.length - 1];
+        
+        let lastmod = "";
+        if (doc.updateTime) {
+          lastmod = doc.updateTime.split('.')[0] + 'Z';
+        }
+
+        let category = "";
+        try {
+          if (doc.fields && doc.fields.category && doc.fields.category.stringValue) {
+            category = doc.fields.category.stringValue;
+          }
+        } catch (e) {
+          // ignore
+        }
+
+        return { id, lastmod, category };
       });
     } catch (err) {
       console.error(`Failed to fetch collection ${collectionName}:`, err);
@@ -29,21 +43,42 @@ export default async function handler(req, res) {
     }
   }
 
-  // Fetch all dynamic entries in parallel
-  const [productIds, postIds, blogIds] = await Promise.all([
-    fetchCollectionIds("products"),
-    fetchCollectionIds("posts"),
-    fetchCollectionIds("blogs")
+  // Fetch collections in parallel
+  const [products, posts, blogs] = await Promise.all([
+    fetchCollectionDocs("products"),
+    fetchCollectionDocs("posts"),
+    fetchCollectionDocs("blogs")
   ]);
 
-  // Construct XML sitemap
-  let sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
+  // Aggregate unique active categories
+  const staticCategories = ["Sarees", "Kurtas", "Lehengas", "Dresses", "Jewelry"];
+  const dynamicCategories = new Set(staticCategories);
+  
+  products.forEach(p => {
+    if (p.category && p.category.toLowerCase() !== "other") {
+      dynamicCategories.add(p.category.charAt(0).toUpperCase() + p.category.slice(1).toLowerCase());
+    }
+  });
+
+  posts.forEach(p => {
+    if (p.category && p.category.toLowerCase() !== "other") {
+      dynamicCategories.add(p.category.charAt(0).toUpperCase() + p.category.slice(1).toLowerCase());
+    }
+  });
+
+  // Start constructing the sitemap XML
+  let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- Static Pages -->
+  <!-- Core Static Pages -->
   <url>
     <loc>${baseUrl}/</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/about</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>${baseUrl}/contact</loc>
@@ -56,43 +91,70 @@ export default async function handler(req, res) {
     <priority>0.3</priority>
   </url>
   <url>
+    <loc>${baseUrl}/privacy-policy</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/terms-of-service</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/disclaimer</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>${baseUrl}/blog</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
 `;
 
+  // Categories query URLs
+  Array.from(dynamicCategories).forEach(cat => {
+    xml += `  <url>
+    <loc>${baseUrl}/?category=${encodeURIComponent(cat)}</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>\n`;
+  });
+
   // Dynamic Products
-  productIds.forEach(id => {
-    sitemapXml += `  <url>
-    <loc>${baseUrl}/product/${id}</loc>
+  products.forEach(p => {
+    xml += `  <url>
+    <loc>${baseUrl}/product/${p.id}</loc>
+    <lastmod>${p.lastmod || "2026-06-22T00:00:00Z"}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>\n`;
   });
 
   // Dynamic Posts/Vlogs
-  postIds.forEach(id => {
-    sitemapXml += `  <url>
-    <loc>${baseUrl}/post/${id}</loc>
+  posts.forEach(p => {
+    xml += `  <url>
+    <loc>${baseUrl}/post/${p.id}</loc>
+    <lastmod>${p.lastmod || "2026-06-22T00:00:00Z"}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>\n`;
   });
 
   // Dynamic Blogs
-  blogIds.forEach(id => {
-    sitemapXml += `  <url>
-    <loc>${baseUrl}/blog/${id}</loc>
+  blogs.forEach(b => {
+    xml += `  <url>
+    <loc>${baseUrl}/blog/${b.id}</loc>
+    <lastmod>${b.lastmod || "2026-06-22T00:00:00Z"}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>\n`;
   });
 
-  sitemapXml += `</urlset>`;
+  xml += `</urlset>`;
 
-  // Serve as XML
+  // Serve as XML content type
   res.setHeader("Content-Type", "application/xml");
   res.setHeader("Cache-Control", "s-maxage=3600, stale-while-revalidate");
-  res.status(200).send(sitemapXml);
+  res.status(200).send(xml);
 }
