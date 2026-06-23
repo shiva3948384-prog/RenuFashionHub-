@@ -7,9 +7,11 @@
       "properties": {
         "name": { "type": "string" },
         "bio": { "type": "string" },
-        "avatar": { "type": "string" }
+        "avatar": { "type": "string" },
+        "privacyPolicy": { "type": "string" },
+        "termsOfService": { "type": "string" }
       },
-      "required": ["name", "bio", "avatar"]
+      "required": ["name", "bio", "avatar", "privacyPolicy", "termsOfService"]
     },
     "post": {
       "title": "Post",
@@ -49,6 +51,25 @@
         "timestamp": { "type": "string" }
       },
       "required": ["id", "name", "email", "mobile", "message", "timestamp"]
+    },
+    "blog": {
+      "title": "Blog",
+      "description": "Fashion blog post",
+      "type": "object",
+      "properties": {
+        "id": { "type": "number" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "image": { "type": "string" },
+        "category": { "type": "string" },
+        "excerpt": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "likes": { "type": "number" },
+        "seoTitle": { "type": "string" },
+        "metaDescription": { "type": "string" },
+        "focusKeyword": { "type": "string" }
+      },
+      "required": ["id", "title", "content", "image", "timestamp"]
     }
   },
   "firestore": {
@@ -67,6 +88,10 @@
     "messages": {
       "schema": "message",
       "description": "Collection of contact messages"
+    },
+    "blogs": {
+      "schema": "blog",
+      "description": "Collection of blog posts"
     }
   }
 }
