@@ -22,5 +22,10 @@ export default defineConfig(({ mode }) => {
     server: {
       hmr: process.env.DISABLE_HMR !== 'true',
     },
+    build: {
+      minify: 'esbuild',
+      cssMinify: true,
+      sourcemap: false,
+    },
   };
 });
