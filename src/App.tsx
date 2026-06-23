@@ -1575,116 +1575,107 @@ By accessing or using Renu Fashion Hub, you acknowledge that you have read, unde
 
 export const DEFAULT_DISCLAIMER = `Last Updated: June 2026
 
-Welcome to Renu Fashion Hub.
+Welcome to the official digital platform of Renu Fashion Hub.
 
-The information provided on this website is published in good faith and is intended solely for general informational, educational, and fashion-related purposes.
+The extensive, curated information provided across all sections of this digital hub is published in absolute good faith and is intended solely for general informational, educational, and aesthetic style-guidance purposes.
 
-By accessing and using this website, you acknowledge and agree to the terms outlined in this Disclaimer.
+By accessing, browsing, exploring, or interacting with any part of this website, you explicitly acknowledge, understand, and agree to the comprehensive terms and conditions outlined in this Disclaimer. If you do not agree with any of these statements, you should discontinue use.
 
-1. General Information
+1. General Information & Purpose
 
-Renu Fashion Hub provides content related to:
+Renu Fashion Hub provides deeply analytical and curated digital content focusing primarily on:
 
-• Fashion trends
-• Style guides
-• Product recommendations
-• Buying guides
-• Fashion inspiration
-• Lifestyle content
-• Affiliate marketing content
+• Indian Ethnic Wear and Modern Silhouette Trends
+• Step-by-step styling manuals, layering rules, and bespoke aesthetic guidelines
+• Independent, research-driven product curations and textile material reviews
+• Guided purchase suggestions and capsule wardrobe organization layouts
+• Global fashion inspirations, local boutique narratives, and runway updates
+• Affiliate promotional partner channels
 
-All content is provided for informational purposes only.
+All materials and ideas published on Renu Fashion Hub represent the subjective opinions and critical evaluations of our style curators. They are provided solely for inspiration and educational discovery.
 
-2. No Purchase Obligation
+2. No Mandatory Purchase Obligation or Commercial Pressure
 
-Renu Fashion Hub does not force, pressure, require, or encourage visitors to purchase any product or service.
+Renu Fashion Hub operates with a strictly informational, non-custodial model. We do not sell products directly, nor do we force, pressure, require, mandate, or encourage any visitor to buy any apparel, accessory, or service listed on our site.
 
-Any recommendation, review, ranking, comparison, buying guide, or featured product represents informational content only.
+Every recommendation, product review, ranking index, trend scorecard, or style comparison published here serves as purely educational references to assist you in navigating your shopping journey.
 
-The final decision to purchase any product remains entirely the responsibility of the user.
+The ultimate, absolute decision to buy any item lies with you as the end consumer. We highly recommend that you exercise due diligence, weigh your personal financial comfort, and conduct your own independent product investigations prior to clicking any checkout button.
 
-Users are strongly encouraged to conduct independent research before making purchasing decisions.
+3. Affiliate Disclosure & Commission Policy
 
-3. Affiliate Disclaimer
+In full compliance with international digital advertising guidelines and honest transparency practices, Renu Fashion Hub discloses that some outbound links on our pages are affiliate links.
 
-Some links on this website may be affiliate links.
+When you click on these links and transition to third-party marketplaces (such as Meesho, Amazon, Myntra, or trusted brand boutiques) and complete a transaction, Renu Fashion Hub may receive a small affiliate commission.
 
-If a user clicks an affiliate link and makes a purchase, Renu Fashion Hub may earn a commission at no additional cost to the user.
+This commission is paid entirely by the partner seller or affiliate network at absolutely no additional cost to you.
 
-Affiliate commissions help support website maintenance and content creation.
+These modest referral premiums are utilized entirely to support the continuous research, technical maintenance, domain registration, server scaling, and editorial efforts of our hub, enabling us to keep our styling tips and reviews entirely free to the public. Our commitment to honest curation remains uncompromised by our affiliate partners.
 
-Affiliate relationships do not influence our commitment to providing useful and transparent information.
+4. Product Information Accuracy & Pricing Disclaimer
 
-4. Product Information Disclaimer
+While we invest substantial effort, time, and attention into keeping all product descriptions, pricing points, discounts, and sizing coordinates updated, we make no guarantees about their absolute accuracy.
 
-We make reasonable efforts to keep product information accurate.
+The digital marketplace is dynamic; therefore, we cannot guarantee:
 
-However, we do not guarantee:
+• Real-time retail Pricing fluctuations
+• Specific percentage Discounts or coupon codes
+• Immediate item Stock Availability
+• Intricate material fabrics or Manufacturer specifications
+• Overall merchant Ratings and review averages
+• Official image colors or pattern representations
 
-• Prices
-• Discounts
-• Availability
-• Product specifications
-• Ratings
-• Features
-• Images
+Sellers and retail facilitators reserve the right to alter features without prior notification, and some entries on our site may become outdated. Users are encouraged to verify all critical specs directly on the vendor checkouts.
 
-Product information may change without notice.
+5. Third-Party Websites & External Routing
 
-Users should verify all information directly with the seller before purchasing.
+Our platform contains various routing paths directing visitors to external fashion storefronts and social systems.
 
-5. Third-Party Websites
+We do not own, control, moderate, or monitor these third-party platforms, and we take no liability for their:
 
-This website may contain links to external websites.
+• Material quality, shipping timelines, or refund processes
+• Legal policies, cookie configurations, or local security layers
+• Editorial correctness, community guidelines, or marketing practices
 
-We do not own or control third-party websites and are not responsible for:
+Any transaction, dispute, or customer assistance case you initiate is handled exclusively by that vendor, entirely outside our knowledge or system.
 
-• Products
-• Services
-• Policies
-• Security
-• Content
-• Privacy practices
+6. No Professional Advice or Diagnosis
 
-Any interaction with third-party websites is solely between the user and the third party.
+The creative guides and articles on Renu Fashion Hub do not constitute professional advice. Our content must never be treated as:
 
-6. No Professional Advice
+• Professional legal counsel
+• Financial planning or budgeting consulting
+• Certifiable styling certifications
+• Medical skin or dermatological textile testing
 
-Content published on Renu Fashion Hub should not be considered:
+Always consult with accredited style professionals, fit models, or certified material experts when seeking specific aesthetic parameters.
 
-• Legal advice
-• Financial advice
-• Tax advice
-• Medical advice
-• Professional consulting advice
+7. Full Limitation of Liability
 
-Users should seek professional guidance when necessary.
+Renu Fashion Hub, including its authors, administrators, and curators, shall not be held responsible for any direct, indirect, incidental, consequential, special, or financial losses of any kind, arising from:
 
-7. Limitation of Liability
+• Your voluntary use or trust of the platform
+• Purchasing selections made at affiliate vendor sites
+• Erroneous product details or typographical bugs
+• Any temporary system outages or technical glitches
 
-Renu Fashion Hub shall not be held responsible for any direct, indirect, incidental, consequential, or financial losses arising from:
+Browsing and relying on our materials is performed solely and fully at your own personal risk.
 
-• Use of the website
-• Reliance on website content
-• Purchases made through third-party websites
-• Product-related issues
-• Service-related issues
+8. Accuracy of Information & Continuous Updates
 
-Use of this website is entirely at the user's own risk.
+All resources, guidelines, and articles on this platform are provided "as is" and "as available". We provide no warranties, whether express or implied, regarding the reliability or completeness of any material published on our channel.
 
-8. Accuracy of Information
+9. Voluntary Consent to Terms
 
-Although we strive for accuracy, we make no warranties regarding the completeness, reliability, or accuracy of any information published on this website.
+By proceeding to explore the styling cards, blogs, or products of Renu Fashion Hub, you declare that you have thoroughly read, fully comprehended, and unconditionally accepted all the disprovals detailed inside this document.
 
-9. Consent
+10. Contacting the Hub
 
-By using this website, you acknowledge that you have read, understood, and agreed to this Disclaimer.
-
-10. Contact Information
+If you have questions, please reach out to us at:
 
 Website: https://renufashionhub.in
-Support: support@renufashionhub.in
-Information: info@renufashionhub.in`;
+Support queries: support@renufashionhub.in
+Corporate notices: info@renufashionhub.in`;
 
 const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any; profile: any }) => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -1742,7 +1733,7 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`h-screen overflow-y-scroll snap-y snap-proximity scroll-smooth ${theme === "dark" ? "bg-[#0B1512] text-amber-50" : "bg-[#FDFBF7] text-[#1C1B18]"} p-4 sm:p-6 pb-24 font-sans selection:bg-amber-500/30 overflow-x-hidden`}
+      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-amber-50" : "bg-[#FDFBF7] text-[#1C1B18]"} p-4 sm:p-6 pb-24 font-sans selection:bg-amber-500/30 overflow-x-hidden`}
     >
       {/* Insert JSON-LD Schema dynamically inside the document */}
       <script type="application/ld+json">
@@ -1761,9 +1752,9 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
           </button>
           
           <div className="text-right">
-            <h1 className="text-xl font-black uppercase tracking-wider font-serif text-amber-500">
+            <p className="text-xl font-black uppercase tracking-wider font-serif text-amber-500">
               Renu Fashion Hub
-            </h1>
+            </p>
             <p className={`text-[10px] uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"} font-bold`}>
               Premium Curation & Trust
             </p>
@@ -1771,7 +1762,7 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
         </div>
 
         {/* 1. HERO SECTION */}
-        <section className="text-center mb-16 relative snap-start scroll-mt-10 md:scroll-mt-16">
+        <section className="text-center mb-16 relative">
           <div className="absolute inset-0 -z-10 flex items-center justify-center opacity-10">
             <Sparkles className="w-48 h-48 text-amber-500 blur-sm animate-pulse" />
           </div>
@@ -1784,9 +1775,9 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
             <span className="inline-block text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-amber-600 dark:text-amber-400 bg-amber-500/10 px-4 py-1.5 rounded-full border border-amber-500/15">
               Welcome to Renu Fashion Hub
             </span>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight font-serif text-stone-900 dark:text-stone-50 leading-tight max-w-2xl mx-auto">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight font-serif text-stone-900 dark:text-stone-50 leading-tight max-w-2xl mx-auto">
               Empowering Fashion Choices Through Style, Inspiration & Trusted Recommendations
-            </h2>
+            </h1>
             <p className={`text-sm sm:text-base max-w-xl mx-auto leading-relaxed ${theme === "dark" ? "text-stone-300" : "text-stone-600"}`}>
               Renu Fashion Hub is your ultimate online fashion platform. We help style seekers discover contemporary fashion trends, timeless style inspiration, research-backed shopping guides, and curated fashion recommendations to simplify shopping and refine your personal style.
             </p>
@@ -1808,7 +1799,7 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className={`snap-start scroll-mt-6 md:scroll-mt-10 p-8 md:p-12 rounded-3xl ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-white border-stone-200"} border shadow-xl mb-12`}
+          className={`p-8 md:p-12 rounded-3xl ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-white border-stone-200"} border shadow-xl mb-12`}
         >
           <div className="flex items-center gap-3 border-b border-amber-500/25 pb-6 mb-8">
             <div className={`p-3 rounded-2xl ${theme === "dark" ? "bg-amber-500/10 text-amber-400" : "bg-amber-500/5 text-amber-600"} border border-amber-500/20`}>
@@ -1842,7 +1833,7 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.8, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 snap-start scroll-mt-6 md:scroll-mt-10"
+          className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12"
         >
           {/* Mission */}
           <div className={`p-8 rounded-3xl ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-white border-stone-200"} border shadow-md flex flex-col justify-between`}>
@@ -1900,7 +1891,7 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-12 snap-start scroll-mt-6 md:scroll-mt-10"
+          className="mb-12"
         >
           <div className="text-center mb-8">
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-600">Dynamic Deliverables</span>
@@ -1947,7 +1938,7 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className={`snap-start scroll-mt-6 md:scroll-mt-10 p-8 md:p-12 rounded-3xl ${theme === "dark" ? "bg-gradient-to-br from-emerald-950/10 via-[#0B1512] to-amber-950/10 border-white/10" : "bg-white border-stone-200"} border shadow-xl mb-12`}
+          className={`p-8 md:p-12 rounded-3xl ${theme === "dark" ? "bg-gradient-to-br from-emerald-950/10 via-[#0B1512] to-amber-950/10 border-white/10" : "bg-white border-stone-200"} border shadow-xl mb-12`}
         >
           <div className="flex items-center gap-3 border-b border-amber-500/25 pb-6 mb-8">
             <div className={`p-3 rounded-2xl ${theme === "dark" ? "bg-amber-500/10 text-amber-400" : "bg-amber-500/5 text-amber-600"} border border-amber-500/20`}>
@@ -2016,7 +2007,7 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
         </motion.section>
 
         {/* 7. OUR VALUES */}
-        <section className="mb-12 snap-start scroll-mt-6 md:scroll-mt-10">
+        <section className="mb-12">
           <div className="text-center mb-10">
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400">Core Foundations</span>
             <h3 className="text-2xl font-black font-serif uppercase text-stone-900 dark:text-stone-100">Our Core Values</h3>
@@ -2056,7 +2047,7 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
         </section>
 
         {/* 8. AFFILIATE TRANSPARENCY SECTION */}
-        <section className={`snap-start scroll-mt-6 md:scroll-mt-10 p-8 rounded-3xl ${theme === "dark" ? "bg-amber-500/[0.02] border-amber-500/10 text-amber-100" : "bg-amber-500/5 border-amber-500/15 text-[#1C1B18]"} border shadow-inner mb-12`}>
+        <section className={`p-8 rounded-3xl ${theme === "dark" ? "bg-amber-500/[0.02] border-amber-500/10 text-amber-100" : "bg-amber-500/5 border-amber-500/15 text-[#1C1B18]"} border shadow-inner mb-12`}>
           <div className="flex items-center gap-2.5 text-amber-500 mb-4">
             <ShieldCheck className="w-5 h-5 flex-shrink-0" />
             <h3 className="text-xs font-bold uppercase tracking-[0.2em]">Affiliate Curation & Disclaimer</h3>
@@ -2083,7 +2074,7 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
         </section>
 
         {/* 10. MEET OUR FOUNDER */}
-        <section className={`snap-start scroll-mt-6 md:scroll-mt-10 p-8 md:p-12 rounded-3xl ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-white border-stone-200"} border shadow-xl mb-12`}>
+        <section className={`p-8 md:p-12 rounded-3xl ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-white border-stone-200"} border shadow-xl mb-12`}>
           <div className="flex flex-col md:flex-row gap-8 items-center">
             <div className="relative flex-shrink-0">
               <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-full p-1 bg-gradient-to-tr from-amber-600 via-amber-400 to-yellow-300 shadow-xl overflow-hidden">
@@ -2114,7 +2105,7 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
         </section>
 
         {/* 11. COMPANY STATISTICS */}
-        <section className="mb-16 grid grid-cols-2 md:grid-cols-4 gap-4 snap-start scroll-mt-6 md:scroll-mt-10">
+        <section className="mb-16 grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { stat: "100+", label: "Fashion Articles Published" },
             { stat: "50+", label: "Detailed Style Guides" },
@@ -2135,7 +2126,7 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
         </section>
 
         {/* 12. FAQ SECTION */}
-        <section className="mb-12 snap-start scroll-mt-6 md:scroll-mt-10">
+        <section className="mb-12">
           <div className="text-center mb-8">
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-600">Frequently Asked Inquiries</span>
             <h3 className="text-2xl font-black font-serif uppercase tracking-tight text-stone-900 dark:text-stone-200 mt-1">
@@ -2522,9 +2513,9 @@ const PrivacyPolicyPage = ({ profile, theme, navigate }: { profile: any; theme: 
           </button>
           
           <div className="text-right">
-            <h1 className="text-xl font-black uppercase tracking-wider font-serif text-amber-500">
+            <p className="text-xl font-black uppercase tracking-wider font-serif text-amber-500">
               Renu Fashion Hub
-            </h1>
+            </p>
             <p className={`text-[10px] uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"} font-bold`}>
               Official Privacy Policy
             </p>
@@ -2542,9 +2533,9 @@ const PrivacyPolicyPage = ({ profile, theme, navigate }: { profile: any; theme: 
               <ShieldCheck className="w-6 h-6 animate-pulse" />
             </div>
             <div>
-              <h2 className="text-2xl font-black font-serif text-amber-950 dark:text-amber-100 uppercase tracking-tight">
+              <h1 className="text-2xl font-black font-serif text-amber-950 dark:text-amber-100 uppercase tracking-tight">
                 Privacy Policy
-              </h2>
+              </h1>
               <p className={`text-[10.5px] uppercase tracking-widest font-bold ${theme === "dark" ? "text-amber-400/60" : "text-amber-600/70"}`}>
                 Transparency & Trust Statement
               </p>
@@ -2646,9 +2637,9 @@ const DisclaimerPage = ({ profile, theme, navigate }: { profile: any; theme: str
           </button>
           
           <div className="text-right">
-            <h1 className="text-xl font-black uppercase tracking-wider font-serif text-amber-500">
+            <p className="text-xl font-black uppercase tracking-wider font-serif text-amber-500">
               Renu Fashion Hub
-            </h1>
+            </p>
             <p className={`text-[10px] uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"} font-bold`}>
               Official Disclaimer
             </p>
@@ -2666,9 +2657,9 @@ const DisclaimerPage = ({ profile, theme, navigate }: { profile: any; theme: str
               <ShieldCheck className="w-6 h-6 animate-pulse" />
             </div>
             <div>
-              <h2 className="text-2xl font-black font-serif text-amber-950 dark:text-amber-100 uppercase tracking-tight">
+              <h1 className="text-2xl font-black font-serif text-amber-950 dark:text-amber-100 uppercase tracking-tight">
                 Disclaimer
-              </h2>
+              </h1>
               <p className={`text-[10.5px] uppercase tracking-widest font-bold ${theme === "dark" ? "text-amber-400/60" : "text-amber-600/70"}`}>
                 Legal Limitations & Disclosures
               </p>
@@ -2763,9 +2754,9 @@ const TermsOfServicePage = ({ profile, theme, navigate }: { profile: any; theme:
           </button>
           
           <div className="text-right">
-            <h1 className="text-xl font-black uppercase tracking-wider font-serif text-amber-500">
+            <p className="text-xl font-black uppercase tracking-wider font-serif text-amber-500">
               Renu Fashion Hub
-            </h1>
+            </p>
             <p className={`text-[10px] uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"} font-bold`}>
               Official Terms & Conditions
             </p>
@@ -2783,9 +2774,9 @@ const TermsOfServicePage = ({ profile, theme, navigate }: { profile: any; theme:
               <ShieldCheck className="w-6 h-6 animate-pulse" />
             </div>
             <div>
-              <h2 className="text-2xl font-black font-serif text-amber-950 dark:text-amber-100 uppercase tracking-tight">
+              <h1 className="text-2xl font-black font-serif text-amber-950 dark:text-amber-100 uppercase tracking-tight">
                 Terms of Service
-              </h2>
+              </h1>
               <p className={`text-[10.5px] uppercase tracking-widest font-bold ${theme === "dark" ? "text-amber-400/60" : "text-amber-600/70"}`}>
                 Legal Agreement & User Obligations
               </p>
@@ -3164,13 +3155,18 @@ const PostDetailPage = ({ posts, products, profile, theme, navigate, isMuted, se
       </div>
 
       <div className="p-6 bg-gradient-to-t from-black via-black/80 to-transparent">
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center gap-4 mb-4">
           <MediaImage url={profile.avatar} className="w-12 h-12 rounded-full border-2 border-white/40 object-cover shadow-2xl" />
           <div>
-            <h4 className="text-base font-black text-white tracking-tight leading-tight">{profile.name}</h4>
+            <span className="text-base font-black text-white tracking-tight leading-tight block">{profile.name}</span>
             <p className="text-xs text-white/50 font-bold tracking-wide">renufashionhub.in</p>
           </div>
         </div>
+
+        {/* Post Caption / Description - H1 Tag for SEO dynamic compliance */}
+        <h1 className="text-sm text-stone-200 mb-4 leading-relaxed line-clamp-3">
+          {post.caption || post.description || post.name || `${autoDetectCategory(post.name, post.description || "")} Style Curation Guide by Renu Agarwal`}
+        </h1>
 
         {post.taggedProducts && post.taggedProducts.length > 0 && (
           <div className="space-y-4">
@@ -4084,7 +4080,7 @@ const PageLoader = ({ theme }: { theme: string }) => (
       </div>
     </motion.div>
     <div className="mt-6 text-center px-4">
-      <h1 className="text-sm font-bold tracking-[0.1em] text-amber-600 dark:text-amber-400 uppercase mb-1.5 font-serif">We Are Preparing For You</h1>
+      <p className="text-sm font-bold tracking-[0.1em] text-amber-600 dark:text-amber-400 uppercase mb-1.5 font-serif">We Are Preparing For You</p>
       <p className="text-[10px] tracking-[0.15em] text-stone-500 dark:text-stone-400 uppercase font-bold mb-3">Please Wait</p>
       <div className="flex items-center justify-center gap-1.5">
         <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-bounce [animation-delay:-0.3s]" />
@@ -4712,7 +4708,7 @@ export default function App() {
           linkUrl = (node as HTMLAnchorElement).href || "";
           break;
         }
-        if (node instanceof HTMLElement && (node as HTMLElement).id === 'blogRichEditor') {
+        if (node instanceof HTMLElement && ((node as HTMLElement).id === 'blogRichEditor' || (node as HTMLElement).id === 'editBlogRichEditor')) {
           break;
         }
         node = node.parentNode as Node;
@@ -4798,6 +4794,10 @@ export default function App() {
     e.preventDefault();
     const value = linkEditorModal.value.trim();
 
+    const editEditor = document.getElementById("editBlogRichEditor");
+    const createEditor = document.getElementById("blogRichEditor");
+    const activeEditor = (editingBlog !== null && editEditor) ? editEditor : createEditor;
+
     if (linkEditorModal.type === "link") {
       const error = validateUrl(value);
       if (error) {
@@ -4817,9 +4817,8 @@ export default function App() {
         selection.addRange(linkEditorModal.savedRange);
       }
 
-      const editor = document.getElementById("blogRichEditor");
-      if (editor) {
-        editor.focus();
+      if (activeEditor) {
+        activeEditor.focus();
       }
 
       document.execCommand('createLink', false, finalUrl);
@@ -4843,18 +4842,18 @@ export default function App() {
         selection.addRange(linkEditorModal.savedRange);
       }
 
-      const editor = document.getElementById("blogRichEditor");
-      if (editor) {
-        editor.focus();
+      if (activeEditor) {
+        activeEditor.focus();
       }
 
       document.execCommand('createLink', false, mailtoUrl);
     }
 
     updateEditorSelectionState();
-    const editor = document.getElementById("blogRichEditor");
-    if (editor) {
-      setNewBlog(prev => ({ ...prev, content: editor.innerHTML }));
+    if (editEditor && editingBlog !== null) {
+      setEditingBlog((prev: any) => ({ ...prev, content: editEditor.innerHTML }));
+    } else if (createEditor) {
+      setNewBlog(prev => ({ ...prev, content: createEditor.innerHTML }));
     }
 
     setLinkEditorModal(prev => ({ ...prev, isOpen: false }));
@@ -4966,6 +4965,38 @@ export default function App() {
       };
       reader.onerror = reject;
     });
+  };
+
+  const handleInsertInlineImage = async (editorId: string) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = async (e: any) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        try {
+          setIsUploading(true);
+          const base64 = await compressImage(file);
+          const editor = document.getElementById(editorId);
+          if (editor) {
+            editor.focus();
+            const imgHtml = `<img src="${base64}" class="max-w-full rounded-2xl my-4 shadow-md inline-block" alt="Fashion hub styling tip" style="display: block; margin: 16px auto;" />`;
+            document.execCommand('insertHTML', false, imgHtml);
+            if (editorId === "editBlogRichEditor") {
+              setEditingBlog((prev: any) => ({ ...prev, content: editor.innerHTML }));
+            } else {
+              setNewBlog((prev: any) => ({ ...prev, content: editor.innerHTML }));
+            }
+          }
+        } catch (err) {
+          console.error("Inline image insertion failed:", err);
+          alert("Failed to insert inline image.");
+        } finally {
+          setIsUploading(false);
+        }
+      }
+    };
+    input.click();
   };
 
   const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>, target: "avatar" | "post" | "product" | "blog") => {
@@ -5225,7 +5256,7 @@ export default function App() {
               transition={{ delay: 0.3 }}
               className="mt-8 text-center px-4"
             >
-              <h1 className="text-xl font-bold tracking-[0.1em] text-amber-600 dark:text-amber-400 uppercase mb-1.5 font-serif">We Are Preparing For You</h1>
+              <p className="text-xl font-bold tracking-[0.1em] text-amber-600 dark:text-amber-400 uppercase mb-1.5 font-serif">We Are Preparing For You</p>
               <p className="text-xs tracking-[0.15em] text-stone-500 dark:text-stone-400 uppercase font-bold mb-4">Please Wait</p>
               <div className="flex items-center justify-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400 animate-bounce [animation-delay:-0.3s]" />
@@ -5673,14 +5704,201 @@ export default function App() {
                   </div>
 
                   <div>
-                    <label className={`block text-[10px] font-bold uppercase tracking-widest ${theme === "dark" ? "text-stone-400" : "text-stone-500"} mb-1`}>Content (Editor/HTML)</label>
-                    <textarea 
-                      value={editingBlog.content}
-                      onChange={(e) => setEditingBlog({...editingBlog, content: e.target.value})}
-                      rows={5}
-                      className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white font-mono" : "bg-black/5 border-black/10 text-[#333] font-mono"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-xs`}
-                      placeholder="Enter html content..."
-                    />
+                    <label className={`block text-[10px] font-bold uppercase tracking-widest ${theme === "dark" ? "text-stone-400" : "text-stone-500"} mb-1`}>Article Content *</label>
+                    <div className={`rounded-xl border ${theme === "dark" ? "bg-[#0b1512] border-white/10" : "bg-stone-50 border-black/10"} overflow-hidden`}>
+                      {/* Edit Editor Toolbar */}
+                      <div className={`p-1.5 border-b flex flex-wrap items-center gap-1.5 ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-[#fcfaf6] border-black/10"}`}>
+                        <button
+                          type="button"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            document.execCommand('bold', false);
+                            updateEditorSelectionState();
+                          }}
+                          className={`p-2 rounded-lg transition-colors ${
+                            editorSelectionState.isBold 
+                              ? "bg-amber-500/20 text-amber-500 border border-amber-500/40" 
+                              : `hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`
+                          }`}
+                          title="Bold"
+                        >
+                          <Bold className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            document.execCommand('italic', false);
+                            updateEditorSelectionState();
+                          }}
+                          className={`p-2 rounded-lg transition-colors ${
+                            editorSelectionState.isItalic 
+                              ? "bg-amber-500/20 text-amber-500 border border-amber-500/40" 
+                              : `hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`
+                          }`}
+                          title="Italic"
+                        >
+                          <Italic className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            document.execCommand('underline', false);
+                            updateEditorSelectionState();
+                          }}
+                          className={`p-2 rounded-lg transition-colors ${
+                            editorSelectionState.isUnderline 
+                              ? "bg-amber-500/20 text-amber-500 border border-amber-500/40" 
+                              : `hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`
+                          }`}
+                          title="Underline"
+                        >
+                          <Underline className="w-4 h-4" />
+                        </button>
+
+                        <div className={`w-px h-6 my-1 ${theme === "dark" ? "bg-white/10" : "bg-black/15"}`} />
+
+                        {/* Format Blocks */}
+                        <button
+                          type="button"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            document.execCommand('formatBlock', false, '<h3>');
+                          }}
+                          className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          title="Format Title Block (Heading 3)"
+                        >
+                          H3
+                        </button>
+                        <button
+                          type="button"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            document.execCommand('formatBlock', false, '<p>');
+                          }}
+                          className={`px-2 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          title="Format Standard Text Block"
+                        >
+                          Text
+                        </button>
+                        <button
+                          type="button"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            document.execCommand('insertUnorderedList', false);
+                          }}
+                          className={`px-2 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          title="Bulleted List"
+                        >
+                          • Bullet List
+                        </button>
+                        <button
+                          type="button"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            document.execCommand('insertOrderedList', false);
+                          }}
+                          className={`px-2 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          title="Numbered List"
+                        >
+                          1. Numbered List
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleInsertInlineImage("editBlogRichEditor")}
+                          className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 flex items-center gap-1.5 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          title="Insert Image Inline"
+                        >
+                          <ImageIcon className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
+                          <span>Add Image</span>
+                        </button>
+
+                        <div className={`w-px h-6 my-1 ${theme === "dark" ? "bg-white/10" : "bg-black/15"}`} />
+
+                        <button
+                          type="button"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            triggerLinkModal("link");
+                          }}
+                          className={`p-2 rounded-lg transition-colors flex items-center gap-1 text-[10px] font-black uppercase tracking-wider ${
+                            editorSelectionState.linkUrl && !editorSelectionState.linkUrl.startsWith("mailto:")
+                              ? "bg-amber-500/20 text-amber-400 border border-amber-500/40" 
+                              : `hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`
+                          }`}
+                          title="Attach Link to Selection"
+                        >
+                          <Link2 className="w-4 h-4 text-amber-500" />
+                          <span>Attach Link</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            triggerLinkModal("email");
+                          }}
+                          className={`p-2 rounded-lg transition-colors flex items-center gap-1 text-[10px] font-black uppercase tracking-wider ${
+                            editorSelectionState.linkUrl && editorSelectionState.linkUrl.startsWith("mailto:")
+                              ? "bg-amber-500/20 text-amber-400 border border-amber-500/40" 
+                              : `hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`
+                          }`}
+                          title="Attach Email to Selection"
+                        >
+                          <Mail className="w-4 h-4 text-amber-500" />
+                          <span>Attach Email</span>
+                        </button>
+
+                        {editorSelectionState.linkUrl && (
+                          <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold border ${
+                            theme === "dark" 
+                              ? "bg-amber-500/10 text-amber-400 border-amber-500/25" 
+                              : "bg-amber-50 text-amber-800 border-amber-200"
+                          }`}>
+                            <span className="truncate max-w-[160px]" title={editorSelectionState.linkUrl}>
+                              {editorSelectionState.linkUrl.startsWith("mailto:") 
+                                ? `Email: ${editorSelectionState.linkUrl.replace("mailto:", "")}` 
+                                : `Linked: ${editorSelectionState.linkUrl}`}
+                            </span>
+                            <button
+                              type="button"
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                document.execCommand('unlink', false);
+                                updateEditorSelectionState();
+                                const editor = document.getElementById("editBlogRichEditor");
+                                if (editor) {
+                                  setEditingBlog((prev: any) => ({ ...prev, content: editor.innerHTML }));
+                                }
+                              }}
+                              className="text-amber-500 hover:text-red-500 transition-colors font-black text-xs ml-1"
+                              title="Remove Link"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Interactive WYSIWYG Editable Area */}
+                      <div
+                        id="editBlogRichEditor"
+                        contentEditable
+                        suppressContentEditableWarning={true}
+                        dangerouslySetInnerHTML={{ __html: editingBlog.content }}
+                        onInput={(e) => {
+                          const html = e.currentTarget.innerHTML;
+                          setEditingBlog((prev: any) => ({ ...prev, content: html }));
+                          updateEditorSelectionState();
+                        }}
+                        onMouseUp={updateEditorSelectionState}
+                        onKeyUp={updateEditorSelectionState}
+                        onFocus={updateEditorSelectionState}
+                        onBlur={updateEditorSelectionState}
+                        className={`w-full min-h-[220px] p-4 text-sm font-semibold focus:outline-none blog-content ${theme === "dark" ? "text-stone-100" : "text-stone-850"}`}
+                      />
+                    </div>
                   </div>
 
                   <div>
@@ -6405,6 +6623,64 @@ export default function App() {
                         >
                           <Underline className="w-4 h-4" />
                         </button>
+
+                        <div className={`w-px h-6 my-1 ${theme === "dark" ? "bg-white/10" : "bg-black/15"}`} />
+
+                        {/* CMS Visual Block styles */}
+                        <button
+                          type="button"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            document.execCommand('formatBlock', false, '<h3>');
+                          }}
+                          className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          title="Format Title Block (Heading 3)"
+                        >
+                          H3
+                        </button>
+                        <button
+                          type="button"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            document.execCommand('formatBlock', false, '<p>');
+                          }}
+                          className={`px-2 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          title="Format Standard Text Block"
+                        >
+                          Text
+                        </button>
+                        <button
+                          type="button"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            document.execCommand('insertUnorderedList', false);
+                          }}
+                          className={`px-2 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          title="Bulleted List"
+                        >
+                          • Bullet List
+                        </button>
+                        <button
+                          type="button"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            document.execCommand('insertOrderedList', false);
+                          }}
+                          className={`px-2 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          title="Numbered List"
+                        >
+                          1. Numbered List
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleInsertInlineImage("blogRichEditor")}
+                          className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 flex items-center gap-1.5 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          title="Insert Image Inline"
+                        >
+                          <ImageIcon className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
+                          <span>Add Image</span>
+                        </button>
+
                         <div className={`w-px h-6 my-1 ${theme === "dark" ? "bg-white/10" : "bg-black/15"}`} />
                         <button
                           type="button"
@@ -7648,65 +7924,85 @@ export default function App() {
                 &copy; 2026 Renu Fashion Hub. All Rights Reserved.
               </div>
               <div className="flex flex-wrap gap-x-3 gap-y-1.5 items-center justify-center max-w-sm">
-                <motion.button
+                <motion.a
+                  href="/about"
                   whileHover={{ scale: 1.1, color: theme === "dark" ? "#FBBF24" : "#D97706" }}
                   whileTap={{ scale: 0.93 }}
                   transition={{ type: "spring", stiffness: 450, damping: 15 }}
-                  onClick={() => handleNavigate("/about")}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavigate("/about");
+                  }}
                   className={`text-[9px] font-black uppercase tracking-[0.18em] transition-colors cursor-pointer outline-none ${
                     theme === "dark" ? "text-amber-500" : "text-[#1C1B18]/80"
                   }`}
                 >
                   About Us
-                </motion.button>
+                </motion.a>
                 <span className={`text-[8px] ${theme === "dark" ? "text-stone-700" : "text-stone-300"}`}>|</span>
-                <motion.button
+                <motion.a
+                  href="/privacy-policy"
                   whileHover={{ scale: 1.1, color: theme === "dark" ? "#FBBF24" : "#D97706" }}
                   whileTap={{ scale: 0.93 }}
                   transition={{ type: "spring", stiffness: 450, damping: 15 }}
-                  onClick={() => handleNavigate("/privacy-policy")}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavigate("/privacy-policy");
+                  }}
                   className={`text-[9px] font-black uppercase tracking-[0.18em] transition-colors cursor-pointer outline-none ${
                     theme === "dark" ? "text-amber-500" : "text-[#1C1B18]/80"
                   }`}
                 >
                   Privacy
-                </motion.button>
+                </motion.a>
                 <span className={`text-[8px] ${theme === "dark" ? "text-stone-700" : "text-stone-300"}`}>|</span>
-                <motion.button
+                <motion.a
+                  href="/terms-of-service"
                   whileHover={{ scale: 1.1, color: theme === "dark" ? "#FBBF24" : "#D97706" }}
                   whileTap={{ scale: 0.93 }}
                   transition={{ type: "spring", stiffness: 450, damping: 15 }}
-                  onClick={() => handleNavigate("/terms-of-service")}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavigate("/terms-of-service");
+                  }}
                   className={`text-[9px] font-black uppercase tracking-[0.18em] transition-colors cursor-pointer outline-none ${
                     theme === "dark" ? "text-amber-500" : "text-[#1C1B18]/80"
                   }`}
                 >
                   Terms
-                </motion.button>
+                </motion.a>
                 <span className={`text-[8px] ${theme === "dark" ? "text-stone-700" : "text-stone-300"}`}>|</span>
-                <motion.button
+                <motion.a
+                  href="/disclaimer"
                   whileHover={{ scale: 1.1, color: theme === "dark" ? "#FBBF24" : "#D97706" }}
                   whileTap={{ scale: 0.93 }}
                   transition={{ type: "spring", stiffness: 450, damping: 15 }}
-                  onClick={() => handleNavigate("/disclaimer")}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavigate("/disclaimer");
+                  }}
                   className={`text-[9px] font-black uppercase tracking-[0.18em] transition-colors cursor-pointer outline-none ${
                     theme === "dark" ? "text-amber-500" : "text-[#1C1B18]/80"
                   }`}
                 >
                   Disclaimer
-                </motion.button>
+                </motion.a>
                 <span className={`text-[8px] ${theme === "dark" ? "text-stone-700" : "text-stone-300"}`}>|</span>
-                <motion.button
+                <motion.a
+                  href="/contact"
                   whileHover={{ scale: 1.1, color: theme === "dark" ? "#FBBF24" : "#D97706" }}
                   whileTap={{ scale: 0.93 }}
                   transition={{ type: "spring", stiffness: 450, damping: 15 }}
-                  onClick={() => handleNavigate("/contact")}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavigate("/contact");
+                  }}
                   className={`text-[9px] font-black uppercase tracking-[0.18em] transition-colors cursor-pointer outline-none ${
                     theme === "dark" ? "text-amber-500" : "text-[#1C1B18]/80"
                   }`}
                 >
                   Contact
-                </motion.button>
+                </motion.a>
               </div>
             </div>
           </div>
