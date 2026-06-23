@@ -4101,6 +4101,19 @@ export default function App() {
   
   const [isMobile, setIsMobile] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const [sidebarHeight, setSidebarHeight] = useState(740);
+
+  useEffect(() => {
+    if (!sidebarRef.current) return;
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        setSidebarHeight(entry.target.getBoundingClientRect().height || entry.contentRect.height);
+      }
+    });
+    resizeObserver.observe(sidebarRef.current);
+    return () => resizeObserver.disconnect();
+  }, []);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -4229,15 +4242,108 @@ export default function App() {
     } else if (location.pathname.startsWith("/blog/")) {
       const idStr = location.pathname.split("/blog/")[1];
       const blog = blogs.find(b => b.id.toString() === idStr || b.docId === idStr);
+      
+      const setMetaTag = (attributeName: string, attributeValue: string, content: string) => {
+        let element = document.querySelector(`meta[${attributeName}="${attributeValue}"]`);
+        if (!element) {
+          element = document.createElement('meta');
+          element.setAttribute(attributeName, attributeValue);
+          document.head.appendChild(element);
+        }
+        element.setAttribute('content', content);
+      };
+
+      const setSchemaJSONLD = (id: string, schemaObj: any | null) => {
+        let element = document.getElementById(id) as HTMLScriptElement;
+        if (!schemaObj) {
+          if (element) element.remove();
+          return;
+        }
+        if (!element) {
+          element = document.createElement('script');
+          element.id = id;
+          element.type = 'application/ld+json';
+          document.head.appendChild(element);
+        }
+        element.textContent = JSON.stringify(schemaObj);
+      };
+
       if (blog) {
-        currentTitle = `${blog.title} - RFH`;
+        const seoTitle = blog.seoTitle || `${blog.title} - Renu Fashion Hub`;
+        const metaDesc = blog.metaDescription || blog.excerpt || "Check out our latest fashion updates...";
+        const focusKeyword = blog.focusKeyword || "";
+        
+        currentTitle = seoTitle;
+
+        // Meta tags for SEO
+        setMetaTag('name', 'description', metaDesc);
+        setMetaTag('name', 'keywords', focusKeyword);
+        
+        // Open Graph
+        setMetaTag('property', 'og:title', seoTitle);
+        setMetaTag('property', 'og:description', metaDesc);
+        setMetaTag('property', 'og:type', 'article');
+        setMetaTag('property', 'og:url', window.location.href);
+        if (blog.image) {
+          setMetaTag('property', 'og:image', blog.image);
+        }
+
+        // Twitter Cards
+        setMetaTag('name', 'twitter:card', 'summary_large_image');
+        setMetaTag('name', 'twitter:title', seoTitle);
+        setMetaTag('name', 'twitter:description', metaDesc);
+        if (blog.image) {
+          setMetaTag('name', 'twitter:image', blog.image);
+        }
+
+        // Structured Data Schema
+        const schema = {
+          "@context": "https://schema.org",
+          "@type": "BlogPosting",
+          "headline": blog.title,
+          "alternativeHeadline": seoTitle,
+          "image": blog.image || "",
+          "genre": blog.category || "Fashion",
+          "keywords": focusKeyword,
+          "publisher": {
+            "@type": "Organization",
+            "name": "Renu Fashion Hub",
+            "logo": {
+              "@type": "ImageObject",
+              "url": profile.avatar || ""
+            }
+          },
+          "url": window.location.href,
+          "datePublished": blog.timestamp,
+          "description": metaDesc,
+          "articleBody": blog.content ? blog.content.replace(/<[^>]*>/g, '') : ""
+        };
+        setSchemaJSONLD('blog-schema', schema);
       } else {
-        currentTitle = "Blog - RFH";
+        currentTitle = "Blog - Renu Fashion Hub";
+        setSchemaJSONLD('blog-schema', null);
       }
     } else if (location.pathname === "/") {
       currentTitle = "Home - Renu Fashion Hub";
+      const setMetaTag = (attributeName: string, attributeValue: string, content: string) => {
+        let element = document.querySelector(`meta[${attributeName}="${attributeValue}"]`);
+        if (!element) {
+          element = document.createElement('meta');
+          element.setAttribute(attributeName, attributeValue);
+          document.head.appendChild(element);
+        }
+        element.setAttribute('content', content);
+      };
+      setMetaTag('name', 'description', "Renu Fashion Hub - Discover the latest fashion trends, styling tips, outfit ideas, and must-have fashion essentials.");
+      setMetaTag('name', 'keywords', "fashion, clothing, style, trends, sarees, kurtas, dresses");
+      setMetaTag('property', 'og:title', currentTitle);
+      setMetaTag('property', 'og:type', 'website');
+      const blogSchemaScript = document.getElementById('blog-schema');
+      if (blogSchemaScript) blogSchemaScript.remove();
     } else {
       currentTitle = "Renu Fashion Hub";
+      const blogSchemaScript = document.getElementById('blog-schema');
+      if (blogSchemaScript) blogSchemaScript.remove();
     }
 
     document.title = currentTitle;
@@ -4249,7 +4355,7 @@ export default function App() {
         page_title: currentTitle,
       });
     }
-  }, [location.pathname, location.search, products, posts]);
+  }, [location.pathname, location.search, products, posts, blogs, profile]);
 
   const dynamicCategories = useMemo(() => {
     const defaultCats = ["All", "Sarees", "Kurtas", "Lehengas", "Dresses", "Jewelry"];
@@ -4568,7 +4674,7 @@ export default function App() {
 
   const [newPost, setNewPost] = useState({ type: "image", url: "", taggedProducts: [] as number[] });
   const [newProduct, setNewProduct] = useState({ name: "", price: "", url: "", buyUrl: "", description: "" });
-  const [newBlog, setNewBlog] = useState({ title: "", category: "", excerpt: "", content: "", image: "" });
+  const [newBlog, setNewBlog] = useState({ title: "", category: "", excerpt: "", content: "", image: "", seoTitle: "", metaDescription: "", focusKeyword: "" });
   const [editorSelectionState, setEditorSelectionState] = useState({
     isBold: false,
     isItalic: false,
@@ -5524,6 +5630,48 @@ export default function App() {
                     />
                   </div>
 
+                  {/* SEO Configuration Block */}
+                  <div className={`p-4 rounded-xl border ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-stone-50 border-stone-200"} space-y-4`}>
+                    <h4 className="text-xs font-black uppercase tracking-wider text-amber-500/90 flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4 text-amber-500" />
+                      SEO Optimization Settings
+                    </h4>
+                    
+                    <div>
+                      <label className={`block text-[9px] font-bold uppercase tracking-widest ${theme === "dark" ? "text-stone-400" : "text-stone-500"} mb-1`}>SEO Title *</label>
+                      <input 
+                        type="text" 
+                        value={editingBlog.seoTitle || ""}
+                        onChange={(e) => setEditingBlog({...editingBlog, seoTitle: e.target.value})}
+                        className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2 focus:outline-none focus:border-amber-500/50 transition-colors text-xs font-semibold`}
+                        placeholder="Latest Fashion Trends 2026..."
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className={`block text-[9px] font-bold uppercase tracking-widest ${theme === "dark" ? "text-stone-400" : "text-stone-500"} mb-1`}>Meta Description *</label>
+                        <textarea 
+                          value={editingBlog.metaDescription || ""}
+                          onChange={(e) => setEditingBlog({...editingBlog, metaDescription: e.target.value})}
+                          rows={2}
+                          className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2 focus:outline-none focus:border-amber-500/50 transition-colors text-xs font-semibold resize-none`}
+                          placeholder="Meta description content..."
+                        />
+                      </div>
+                      <div>
+                        <label className={`block text-[9px] font-bold uppercase tracking-widest ${theme === "dark" ? "text-stone-400" : "text-stone-500"} mb-1`}>Focus Keyword *</label>
+                        <textarea 
+                          value={editingBlog.focusKeyword || ""}
+                          onChange={(e) => setEditingBlog({...editingBlog, focusKeyword: e.target.value})}
+                          rows={2}
+                          className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2 focus:outline-none focus:border-amber-500/50 transition-colors text-xs font-semibold resize-none`}
+                          placeholder="Focus keyword content..."
+                        />
+                      </div>
+                    </div>
+                  </div>
+
                   <div>
                     <label className={`block text-[10px] font-bold uppercase tracking-widest ${theme === "dark" ? "text-stone-400" : "text-stone-500"} mb-1`}>Content (Editor/HTML)</label>
                     <textarea 
@@ -6161,6 +6309,48 @@ export default function App() {
                     />
                   </div>
 
+                  {/* SEO Configuration Section */}
+                  <div className={`p-4 rounded-xl border ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-stone-50 border-stone-200"} space-y-4`}>
+                    <h4 className="text-xs font-black uppercase tracking-wider text-amber-500/90 flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4 text-amber-500" />
+                      SEO Optimization Settings
+                    </h4>
+                    
+                    <div>
+                      <label className={`block text-[9px] font-bold uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"} mb-1`}>SEO Title (Display in Search Results / social preview) *</label>
+                      <input 
+                        type="text" 
+                        placeholder="e.g. Latest Fashion Trends 2026: Top Styles Every Fashion Lover Must Know"
+                        value={newBlog.seoTitle}
+                        onChange={(e) => setNewBlog({ ...newBlog, seoTitle: e.target.value })}
+                        className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white placeholder-white/30" : "bg-black/5 border-black/10 text-black placeholder-black/40"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-xs font-semibold`}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className={`block text-[9px] font-bold uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"} mb-1`}>Meta Description *</label>
+                        <textarea 
+                          placeholder="e.g. Discover the latest fashion trends of 2026, styling tips, outfit ideas, and must-have fashion essentials."
+                          value={newBlog.metaDescription}
+                          onChange={(e) => setNewBlog({ ...newBlog, metaDescription: e.target.value })}
+                          rows={2}
+                          className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white placeholder-white/30" : "bg-black/5 border-black/10 text-black placeholder-black/40"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-xs font-semibold resize-none`}
+                        />
+                      </div>
+                      <div>
+                        <label className={`block text-[9px] font-bold uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"} mb-1`}>Focus Keyword *</label>
+                        <textarea 
+                          placeholder="e.g. fashion trends 2026, styling tips"
+                          value={newBlog.focusKeyword}
+                          onChange={(e) => setNewBlog({ ...newBlog, focusKeyword: e.target.value })}
+                          rows={2}
+                          className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white placeholder-white/30" : "bg-black/5 border-black/10 text-black placeholder-black/40"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-xs font-semibold resize-none`}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Document Rich-Text Formatting Controls */}
                   <div>
                     <label className={`block text-[10px] font-bold uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"} mb-1`}>Article Content *</label>
@@ -6349,10 +6539,13 @@ export default function App() {
                               excerpt: newBlog.excerpt || "Check out our latest fashion updates...",
                               content: newBlog.content,
                               image: newBlog.image || "",
-                              timestamp: new Date().toISOString()
+                              timestamp: new Date().toISOString(),
+                              seoTitle: newBlog.seoTitle || "",
+                              metaDescription: newBlog.metaDescription || "",
+                              focusKeyword: newBlog.focusKeyword || ""
                             };
                             setTempBlogs([blogPost, ...tempBlogs]);
-                            setNewBlog({ title: "", category: "", excerpt: "", content: "", image: "" });
+                            setNewBlog({ title: "", category: "", excerpt: "", content: "", image: "", seoTitle: "", metaDescription: "", focusKeyword: "" });
                             const editor = document.getElementById("blogRichEditor");
                             if (editor) editor.innerHTML = "";
                           }}
@@ -6647,19 +6840,19 @@ export default function App() {
                   
                   <div className="mt-6 space-y-3 pt-6 border-t border-amber-500/10">
                     <div className="flex items-center gap-3">
-                      <Phone className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                      <Phone className="w-4 h-4 text-amber-500 flex-shrink-0 animate-bounce" />
                       <a href="tel:+917248763036" className="text-xs font-bold hover:underline" itemProp="telephone">
                         +91 72487 63036
                       </a>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Mail className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                      <Mail className="w-4 h-4 text-amber-500 flex-shrink-0 animate-bounce" />
                       <a href="mailto:support@renufashionhub.in" className="text-xs font-bold hover:underline" itemProp="email">
                         support@renufashionhub.in
                       </a>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Clock className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                      <Clock className="w-4 h-4 text-amber-500 flex-shrink-0 animate-pulse" />
                       <span className="text-xs font-bold">
                         Mon - Sat: 11:00 AM - 8:00 PM
                       </span>
@@ -6809,14 +7002,20 @@ export default function App() {
                             />
                           </div>
 
-                          <button 
+                          <motion.button 
+                            whileHover={{ 
+                              scale: 1.025,
+                              boxShadow: theme === "dark" ? "0 0 16px rgba(245, 158, 11, 0.4)" : "0 4px 12px rgba(28, 27, 24, 0.15)"
+                            }}
+                            whileTap={{ scale: 0.985 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 15 }}
                             type="submit"
                             disabled={isSendingMessage}
                             className={`w-full py-4 rounded-xl ${
                               theme === "dark" 
-                                ? "bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold" 
-                                : "bg-amber-950 hover:bg-amber-900 text-white font-semibold"
-                            } transition-all duration-300 shadow-md flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50`}
+                                ? "bg-amber-500 text-stone-950 font-bold" 
+                                : "bg-amber-950 text-white font-semibold"
+                            } transition-all duration-300 shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer`}
                           >
                             {isSendingMessage ? (
                               <>
@@ -6825,11 +7024,11 @@ export default function App() {
                               </>
                             ) : (
                               <>
-                                <Send className="w-3.5 h-3.5" />
+                                <Send className="w-3.5 h-3.5 animate-pulse" />
                                 <span>Send Inquire Message</span>
                               </>
                             )}
-                          </button>
+                          </motion.button>
                         </form>
                       </motion.div>
                     )}
@@ -6888,7 +7087,15 @@ export default function App() {
 
         <div className="lg:grid lg:grid-cols-12 lg:gap-12 items-start mt-8">
           {/* Left Column: Profile & Social Links & Action Buttons */}
-          <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-6">
+          <div 
+            ref={sidebarRef}
+            className="lg:col-span-5 space-y-6 lg:sticky"
+            style={isMobile ? {} : {
+              position: "sticky",
+              top: `calc(100vh - ${sidebarHeight + 40}px)`,
+              alignSelf: "start"
+            }}
+          >
             
             {/* Profile Section */}
             <motion.div 
