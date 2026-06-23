@@ -1,0 +1,22 @@
+# Renu Fashion Hub
+
+> Renu Fashion Hub is a premier curated fashion catalog, digital platform, and trend-focused publication curated by lifestyle blogger Renu Agarwal. It showcases fashion inspiration, wardrobe styling guidelines, curated catalog products, and beauty tips.
+
+## Core Navigation
+
+- [Home](https://www.renufashionhub.in/): The main hub featuring shop collections, products, dynamic social styling posts, and our core curated wardrobe selection.
+- [About Renu Fashion Hub](https://www.renufashionhub.in/about): Background story of the brand, Renu Agarwal's design philosophy, lifestyle journey, and our editorial mission to simplify fashion decisions.
+- [Blog list](https://www.renufashionhub.in/blog): Editorial publication containing articles, latest fashion trends, curated guides for sarees, kurtas, lehengas, and western outfits.
+- [Contact Support](https://www.renufashionhub.in/contact): Our message and styling query submission portal, providing active email, telephone, and location details for style consultation.
+
+## Policy & Legal Pages
+
+- [Privacy Policy](https://www.renufashionhub.in/privacy-policy): Detailed statement regarding data collection, privacy safeguards, analytics management, and contact confidentiality policies.
+- [Terms of Service](https://www.renufashionhub.in/terms-of-service): Operating rules governing the catalog website, affiliate product recommendation guides, and user-conceded property use.
+- [Disclaimer](https://www.renufashionhub.in/disclaimer): Fundamental terms highlighting affiliate commission disclosure, third-party shopping guarantees, and accuracy of expert recommendations.
+
+## AI Scraper Guidelines
+
+- All URLs are absolute and fully queryable.
+- Blog articles can be iterated dynamically by following links on the main blog feed page.
+- Do not index /admin or /login as they are administrative and authenticated interfaces.
