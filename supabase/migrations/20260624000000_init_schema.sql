@@ -1,11 +1,16 @@
 -- Migration: Initial Schema Setup with Tables, Storage, and RLS Roles
 -- Created: 2026-06-24
 
--- Create custom role type
-CREATE TYPE public.user_role AS ENUM ('user', 'admin', 'owner');
+-- Create custom role type safely
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role') THEN
+    CREATE TYPE public.user_role AS ENUM ('user', 'admin', 'owner');
+  END IF;
+END$$;
 
 -- 1. Create Profiles Table (Linked to Supabase Auth)
-CREATE TABLE public.profiles (
+CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
   email TEXT UNIQUE,
   role public.user_role NOT NULL DEFAULT 'user',
@@ -16,7 +21,7 @@ CREATE TABLE public.profiles (
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 -- 2. Create Products Table
-CREATE TABLE public.products (
+CREATE TABLE IF NOT EXISTS public.products (
   id BIGINT PRIMARY KEY, -- Using bigints to map the Javascript timestamp IDs directly
   name TEXT NOT NULL,
   buy_url TEXT,
@@ -32,7 +37,7 @@ CREATE TABLE public.products (
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 
 -- 3. Create Blogs Table
-CREATE TABLE public.blogs (
+CREATE TABLE IF NOT EXISTS public.blogs (
   id BIGINT PRIMARY KEY,
   title TEXT NOT NULL,
   excerpt TEXT,
@@ -49,7 +54,7 @@ CREATE TABLE public.blogs (
 ALTER TABLE public.blogs ENABLE ROW LEVEL SECURITY;
 
 -- 4. Create Posts Table
-CREATE TABLE public.posts (
+CREATE TABLE IF NOT EXISTS public.posts (
   id BIGINT PRIMARY KEY,
   url TEXT NOT NULL,
   type TEXT NOT NULL DEFAULT 'video',
@@ -61,7 +66,7 @@ CREATE TABLE public.posts (
 ALTER TABLE public.posts ENABLE ROW LEVEL SECURITY;
 
 -- 5. Create Messages/Leads Table
-CREATE TABLE public.messages (
+CREATE TABLE IF NOT EXISTS public.messages (
   id BIGINT PRIMARY KEY,
   name TEXT,
   email TEXT,
@@ -95,10 +100,12 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- ========================================================
 
 -- Profiles RLS
+DROP POLICY IF EXISTS "Allow public read of profiles" ON public.profiles;
 CREATE POLICY "Allow public read of profiles"
 ON public.profiles FOR SELECT
 USING (true);
 
+DROP POLICY IF EXISTS "Allow individuals to update their own profile" ON public.profiles;
 CREATE POLICY "Allow individuals to update their own profile"
 ON public.profiles FOR UPDATE
 USING (auth.uid() = id)
@@ -111,45 +118,54 @@ WITH CHECK (
   )
 );
 
+DROP POLICY IF EXISTS "Allow admin/owners full control over profiles" ON public.profiles;
 CREATE POLICY "Allow admin/owners full control over profiles"
 ON public.profiles FOR ALL
 USING (public.is_admin_or_owner(auth.uid()));
 
 -- Products RLS
+DROP POLICY IF EXISTS "Allow public read access to products" ON public.products;
 CREATE POLICY "Allow public read access to products"
 ON public.products FOR SELECT
 USING (true);
 
+DROP POLICY IF EXISTS "Allow admin and owner write access to products" ON public.products;
 CREATE POLICY "Allow admin and owner write access to products"
 ON public.products FOR ALL
 USING (public.is_admin_or_owner(auth.uid()))
 WITH CHECK (public.is_admin_or_owner(auth.uid()));
 
 -- Blogs RLS
+DROP POLICY IF EXISTS "Allow public read access to blogs" ON public.blogs;
 CREATE POLICY "Allow public read access to blogs"
 ON public.blogs FOR SELECT
 USING (true);
 
+DROP POLICY IF EXISTS "Allow admin and owner write access to blogs" ON public.blogs;
 CREATE POLICY "Allow admin and owner write access to blogs"
 ON public.blogs FOR ALL
 USING (public.is_admin_or_owner(auth.uid()))
 WITH CHECK (public.is_admin_or_owner(auth.uid()));
 
 -- Posts RLS
+DROP POLICY IF EXISTS "Allow public read access to posts" ON public.posts;
 CREATE POLICY "Allow public read access to posts"
 ON public.posts FOR SELECT
 USING (true);
 
+DROP POLICY IF EXISTS "Allow admin and owner write access to posts" ON public.posts;
 CREATE POLICY "Allow admin and owner write access to posts"
 ON public.posts FOR ALL
 USING (public.is_admin_or_owner(auth.uid()))
 WITH CHECK (public.is_admin_or_owner(auth.uid()));
 
 -- Messages RLS
+DROP POLICY IF EXISTS "Allow public insert to messages" ON public.messages;
 CREATE POLICY "Allow public insert to messages"
 ON public.messages FOR INSERT
 WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Allow admin and owner full control over messages" ON public.messages;
 CREATE POLICY "Allow admin and owner full control over messages"
 ON public.messages FOR ALL
 USING (public.is_admin_or_owner(auth.uid()))
@@ -175,7 +191,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-CREATE OR REPLACE TRIGGER on_auth_user_created
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
 
@@ -191,19 +208,23 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- Storage RLS Policies
+DROP POLICY IF EXISTS "Allow public read access to product-images bucket" ON storage.objects;
 CREATE POLICY "Allow public read access to product-images bucket"
 ON storage.objects FOR SELECT
 USING (bucket_id = 'product-images');
 
+DROP POLICY IF EXISTS "Allow admin write access to product-images bucket" ON storage.objects;
 CREATE POLICY "Allow admin write access to product-images bucket"
 ON storage.objects FOR ALL
 USING (bucket_id = 'product-images' AND public.is_admin_or_owner(auth.uid()))
 WITH CHECK (bucket_id = 'product-images' AND public.is_admin_or_owner(auth.uid()));
 
+DROP POLICY IF EXISTS "Allow public read access to blog-images bucket" ON storage.objects;
 CREATE POLICY "Allow public read access to blog-images bucket"
 ON storage.objects FOR SELECT
 USING (bucket_id = 'blog-images');
 
+DROP POLICY IF EXISTS "Allow admin write access to blog-images bucket" ON storage.objects;
 CREATE POLICY "Allow admin write access to blog-images bucket"
 ON storage.objects FOR ALL
 USING (bucket_id = 'blog-images' AND public.is_admin_or_owner(auth.uid()))
