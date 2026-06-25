@@ -807,7 +807,7 @@ const ContactSupportAndFaq = ({ theme }: { theme: string }) => {
       </div>
 
       {/* Accordion List */}
-      <div className="space-y-3">
+      <div className="space-y-4 max-w-3xl mx-auto w-full">
         {faqs.map((faq, idx) => {
           const isOpen = openIndex === idx;
           return (
@@ -816,22 +816,34 @@ const ContactSupportAndFaq = ({ theme }: { theme: string }) => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 + idx * 0.05 }}
-              className={`rounded-2xl border ${
+              className={`rounded-2xl border transition-all duration-300 shadow-xs overflow-hidden ${
                 theme === "dark" 
-                  ? "bg-white/[0.02] border-white/5 hover:bg-white/[0.04]" 
-                  : "bg-stone-50/50 border-amber-500/10 hover:bg-stone-100"
-              } overflow-hidden transition-all duration-300`}
+                  ? isOpen 
+                    ? "bg-[#0E1F1A] border-amber-500/35 shadow-md"
+                    : "bg-white/[0.02] border-white/5 hover:bg-white/[0.04] hover:border-white/10"
+                  : isOpen
+                    ? "bg-amber-50/40 border-amber-500/30 shadow-md"
+                    : "bg-white border-stone-200 hover:bg-stone-50/60 hover:border-amber-500/20"
+              }`}
             >
               <button
                 type="button"
                 onClick={() => setOpenIndex(isOpen ? null : idx)}
-                className="w-full text-left px-5 py-4 flex items-center justify-between gap-4 cursor-pointer"
+                className="w-full text-left px-5 py-4.5 sm:px-6 sm:py-5 flex items-center justify-between gap-4 cursor-pointer focus:outline-none focus:ring-1 focus:ring-amber-500/30 rounded-t-2xl"
               >
-                <span className="text-xs sm:text-sm font-sans font-semibold text-stone-800 dark:text-amber-100 leading-tight">
+                <span className={`text-sm sm:text-base font-sans font-bold tracking-tight leading-snug transition-colors duration-200 ${
+                  theme === "dark" 
+                    ? isOpen ? "text-amber-300" : "text-amber-100 hover:text-amber-300" 
+                    : isOpen ? "text-amber-950 font-extrabold" : "text-stone-900 hover:text-amber-900"
+                }`}>
                   {faq.q}
                 </span>
                 <ChevronDown 
-                  className={`w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} 
+                  className={`w-4 h-4 shrink-0 transition-transform duration-300 ${
+                    theme === "dark" 
+                      ? isOpen ? "text-amber-300 rotate-180" : "text-amber-400"
+                      : isOpen ? "text-amber-700 rotate-180" : "text-amber-600"
+                  }`} 
                 />
               </button>
 
@@ -843,7 +855,11 @@ const ContactSupportAndFaq = ({ theme }: { theme: string }) => {
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.25, ease: "easeInOut" }}
                   >
-                    <div className={`px-5 pb-4 text-xs ${theme === "dark" ? "text-stone-300" : "text-stone-600"} border-t ${theme === "dark" ? "border-white/5" : "border-amber-500/5"} pt-3 leading-relaxed`}>
+                    <div className={`px-5 pb-5 sm:px-6 sm:pb-6 text-xs sm:text-sm leading-relaxed border-t pt-4 ${
+                      theme === "dark" 
+                        ? "text-stone-200 bg-stone-950/20 border-white/5" 
+                        : "text-stone-700 bg-stone-50/40 border-amber-500/10"
+                    }`}>
                       {faq.a}
                     </div>
                   </motion.div>
@@ -4342,6 +4358,16 @@ export default function App() {
       if (blogSchemaScript) blogSchemaScript.remove();
     }
 
+    // Dynamic canonical URL update
+    let canonicalUrl = "https://www.renufashionhub.in" + (location.pathname === "/" ? "/" : location.pathname);
+    let canonicalLink = document.querySelector("link[rel='canonical']");
+    if (!canonicalLink) {
+      canonicalLink = document.createElement("link");
+      canonicalLink.setAttribute("rel", "canonical");
+      document.head.appendChild(canonicalLink);
+    }
+    canonicalLink.setAttribute("href", canonicalUrl);
+
     document.title = currentTitle;
 
     if (typeof window !== "undefined" && (window as any).gtag) {
@@ -7337,6 +7363,8 @@ export default function App() {
       </div>
 
       <div className="relative w-full max-w-md md:max-w-3xl lg:max-w-6xl mx-auto px-6 md:px-8 lg:px-12 pt-16 pb-24">
+        {/* SEO Main Title */}
+        <h1 className="sr-only">Renu Fashion Hub - Curated Style Guides, Contemporary Apparel Trends, & Personal Fashion Blog</h1>
         {/* Header Actions */}
         <div className="absolute top-6 left-6 flex gap-3 z-20">
           <button 
@@ -7490,7 +7518,7 @@ export default function App() {
               </PremiumButton>
 
               {/* Added Legal buttons adjacent to About button */}
-              <div className="grid grid-cols-3 gap-2 pt-1 relative z-30">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 relative z-30">
                 <motion.button
                   whileHover={{ 
                     scale: 1.04, 
@@ -7613,7 +7641,7 @@ export default function App() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
-                className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"
+                className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4"
               >
                 {filteredPosts.length === 0 && filteredProducts.length === 0 ? (
                   <div className="col-span-full">
@@ -7641,7 +7669,7 @@ export default function App() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
-                className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"
+                className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4"
               >
                 {filteredPosts.length === 0 ? (
                   <div className="col-span-full">
@@ -7707,7 +7735,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
                   {filteredProducts.length === 0 ? (
                     <div className="col-span-full">
                       <EmptyState icon={Tag} message={searchQuery || selectedCategory !== "All" ? "No products match your search" : "No any products yet"} />
