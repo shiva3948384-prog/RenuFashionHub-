@@ -419,14 +419,7 @@ const CustomCursor = ({ theme, isMobile }: { theme: string, isMobile: boolean })
       isClicking = false;
     };
 
-    const handleScrollTrigger = () => {
-      if (targetX === -100 || targetY === -100) return;
-      const now = Date.now();
-      if (now - lastScrollRippleTime > 180) { // Elite frequency scroll ripple throttling
-        lastScrollRippleTime = now;
-        addRippleRef.current(targetX, targetY);
-      }
-    };
+    // Scroll triggers for ripples removed as requested
 
     const tick = () => {
       const dotEase = 0.25;
@@ -476,9 +469,7 @@ const CustomCursor = ({ theme, isMobile }: { theme: string, isMobile: boolean })
     window.addEventListener("mousedown", handleMouseDown, { passive: true });
     window.addEventListener("mouseup", handleMouseUp, { passive: true });
     
-    // Support nested horizontal scrolling containers & momentum scrolling globally by listening to window's capture phase
-    window.addEventListener("scroll", handleScrollTrigger, { capture: true, passive: true });
-    window.addEventListener("wheel", handleScrollTrigger, { passive: true });
+    // Scroll and wheel listeners for ripples removed as requested
 
     requestRef = requestAnimationFrame(tick);
 
@@ -486,8 +477,7 @@ const CustomCursor = ({ theme, isMobile }: { theme: string, isMobile: boolean })
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mousedown", handleMouseDown);
       window.removeEventListener("mouseup", handleMouseUp);
-      window.removeEventListener("scroll", handleScrollTrigger, { capture: true });
-      window.removeEventListener("wheel", handleScrollTrigger);
+      // Scroll cleanups removed
       cancelAnimationFrame(requestRef);
     };
   }, [isMobile]);
@@ -5072,6 +5062,20 @@ export default function App() {
   };
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [editingBlog, setEditingBlog] = useState<any>(null);
+  const editEditorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (editingBlog && editEditorRef.current) {
+      if (editEditorRef.current.getAttribute("data-loaded-id") !== String(editingBlog.id)) {
+        editEditorRef.current.innerHTML = editingBlog.content || "";
+        editEditorRef.current.setAttribute("data-loaded-id", String(editingBlog.id));
+      }
+    } else if (!editingBlog && editEditorRef.current) {
+      editEditorRef.current.removeAttribute("data-loaded-id");
+      editEditorRef.current.innerHTML = "";
+    }
+  }, [editingBlog]);
+
   const [isFetchingProduct, setIsFetchingProduct] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{ type: "post" | "product" | "message" | "blog", id: any, docId?: string } | null>(null);
 
@@ -6076,9 +6080,9 @@ export default function App() {
                       {/* Interactive WYSIWYG Editable Area */}
                       <div
                         id="editBlogRichEditor"
+                        ref={editEditorRef}
                         contentEditable
                         suppressContentEditableWarning={true}
-                        dangerouslySetInnerHTML={{ __html: editingBlog.content }}
                         onInput={(e) => {
                           const html = e.currentTarget.innerHTML;
                           setEditingBlog((prev: any) => ({ ...prev, content: html }));
@@ -6132,7 +6136,11 @@ export default function App() {
                   </button>
                   <button 
                     onClick={() => {
-                      setTempBlogs(tempBlogs.map(b => b.id === editingBlog.id ? editingBlog : b));
+                      const editor = document.getElementById("editBlogRichEditor");
+                      const updatedBlog = editor 
+                        ? { ...editingBlog, content: editor.innerHTML }
+                        : editingBlog;
+                      setTempBlogs(tempBlogs.map(b => b.id === updatedBlog.id ? updatedBlog : b));
                       setEditingBlog(null);
                     }}
                     className="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 text-stone-950 font-black uppercase text-xs tracking-wider transition-colors shadow-lg"
