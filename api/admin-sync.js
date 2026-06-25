@@ -52,13 +52,11 @@ export default async function handler(req, res) {
       errors: []
     };
 
-    // 1. Handle Blog Upserts
+    // 1. Handle Blog Upserts in Bulk
     if (blogs && Array.isArray(blogs) && blogs.length > 0) {
-      for (const b of blogs) {
+      const dbRecords = blogs.map(b => {
         const id = parseInt(b.id, 10);
-        if (isNaN(id)) continue;
-
-        const dbRecord = {
+        return {
           id,
           title: b.title || "",
           excerpt: b.excerpt || "",
@@ -70,24 +68,24 @@ export default async function handler(req, res) {
           focus_keyword: b.focus_keyword || b.focusKeyword || "",
           timestamp: b.timestamp || new Date().toISOString()
         };
+      }).filter(b => !isNaN(b.id));
 
-        const { error } = await supabase.from('blogs').upsert(dbRecord);
+      if (dbRecords.length > 0) {
+        const { error } = await supabase.from('blogs').upsert(dbRecords);
         if (error) {
-          console.error(`Error upserting blog ${id} to Supabase:`, error.message);
-          results.errors.push(`Blog ${id}: ${error.message}`);
+          console.error(`Error bulk upserting blogs to Supabase:`, error.message);
+          results.errors.push(`Blogs bulk upsert: ${error.message}`);
         } else {
-          results.blogsUpserted++;
+          results.blogsUpserted = dbRecords.length;
         }
       }
     }
 
-    // 2. Handle Product Upserts
+    // 2. Handle Product Upserts in Bulk
     if (products && Array.isArray(products) && products.length > 0) {
-      for (const p of products) {
+      const dbRecords = products.map(p => {
         const id = parseInt(p.id, 10);
-        if (isNaN(id)) continue;
-
-        const dbRecord = {
+        return {
           id,
           name: p.name || "",
           buy_url: p.buyUrl || p.buy_url || null,
@@ -97,68 +95,76 @@ export default async function handler(req, res) {
           category: p.category || "",
           reviews: p.reviews || []
         };
+      }).filter(p => !isNaN(p.id));
 
-        const { error } = await supabase.from('products').upsert(dbRecord);
+      if (dbRecords.length > 0) {
+        const { error } = await supabase.from('products').upsert(dbRecords);
         if (error) {
-          console.error(`Error upserting product ${id} to Supabase:`, error.message);
-          results.errors.push(`Product ${id}: ${error.message}`);
+          console.error(`Error bulk upserting products to Supabase:`, error.message);
+          results.errors.push(`Products bulk upsert: ${error.message}`);
         } else {
-          results.productsUpserted++;
+          results.productsUpserted = dbRecords.length;
         }
       }
     }
 
-    // 3. Handle Post/Vlog Upserts
+    // 3. Handle Post/Vlog Upserts in Bulk
     if (posts && Array.isArray(posts) && posts.length > 0) {
-      for (const po of posts) {
+      const dbRecords = posts.map(po => {
         const id = parseInt(po.id, 10);
-        if (isNaN(id)) continue;
-
-        const dbRecord = {
+        return {
           id,
           url: po.url || "",
           type: po.type || "video",
           tagged_products: po.taggedProducts || po.tagged_products || []
         };
+      }).filter(po => !isNaN(po.id));
 
-        const { error } = await supabase.from('posts').upsert(dbRecord);
+      if (dbRecords.length > 0) {
+        const { error } = await supabase.from('posts').upsert(dbRecords);
         if (error) {
-          console.error(`Error upserting post ${id} to Supabase:`, error.message);
-          results.errors.push(`Post ${id}: ${error.message}`);
+          console.error(`Error bulk upserting posts to Supabase:`, error.message);
+          results.errors.push(`Posts bulk upsert: ${error.message}`);
         } else {
-          results.postsUpserted++;
+          results.postsUpserted = dbRecords.length;
         }
       }
     }
 
-    // 4. Handle Deletions
+    // 4. Handle Deletions in Bulk
     if (deletedBlogIds && Array.isArray(deletedBlogIds) && deletedBlogIds.length > 0) {
-      for (const idStr of deletedBlogIds) {
-        const id = parseInt(idStr, 10);
-        if (isNaN(id)) continue;
-        const { error } = await supabase.from('blogs').delete().eq('id', id);
-        if (error) results.errors.push(`Delete Blog ${id}: ${error.message}`);
-        else results.blogsDeleted++;
+      const ids = deletedBlogIds.map(id => parseInt(id, 10)).filter(id => !isNaN(id));
+      if (ids.length > 0) {
+        const { error } = await supabase.from('blogs').delete().in('id', ids);
+        if (error) {
+          results.errors.push(`Delete Blogs bulk: ${error.message}`);
+        } else {
+          results.blogsDeleted = ids.length;
+        }
       }
     }
 
     if (deletedProductIds && Array.isArray(deletedProductIds) && deletedProductIds.length > 0) {
-      for (const idStr of deletedProductIds) {
-        const id = parseInt(idStr, 10);
-        if (isNaN(id)) continue;
-        const { error } = await supabase.from('products').delete().eq('id', id);
-        if (error) results.errors.push(`Delete Product ${id}: ${error.message}`);
-        else results.productsDeleted++;
+      const ids = deletedProductIds.map(id => parseInt(id, 10)).filter(id => !isNaN(id));
+      if (ids.length > 0) {
+        const { error } = await supabase.from('products').delete().in('id', ids);
+        if (error) {
+          results.errors.push(`Delete Products bulk: ${error.message}`);
+        } else {
+          results.productsDeleted = ids.length;
+        }
       }
     }
 
     if (deletedPostIds && Array.isArray(deletedPostIds) && deletedPostIds.length > 0) {
-      for (const idStr of deletedPostIds) {
-        const id = parseInt(idStr, 10);
-        if (isNaN(id)) continue;
-        const { error } = await supabase.from('posts').delete().eq('id', id);
-        if (error) results.errors.push(`Delete Post ${id}: ${error.message}`);
-        else results.postsDeleted++;
+      const ids = deletedPostIds.map(id => parseInt(id, 10)).filter(id => !isNaN(id));
+      if (ids.length > 0) {
+        const { error } = await supabase.from('posts').delete().in('id', ids);
+        if (error) {
+          results.errors.push(`Delete Posts bulk: ${error.message}`);
+        } else {
+          results.postsDeleted = ids.length;
+        }
       }
     }
 
