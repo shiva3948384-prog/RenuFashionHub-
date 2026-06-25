@@ -5,6 +5,18 @@
       "destination": "/api/sitemap"
     },
     {
+      "source": "/blog/:id",
+      "destination": "/api/seo-handler?type=blog&id=:id"
+    },
+    {
+      "source": "/product/:id",
+      "destination": "/api/seo-handler?type=product&id=:id"
+    },
+    {
+      "source": "/post/:id",
+      "destination": "/api/seo-handler?type=post&id=:id"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
