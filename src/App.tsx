@@ -390,10 +390,21 @@ const CustomCursor = ({ theme, isMobile }: { theme: string, isMobile: boolean })
   const dotRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
   const currentDotPos = useRef<{ x: number, y: number }>({ x: -100, y: -100 });
+  const addRippleRef = useRef<(x: number, y: number) => void>(() => {});
+
+  useEffect(() => {
+    const addRipple = (x: number, y: number) => {
+      const id = Date.now() + Math.random();
+      setRipples((prev) => [...prev, { id, x, y }]);
+      setTimeout(() => {
+        setRipples((prev) => prev.filter((r) => r.id !== id));
+      }, 600);
+    };
+    addRippleRef.current = addRipple;
+  }, []);
 
   useEffect(() => {
     if (isMobile) return;
-
     let targetX = -100;
     let targetY = -100;
     let dotX = -100;
@@ -403,10 +414,12 @@ const CustomCursor = ({ theme, isMobile }: { theme: string, isMobile: boolean })
     let isPointer = false;
     let isClicking = false;
     let requestRef: number;
+    let lastScrollRippleTime = 0;
 
     const handleMouseMove = (e: MouseEvent) => {
       targetX = e.clientX;
       targetY = e.clientY;
+      currentDotPos.current = { x: targetX, y: targetY };
       
       const target = e.target as HTMLElement;
       isPointer = window.getComputedStyle(target).cursor === "pointer" || 
@@ -422,6 +435,15 @@ const CustomCursor = ({ theme, isMobile }: { theme: string, isMobile: boolean })
 
     const handleMouseUp = () => {
       isClicking = false;
+    };
+
+    const handleScrollTrigger = () => {
+      if (targetX === -100 || targetY === -100) return;
+      const now = Date.now();
+      if (now - lastScrollRippleTime > 180) { // Elite frequency scroll ripple throttling
+        lastScrollRippleTime = now;
+        addRippleRef.current(targetX, targetY);
+      }
     };
 
     const tick = () => {
@@ -472,45 +494,42 @@ const CustomCursor = ({ theme, isMobile }: { theme: string, isMobile: boolean })
     window.addEventListener("mousedown", handleMouseDown, { passive: true });
     window.addEventListener("mouseup", handleMouseUp, { passive: true });
     
+    // Support nested horizontal scrolling containers & momentum scrolling globally by listening to window's capture phase
+    window.addEventListener("scroll", handleScrollTrigger, { capture: true, passive: true });
+    window.addEventListener("wheel", handleScrollTrigger, { passive: true });
+
     requestRef = requestAnimationFrame(tick);
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mousedown", handleMouseDown);
       window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("scroll", handleScrollTrigger, { capture: true });
+      window.removeEventListener("wheel", handleScrollTrigger);
       cancelAnimationFrame(requestRef);
     };
   }, [isMobile]);
 
   useEffect(() => {
     const handleMouseDownGlobal = (e: MouseEvent) => {
-      // Use current smooth dot position if it's already active, otherwise fall back to clientX/Y
       const { x, y } = currentDotPos.current;
       if (x !== -100 && y !== -100) {
-        addRipple(x, y);
+        addRippleRef.current(x, y);
       } else {
-        addRipple(e.clientX, e.clientY);
+        addRippleRef.current(e.clientX, e.clientY);
       }
     };
 
     const handleTouchStartGlobal = (e: TouchEvent) => {
       if (e.touches.length > 0) {
-        addRipple(e.touches[0].clientX, e.touches[0].clientY);
+        addRippleRef.current(e.touches[0].clientX, e.touches[0].clientY);
       }
     };
 
     const handleCustomRippleGlobal = (e: any) => {
       if (e.detail) {
-        addRipple(e.detail.x, e.detail.y);
+        addRippleRef.current(e.detail.x, e.detail.y);
       }
-    };
-
-    const addRipple = (x: number, y: number) => {
-      const id = Date.now() + Math.random();
-      setRipples((prev) => [...prev, { id, x, y }]);
-      setTimeout(() => {
-        setRipples((prev) => prev.filter((r) => r.id !== id));
-      }, 600);
     };
 
     window.addEventListener("mousedown", handleMouseDownGlobal, { passive: true });
@@ -1693,7 +1712,33 @@ Website: https://renufashionhub.in
 Support queries: support@renufashionhub.in
 Corporate notices: info@renufashionhub.in`;
 
-const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any; profile: any }) => {
+const AboutPage = ({ 
+  theme, 
+  navigate, 
+  profile,
+  products,
+  blogs,
+  posts,
+  isProductsLoaded,
+  isBlogsLoaded,
+  isPostsLoaded,
+  productsError,
+  blogsError,
+  postsError
+}: { 
+  theme: string; 
+  navigate: any; 
+  profile: any;
+  products: any[];
+  blogs: any[];
+  posts: any[];
+  isProductsLoaded: boolean;
+  isBlogsLoaded: boolean;
+  isPostsLoaded: boolean;
+  productsError: boolean;
+  blogsError: boolean;
+  postsError: boolean;
+}) => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const toggleFaq = (idx: number) => {
@@ -1792,7 +1837,7 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
               Welcome to Renu Fashion Hub
             </span>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight font-serif text-stone-900 dark:text-stone-50 leading-tight max-w-2xl mx-auto">
-              Empowering Fashion Choices Through Style, Inspiration & Trusted Recommendations
+              About Renu Fashion Hub
             </h1>
             <p className={`text-sm sm:text-base max-w-xl mx-auto leading-relaxed ${theme === "dark" ? "text-stone-300" : "text-stone-600"}`}>
               Renu Fashion Hub is your ultimate online fashion platform. We help style seekers discover contemporary fashion trends, timeless style inspiration, research-backed shopping guides, and curated fashion recommendations to simplify shopping and refine your personal style.
@@ -2121,25 +2166,18 @@ const AboutPage = ({ theme, navigate, profile }: { theme: string; navigate: any;
         </section>
 
         {/* 11. COMPANY STATISTICS */}
-        <section className="mb-16 grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { stat: "100+", label: "Fashion Articles Published" },
-            { stat: "50+", label: "Detailed Style Guides" },
-            { stat: "500+", label: "Curated Product Recommendations" },
-            { stat: "1.2M+", label: "Growing Global Community" }
-          ].map((card, i) => (
-            <motion.div 
-              whileHover={{ y: -3 }}
-              key={i} 
-              className={`p-6 rounded-2xl text-center border ${
-                theme === "dark" ? "bg-white/[0.01] border-white/5 shadow-[0_4px_16px_rgba(0,0,0,0.2)]" : "bg-white border-stone-150 shadow-sm"
-              }`}
-            >
-              <span className="block text-3xl font-extrabold font-serif text-amber-500 mb-1">{card.stat}</span>
-              <span className={`text-[10px] uppercase font-black tracking-widest leading-normal ${theme === "dark" ? "text-stone-400" : "text-stone-600"}`}>{card.label}</span>
-            </motion.div>
-          ))}
-        </section>
+        <CompanyStatisticsSection 
+          theme={theme}
+          productsCount={products.length}
+          blogsCount={blogs.length}
+          postsCount={posts.length}
+          isProductsLoaded={isProductsLoaded}
+          isBlogsLoaded={isBlogsLoaded}
+          isPostsLoaded={isPostsLoaded}
+          productsError={productsError}
+          blogsError={blogsError}
+          postsError={postsError}
+        />
 
         {/* 12. FAQ SECTION */}
         <section className="mb-12">
@@ -4107,6 +4145,151 @@ const PageLoader = ({ theme }: { theme: string }) => (
   </motion.div>
 );
 
+const CountUp = ({ end, isLoaded, hasError, theme }: { end: number; isLoaded: boolean; hasError: boolean; theme: string }) => {
+  const [count, setCount] = useState(0);
+  const elementRef = useRef<HTMLSpanElement | null>(null);
+  const animatedRef = useRef(false);
+
+  useEffect(() => {
+    if (!isLoaded || hasError) {
+      setCount(0);
+      animatedRef.current = false;
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && !animatedRef.current) {
+          animatedRef.current = true;
+          let startTimestamp: number | null = null;
+          const duration = 1200; // 1.2s animation
+
+          const step = (timestamp: number) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            // Ease out quad
+            const easeProgress = progress * (2 - progress);
+            setCount(Math.floor(easeProgress * end));
+            if (progress < 1) {
+              window.requestAnimationFrame(step);
+            } else {
+              setCount(end);
+            }
+          };
+          window.requestAnimationFrame(step);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (elementRef.current) {
+      observer.observe(elementRef.current);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [end, isLoaded, hasError]);
+
+  if (!isLoaded || hasError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[44px]">
+        <span className="block text-3xl font-extrabold font-serif text-stone-400 dark:text-stone-600 mb-1 leading-none">--</span>
+        <span className="text-[9px] font-bold text-amber-500/80 animate-pulse">Loading...</span>
+      </div>
+    );
+  }
+
+  return (
+    <span ref={elementRef} className="block text-3xl font-extrabold font-serif text-amber-500 mb-1 leading-none min-h-[36px] flex items-center justify-center">
+      {count}+
+    </span>
+  );
+};
+
+const CompanyStatisticsSection = ({ 
+  theme, 
+  productsCount, 
+  blogsCount, 
+  postsCount, 
+  isProductsLoaded, 
+  isBlogsLoaded, 
+  isPostsLoaded,
+  productsError,
+  blogsError,
+  postsError
+}: { 
+  theme: string; 
+  productsCount: number; 
+  blogsCount: number; 
+  postsCount: number; 
+  isProductsLoaded: boolean; 
+  isBlogsLoaded: boolean; 
+  isPostsLoaded: boolean; 
+  productsError: boolean;
+  blogsError: boolean;
+  postsError: boolean;
+}) => {
+  return (
+    <section className="mb-16 grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* Card 1: Curated Products */}
+      <motion.div 
+        whileHover={{ y: -3 }}
+        className={`p-6 rounded-2xl text-center border flex flex-col justify-center min-h-[105px] ${
+          theme === "dark" ? "bg-white/[0.01] border-white/5 shadow-[0_4px_16px_rgba(0,0,0,0.2)]" : "bg-white border-stone-150 shadow-sm"
+        }`}
+      >
+        <CountUp end={productsCount} isLoaded={isProductsLoaded} hasError={productsError} theme={theme} />
+        <span className={`text-[10px] uppercase font-black tracking-widest leading-normal mt-1 ${theme === "dark" ? "text-stone-400" : "text-stone-600"}`}>
+          Curated Products
+        </span>
+      </motion.div>
+
+      {/* Card 2: Editorial Blogs */}
+      <motion.div 
+        whileHover={{ y: -3 }}
+        className={`p-6 rounded-2xl text-center border flex flex-col justify-center min-h-[105px] ${
+          theme === "dark" ? "bg-white/[0.01] border-white/5 shadow-[0_4px_16px_rgba(0,0,0,0.2)]" : "bg-white border-stone-150 shadow-sm"
+        }`}
+      >
+        <CountUp end={blogsCount} isLoaded={isBlogsLoaded} hasError={blogsError} theme={theme} />
+        <span className={`text-[10px] uppercase font-black tracking-widest leading-normal mt-1 ${theme === "dark" ? "text-stone-400" : "text-stone-600"}`}>
+          Editorial Blogs
+        </span>
+      </motion.div>
+
+      {/* Card 3: Lifestyle Videos */}
+      <motion.div 
+        whileHover={{ y: -3 }}
+        className={`p-6 rounded-2xl text-center border flex flex-col justify-center min-h-[105px] ${
+          theme === "dark" ? "bg-white/[0.01] border-white/5 shadow-[0_4px_16px_rgba(0,0,0,0.2)]" : "bg-white border-stone-150 shadow-sm"
+        }`}
+      >
+        <CountUp end={postsCount} isLoaded={isPostsLoaded} hasError={postsError} theme={theme} />
+        <span className={`text-[10px] uppercase font-black tracking-widest leading-normal mt-1 ${theme === "dark" ? "text-stone-400" : "text-stone-600"}`}>
+          Lifestyle Videos
+        </span>
+      </motion.div>
+
+      {/* Card 4: Platform Status */}
+      <motion.div 
+        whileHover={{ y: -3 }}
+        className={`p-6 rounded-2xl text-center border flex flex-col justify-center min-h-[105px] ${
+          theme === "dark" ? "bg-white/[0.01] border-white/5 shadow-[0_4px_16px_rgba(0,0,0,0.2)]" : "bg-white border-stone-150 shadow-sm"
+        }`}
+      >
+        <span className="block text-sm font-extrabold font-serif text-amber-500 mb-1 leading-tight">
+          Growing Fashion Platform
+        </span>
+        <span className={`text-[10px] uppercase font-black tracking-widest leading-normal mt-1 ${theme === "dark" ? "text-stone-400" : "text-stone-600"}`}>
+          Platform Status
+        </span>
+      </motion.div>
+    </section>
+  );
+};
+
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -4173,6 +4356,9 @@ export default function App() {
   const [messages, setMessages] = useState<any[]>([]);
   const [blogs, setBlogs] = useState<any[]>([]);
   const [isBlogsLoaded, setIsBlogsLoaded] = useState(false);
+  const [postsError, setPostsError] = useState(false);
+  const [productsError, setProductsError] = useState(false);
+  const [blogsError, setBlogsError] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [isAdminUser, setIsAdminUser] = useState(false);
   const [isSendingMessage, setIsSendingMessage] = useState(false);
@@ -4494,9 +4680,11 @@ export default function App() {
       const data = snapshot.docs.map(doc => ({ ...doc.data(), docId: doc.id }));
       setPosts(data);
       setIsPostsLoaded(true);
+      setPostsError(false);
     }, (err) => {
       console.error("Posts sync error:", err);
       setIsPostsLoaded(true);
+      setPostsError(true);
     });
 
     // Real-time Products
@@ -4504,9 +4692,11 @@ export default function App() {
       const data = snapshot.docs.map(doc => ({ ...doc.data(), docId: doc.id }));
       setProducts(data);
       setIsProductsLoaded(true);
+      setProductsError(false);
     }, (err) => {
       console.error("Products sync error:", err);
       setIsProductsLoaded(true);
+      setProductsError(true);
     });
 
     // Real-time Blogs
@@ -4514,9 +4704,11 @@ export default function App() {
       const data = snapshot.docs.map(doc => ({ ...doc.data(), docId: doc.id }));
       setBlogs(data);
       setIsBlogsLoaded(true);
+      setBlogsError(false);
     }, (err) => {
       console.error("Blogs sync error:", err);
       setIsBlogsLoaded(true);
+      setBlogsError(true);
     });
 
     // Real-time Messages (Admin only)
@@ -7086,7 +7278,7 @@ export default function App() {
                   Styling Consultant Lounge
                 </span>
                 <h1 className="text-3xl font-serif font-semibold tracking-tight text-amber-950 dark:text-amber-100 flex items-center gap-2 group-hover:opacity-85 transition-opacity">
-                  Renu Agarwal Studio <Sparkles className="w-5 h-5 text-amber-500 animate-pulse group-hover:scale-110 transition-transform" />
+                  Contact Renu Fashion Hub <Sparkles className="w-5 h-5 text-amber-500 animate-pulse group-hover:scale-110 transition-transform" />
                 </h1>
               </div>
               <button 
@@ -7363,8 +7555,6 @@ export default function App() {
       </div>
 
       <div className="relative w-full max-w-md md:max-w-3xl lg:max-w-6xl mx-auto px-6 md:px-8 lg:px-12 pt-16 pb-24">
-        {/* SEO Main Title */}
-        <h1 className="sr-only">Renu Fashion Hub - Curated Style Guides, Contemporary Apparel Trends, & Personal Fashion Blog</h1>
         {/* Header Actions */}
         <div className="absolute top-6 left-6 flex gap-3 z-20">
           <button 
@@ -7425,7 +7615,7 @@ export default function App() {
               </div>
               
               <div className="flex items-center justify-center lg:justify-start gap-2 mb-1">
-                <h1 className="text-2xl font-bold tracking-tight">{profile.name}</h1>
+                <div className="text-2xl font-bold tracking-tight">{profile.name}</div>
                 <CheckCircle2 className="w-5 h-5 text-blue-500 fill-blue-500/10" />
               </div>
               <div className="flex items-center justify-center lg:justify-start gap-1.5 mb-2">
@@ -7580,6 +7770,14 @@ export default function App() {
 
           {/* Right Column: Carousel, Tabs & Dynamic Content List */}
           <div className="lg:col-span-7 space-y-8 mt-10 lg:mt-0">
+            {/* Dynamic visible H1 tag for SEO compliance */}
+            <h1 className="text-xl sm:text-2xl font-black font-serif tracking-tight text-amber-950 dark:text-amber-100 leading-tight">
+              {searchQuery 
+                ? `Search Results for "${searchQuery}"` 
+                : (selectedCategory && selectedCategory !== "All") 
+                  ? selectedCategory 
+                  : "Renu Fashion Hub – Women's Fashion, Sarees, Kurtis, Jewellery & Style Guides"}
+            </h1>
             {/* Weekly Best Sellers Carousel */}
             <LatestArrivalsCarousel products={products} posts={posts} theme={theme} navigate={handleNavigate} />
 
@@ -8052,7 +8250,22 @@ export default function App() {
       </div>
         </motion.div>
           } />
-          <Route path="/about" element={<AboutPage profile={profile} theme={theme} navigate={handleNavigate} />} />
+          <Route path="/about" element={
+            <AboutPage 
+              profile={profile} 
+              theme={theme} 
+              navigate={handleNavigate} 
+              products={products}
+              blogs={blogs}
+              posts={posts}
+              isProductsLoaded={isProductsLoaded}
+              isBlogsLoaded={isBlogsLoaded}
+              isPostsLoaded={isPostsLoaded}
+              productsError={productsError}
+              blogsError={blogsError}
+              postsError={postsError}
+            />
+          } />
           <Route path="/about-us" element={<Navigate to="/about" replace />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage profile={profile} theme={theme} navigate={handleNavigate} />} />
           <Route path="/terms-of-service" element={<TermsOfServicePage profile={profile} theme={theme} navigate={handleNavigate} />} />
