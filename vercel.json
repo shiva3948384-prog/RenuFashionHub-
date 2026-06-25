@@ -29,7 +29,7 @@
       "destination": "/api/seo-handler?type=post&id=:id"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
   ]
