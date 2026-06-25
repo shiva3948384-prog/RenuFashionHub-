@@ -3,30 +3,37 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { createServer as createViteServer } from "vite";
 import compression from "compression";
+import { createClient } from "@supabase/supabase-js";
+import dotenv from "dotenv";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+dotenv.config();
+
+let __filename = "";
+let __dirname = "";
+try {
+  __filename = fileURLToPath(import.meta.url);
+  __dirname = path.dirname(__filename);
+} catch (e) {
+  __filename = process.cwd();
+  __dirname = process.cwd();
+}
 
 async function startServer() {
   const app = express();
   app.use(compression());
   const PORT = 3000;
 
-  const projectId = "ai-studio-applet-webapp-644f0";
-  const databaseId = "ai-studio-06f9cdf8-bcdb-4985-98dd-f7d34d6cf66c";
-  const baseRESTUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/${databaseId}/documents`;
   const baseUrl = "https://www.renufashionhub.in";
 
-  // Helper to extract typed values from Firestore REST API
-  function getFieldValue(field: any): any {
-    if (!field) return undefined;
-    if ('stringValue' in field) return field.stringValue;
-    if ('integerValue' in field) return parseInt(field.integerValue, 10);
-    if ('doubleValue' in field) return parseFloat(field.doubleValue);
-    if ('booleanValue' in field) return field.booleanValue;
-    if ('timestampValue' in field) return field.timestampValue;
-    return undefined;
-  }
+  const SUPABASE_URL = process.env.SUPABASE_URL || "";
+  const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
 
   // XML escaping utility to avoid SEMrush / structural parsing alerts
   function escapeXml(unsafe: string): string {
@@ -42,51 +49,36 @@ async function startServer() {
     });
   }
 
-  // Helper to fetch collection docs via Firestore REST API
-  async function fetchCollectionDocs(collectionName: string) {
+  // Helper to fetch collection docs via Supabase Client
+  async function fetchCollectionDocs(tableName: string) {
     try {
-      const url = `${baseRESTUrl}/${collectionName}?pageSize=300`;
-      const response = await fetch(url);
-      if (!response.ok) {
-        console.error(`Error fetching ${collectionName}:`, response.statusText);
+      const { data, error } = await supabase.from(tableName).select('*');
+      if (error) {
+        console.error(`Failed to fetch ${tableName} from Supabase:`, error.message);
         return [];
       }
-      const data = await response.json();
-      if (!data.documents) return [];
-
-      return data.documents.map((doc: any) => {
-        const nameParts = doc.name.split('/');
-        const docId = nameParts[nameParts.length - 1];
-
-        let lastmod = "";
-        if (doc.updateTime) {
-          lastmod = doc.updateTime.split('.')[0] + 'Z';
-        } else {
-          lastmod = new Date().toISOString().split('.')[0] + 'Z';
-        }
-
-        let customId = docId;
-        let category = "";
-
-        if (doc.fields) {
-          if (doc.fields.id) {
-            const val = getFieldValue(doc.fields.id);
-            if (val !== undefined) {
-              customId = String(val);
+      return (data || []).map((row: any) => {
+        let lastmod = new Date().toISOString().split('.')[0] + 'Z';
+        const timestampField = row.timestamp || row.created_at;
+        if (timestampField) {
+          try {
+            const d = new Date(timestampField);
+            if (!isNaN(d.getTime())) {
+              lastmod = d.toISOString().split('.')[0] + 'Z';
             }
-          }
-          if (doc.fields.category) {
-            const catVal = getFieldValue(doc.fields.category);
-            if (catVal !== undefined) {
-              category = String(catVal);
-            }
+          } catch (e) {
+            // Ignore format errors and keep default
           }
         }
 
-        return { id: customId, lastmod, category };
+        return {
+          id: String(row.id),
+          lastmod,
+          category: row.category ? String(row.category) : ""
+        };
       });
     } catch (err) {
-      console.error(`Failed to fetch collection ${collectionName}:`, err);
+      console.error(`Failed to fetch collection ${tableName} via Supabase Client:`, err);
       return [];
     }
   }
@@ -99,7 +91,7 @@ async function startServer() {
   // Fully dynamic sitemap XML endpoint
   app.get("/sitemap.xml", async (req, res) => {
     try {
-      // Fetch dynamic content from Firestore in parallel
+      // Fetch dynamic content from Supabase in parallel
       const [products, posts, blogs] = await Promise.all([
         fetchCollectionDocs("products"),
         fetchCollectionDocs("posts"),
@@ -215,6 +207,8 @@ async function startServer() {
 
       res.setHeader("Content-Type", "application/xml");
       res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+      res.setHeader("Pragma", "no-cache");
+      res.setHeader("Expires", "0");
       res.status(200).send(xml);
     } catch (err) {
       console.error("Critical error in sitemap generation:", err);
