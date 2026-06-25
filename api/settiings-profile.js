@@ -22,7 +22,11 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     try {
-      if (fs.existsSync(PROFILE_FILE_PATH)) {
+      const tmpPath = "/tmp/settings_profile.json";
+      if (fs.existsSync(tmpPath)) {
+        const data = fs.readFileSync(tmpPath, "utf8");
+        return res.status(200).json(JSON.parse(data));
+      } else if (fs.existsSync(PROFILE_FILE_PATH)) {
         const data = fs.readFileSync(PROFILE_FILE_PATH, "utf8");
         return res.status(200).json(JSON.parse(data));
       } else {
@@ -36,7 +40,13 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
       const data = req.body || {};
-      fs.writeFileSync(PROFILE_FILE_PATH, JSON.stringify(data, null, 2), "utf8");
+      try {
+        fs.writeFileSync(PROFILE_FILE_PATH, JSON.stringify(data, null, 2), "utf8");
+      } catch (fileErr) {
+        // Fallback for Vercel's read-only filesystem
+        const tmpPath = "/tmp/settings_profile.json";
+        fs.writeFileSync(tmpPath, JSON.stringify(data, null, 2), "utf8");
+      }
       return res.status(200).json({ success: true, data });
     } catch (err) {
       console.error("Vercel API POST /api/settings/profile error:", err);
