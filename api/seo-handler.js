@@ -1,4 +1,4 @@
-// Serverless dynamic SEO and metadata injector for Renu Fashion Hub
+// Serverless dynamic SEO and metadata injector for Renu Fashion Hub supporting both Firestore & Supabase
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import fs from 'fs';
@@ -17,6 +17,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   }
 });
 
+// Load config or set default metadata
 function escapeHtmlAttr(str) {
   if (!str) return "";
   return String(str)
@@ -28,7 +29,6 @@ function escapeHtmlAttr(str) {
 }
 
 export default async function handler(req, res) {
-  // Use Vercel request query parsing
   const { type, id } = req.query;
 
   let title = "Renu Fashion Hub";
@@ -38,48 +38,77 @@ export default async function handler(req, res) {
 
   try {
     if (type && id) {
-      const cleanId = String(id).split('?')[0]; // strip trailing query params if any
-      const bigIntId = parseInt(cleanId, 10);
+      const cleanId = String(id).split('?')[0];
 
-      if (!isNaN(bigIntId)) {
-        if (type === "blog") {
-          const { data: blog, error } = await supabase
+      if (type === "blog") {
+        let blog = null;
+        if (!isNaN(parseInt(cleanId, 10))) {
+          const { data, error } = await supabase
             .from('blogs')
             .select('*')
-            .eq('id', bigIntId)
+            .eq('id', parseInt(cleanId, 10))
             .single();
-
-          if (!error && blog) {
-            title = blog.seo_title || `${blog.title} - Renu Fashion Hub`;
-            description = blog.meta_description || blog.excerpt || description;
-            image = blog.image_url || image;
-            url = `${baseUrl}/blog/${cleanId}`;
+          if (!error && data) {
+            blog = {
+              id: String(data.id),
+              title: data.title,
+              excerpt: data.excerpt,
+              image_url: data.image_url,
+              seo_title: data.seo_title,
+              meta_description: data.meta_description
+            };
           }
-        } else if (type === "product") {
-          const { data: product, error } = await supabase
+        }
+
+        if (blog) {
+          title = blog.seo_title || `${blog.title} - Renu Fashion Hub`;
+          description = blog.meta_description || blog.excerpt || description;
+          image = blog.image_url || image;
+          url = `${baseUrl}/blog/${cleanId}`;
+        }
+      } else if (type === "product") {
+        let product = null;
+        if (!isNaN(parseInt(cleanId, 10))) {
+          const { data, error } = await supabase
             .from('products')
             .select('*')
-            .eq('id', bigIntId)
+            .eq('id', parseInt(cleanId, 10))
             .single();
-
-          if (!error && product) {
-            title = `${product.name} - Renu Fashion Hub`;
-            description = product.description || description;
-            image = product.image_url || image;
-            url = `${baseUrl}/product/${cleanId}`;
+          if (!error && data) {
+            product = {
+              id: String(data.id),
+              name: data.name,
+              description: data.description,
+              image_url: data.image_url
+            };
           }
-        } else if (type === "post") {
-          const { data: post, error } = await supabase
+        }
+
+        if (product) {
+          title = `${product.name} - Renu Fashion Hub`;
+          description = product.description || description;
+          image = product.image_url || image;
+          url = `${baseUrl}/product/${cleanId}`;
+        }
+      } else if (type === "post") {
+        let post = null;
+        if (!isNaN(parseInt(cleanId, 10))) {
+          const { data, error } = await supabase
             .from('posts')
             .select('*')
-            .eq('id', bigIntId)
+            .eq('id', parseInt(cleanId, 10))
             .single();
-
-          if (!error && post) {
-            title = `Post #${cleanId} - Renu Fashion Hub`;
-            description = "Watch the latest outfit style, custom lookbook, and collection recommendation video at Renu Fashion Hub.";
-            url = `${baseUrl}/post/${cleanId}`;
+          if (!error && data) {
+            post = {
+              id: String(data.id)
+            };
           }
+        }
+
+        if (post) {
+          title = `Post #${cleanId} - Renu Fashion Hub`;
+          description = "Watch the latest outfit style, custom lookbook, and collection recommendation video at Renu Fashion Hub.";
+          url = `${baseUrl}/post/${cleanId}`;
         }
       }
     }
@@ -99,7 +128,6 @@ export default async function handler(req, res) {
     }
   } catch (fileErr) {
     console.error("Failed to read HTML template in seo-handler:", fileErr);
-    // Simple fallback template if reading files completely fails
     html = `<!doctype html>
 <html lang="en">
   <head>
@@ -116,7 +144,6 @@ export default async function handler(req, res) {
 
   // Inject/Replace HTML Metadata Tags with robust clean-and-inject strategy
   try {
-    // Strip any existing title, meta description, keywords, og:*, twitter:*, and canonical link tags to avoid duplicates
     html = html.replace(/<title>.*?<\/title>/gi, '');
     html = html.replace(/<meta\s+[^>]*name=["']description["'][^>]*>/gi, '');
     html = html.replace(/<meta\s+[^>]*name=["']keywords["'][^>]*>/gi, '');
@@ -130,7 +157,6 @@ export default async function handler(req, res) {
     html = html.replace(/<meta\s+[^>]*name=["']twitter:image["'][^>]*>/gi, '');
     html = html.replace(/<link\s+[^>]*rel=["']canonical["'][^>]*>/gi, '');
 
-    // Inject our fresh, correct tags right before </head>
     const cleanMeta = `
     <title>${escapeHtmlAttr(title)}</title>
     <meta name="description" content="${escapeHtmlAttr(description)}" />
@@ -150,7 +176,6 @@ export default async function handler(req, res) {
     console.error("Regex replacement failed in seo-handler:", replaceErr);
   }
 
-  // Send output HTML
   res.setHeader("Content-Type", "text/html; charset=utf-8");
   res.setHeader("Cache-Control", "public, max-age=60, s-maxage=3600");
   res.status(200).send(html);
