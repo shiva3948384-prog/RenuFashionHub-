@@ -5,6 +5,18 @@
       "destination": "/api/sitemap"
     },
     {
+      "source": "/api/settings/profile",
+      "destination": "/api/settings-profile"
+    },
+    {
+      "source": "/api/products/:id/reviews",
+      "destination": "/api/products?id=:id&action=reviews"
+    },
+    {
+      "source": "/api/messages/:id",
+      "destination": "/api/messages?id=:id"
+    },
+    {
       "source": "/blog/:id",
       "destination": "/api/seo-handler?type=blog&id=:id"
     },
