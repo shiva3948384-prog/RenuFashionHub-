@@ -5,6 +5,7 @@ import { createServer as createViteServer } from "vite";
 import compression from "compression";
 import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
+import fs from "fs";
 
 dotenv.config();
 
@@ -225,6 +226,132 @@ async function startServer() {
       res.status(200).send(fallbackXml);
     }
   });
+
+  // Dynamic SEO and metadata injector for specific route requests
+  async function serveSeoHtml(req: any, res: any, type: string) {
+    let title = "Renu Fashion Hub";
+    let description = "Premium Fashion • Latest Trends • Style Hub. Elevating your style every day ✨";
+    let image = `${baseUrl}/favicon.png`;
+    let url = `${baseUrl}`;
+
+    try {
+      const { id } = req.params;
+      if (id) {
+        const cleanId = String(id).split('?')[0];
+        const bigIntId = parseInt(cleanId, 10);
+
+        if (!isNaN(bigIntId)) {
+          if (type === "blog") {
+            const { data: blog, error } = await supabase
+              .from('blogs')
+              .select('*')
+              .eq('id', bigIntId)
+              .single();
+
+            if (!error && blog) {
+              title = (blog as any).seo_title || `${(blog as any).title} - Renu Fashion Hub`;
+              description = (blog as any).meta_description || (blog as any).excerpt || description;
+              image = (blog as any).image_url || image;
+              url = `${baseUrl}/blog/${cleanId}`;
+            }
+          } else if (type === "product") {
+            const { data: product, error } = await supabase
+              .from('products')
+              .select('*')
+              .eq('id', bigIntId)
+              .single();
+
+            if (!error && product) {
+              title = `${(product as any).name} - Renu Fashion Hub`;
+              description = (product as any).description || description;
+              image = (product as any).image_url || image;
+              url = `${baseUrl}/product/${cleanId}`;
+            }
+          } else if (type === "post") {
+            const { data: post, error } = await supabase
+              .from('posts')
+              .select('*')
+              .eq('id', bigIntId)
+              .single();
+
+            if (!error && post) {
+              title = `Post #${cleanId} - Renu Fashion Hub`;
+              description = "Watch the latest outfit style, custom lookbook, and collection recommendation video at Renu Fashion Hub.";
+              url = `${baseUrl}/post/${cleanId}`;
+            }
+          }
+        }
+      }
+    } catch (dbErr) {
+      console.error("Database lookup error in server seo handler:", dbErr);
+    }
+
+    // Read index.html
+    let html = "";
+    const distPath = path.join(process.cwd(), 'dist');
+    try {
+      html = fs.readFileSync(path.join(distPath, 'index.html'), 'utf8');
+    } catch (fileErr) {
+      try {
+        html = fs.readFileSync(path.join(process.cwd(), 'index.html'), 'utf8');
+      } catch (e) {
+        html = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>${escapeXml(title)}</title>
+    <meta name="description" content="${escapeXml(description)}" />
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>`;
+      }
+    }
+
+    try {
+      // Strip any existing title, meta description, keywords, og:*, twitter:*, and canonical link tags to avoid duplicates
+      html = html.replace(/<title>.*?<\/title>/gi, '');
+      html = html.replace(/<meta\s+[^>]*name=["']description["'][^>]*>/gi, '');
+      html = html.replace(/<meta\s+[^>]*name=["']keywords["'][^>]*>/gi, '');
+      html = html.replace(/<meta\s+[^>]*property=["']og:title["'][^>]*>/gi, '');
+      html = html.replace(/<meta\s+[^>]*property=["']og:description["'][^>]*>/gi, '');
+      html = html.replace(/<meta\s+[^>]*property=["']og:image["'][^>]*>/gi, '');
+      html = html.replace(/<meta\s+[^>]*property=["']og:url["'][^>]*>/gi, '');
+      html = html.replace(/<meta\s+[^>]*name=["']twitter:card["'][^>]*>/gi, '');
+      html = html.replace(/<meta\s+[^>]*name=["']twitter:title["'][^>]*>/gi, '');
+      html = html.replace(/<meta\s+[^>]*name=["']twitter:description["'][^>]*>/gi, '');
+      html = html.replace(/<meta\s+[^>]*name=["']twitter:image["'][^>]*>/gi, '');
+      html = html.replace(/<link\s+[^>]*rel=["']canonical["'][^>]*>/gi, '');
+
+      // Inject our fresh, correct tags right before </head>
+      const cleanMeta = `
+      <title>${escapeXml(title)}</title>
+      <meta name="description" content="${escapeXml(description)}" />
+      <link rel="canonical" href="${escapeXml(url)}" />
+      <meta property="og:title" content="${escapeXml(title)}" />
+      <meta property="og:description" content="${escapeXml(description)}" />
+      <meta property="og:image" content="${escapeXml(image)}" />
+      <meta property="og:url" content="${escapeXml(url)}" />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content="${escapeXml(title)}" />
+      <meta name="twitter:description" content="${escapeXml(description)}" />
+      <meta name="twitter:image" content="${escapeXml(image)}" />
+`;
+      html = html.replace(/<\/head>/i, `${cleanMeta}\n</head>`);
+    } catch (replaceErr) {
+      console.error("Replacement failed in server seo handler:", replaceErr);
+    }
+
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.status(200).send(html);
+  }
+
+  // Bind SEO handlers to routes before serving general SPA fallback
+  app.get("/blog/:id", (req, res) => serveSeoHtml(req, res, "blog"));
+  app.get("/product/:id", (req, res) => serveSeoHtml(req, res, "product"));
+  app.get("/post/:id", (req, res) => serveSeoHtml(req, res, "post"));
 
   // Vite development vs production asset serving configuration
   if (process.env.NODE_ENV !== "production") {
