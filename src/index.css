@@ -22,7 +22,7 @@
       cursor: auto !important;
     }
   }
-
+  
   /* Reusable Global Heading Style System to ensure excellent mobile & desktop contrast */
   h1, h2, h3, h4, h5, h6, .heading-system {
     @apply transition-colors duration-200;
