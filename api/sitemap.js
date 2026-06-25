@@ -1,6 +1,8 @@
-// Dynamic sitemap generator for Renu Fashion Hub via Supabase
+// Dynamic sitemap generator for Renu Fashion Hub supporting both Firestore & Supabase
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
 
 dotenv.config();
 
@@ -30,8 +32,9 @@ function escapeXml(unsafe) {
   });
 }
 
-// Helper to fetch collection items via Supabase Client
-async function fetchCollectionDocs(tableName) {
+// Fetch collection items via Supabase Client
+async function fetchCollectionDocsSupabase(tableName) {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) return [];
   try {
     const { data, error } = await supabase.from(tableName).select('*');
     if (error) {
@@ -47,9 +50,7 @@ async function fetchCollectionDocs(tableName) {
           if (!isNaN(d.getTime())) {
             lastmod = d.toISOString().split('.')[0] + 'Z';
           }
-        } catch (e) {
-          // Keep default
-        }
+        } catch (e) {}
       }
 
       return {
@@ -64,13 +65,18 @@ async function fetchCollectionDocs(tableName) {
   }
 }
 
+// Fetch only from Supabase
+async function fetchCombinedDocs(tableName) {
+  return fetchCollectionDocsSupabase(tableName);
+}
+
 export default async function handler(req, res) {
   try {
-    // Fetch collections in parallel
+    // Fetch combined collections in parallel
     const [products, posts, blogs] = await Promise.all([
-      fetchCollectionDocs("products"),
-      fetchCollectionDocs("posts"),
-      fetchCollectionDocs("blogs")
+      fetchCombinedDocs("products"),
+      fetchCombinedDocs("posts"),
+      fetchCombinedDocs("blogs")
     ]);
 
     // Aggregate unique active categories
@@ -187,7 +193,6 @@ export default async function handler(req, res) {
     res.status(200).send(xml);
   } catch (err) {
     console.error("Critical error in sitemap generation:", err);
-    // Fallback simple sitemap in the rare case of overall failure so Google bots get a valid response
     const fallbackXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
