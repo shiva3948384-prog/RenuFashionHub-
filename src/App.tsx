@@ -8,25 +8,6 @@ import { Routes, Route, Link, useNavigate, useParams, useLocation, Navigate } fr
 import { get, set } from "idb-keyval";
 import { motion, AnimatePresence } from "motion/react";
 import { 
-  db, 
-  auth, 
-  signInWithGoogle, 
-  logout, 
-  onAuthStateChanged,
-  collection,
-  doc,
-  setDoc,
-  getDoc,
-  onSnapshot,
-  query,
-  orderBy,
-  addDoc,
-  deleteDoc,
-  updateDoc,
-  handleFirestoreError,
-  OperationType
-} from "./firebase";
-import { 
   Instagram, 
   Youtube, 
   Facebook,
@@ -892,7 +873,7 @@ const ContactSupportAndFaq = ({ theme }: { theme: string }) => {
   );
 };
 
-const ProductDetailPage = ({ products, theme, navigate, db, isLoaded }: { products: any[]; theme: string; navigate: any; db: any; isLoaded: boolean }) => {
+const ProductDetailPage = ({ products, theme, navigate, isLoaded }: { products: any[]; theme: string; navigate: any; isLoaded: boolean }) => {
   const { id } = useParams();
   const product = products.find(p => p.id.toString() === id || p.docId === id);
   const [newReview, setNewReview] = useState({ user: "", rating: 5, comment: "" });
@@ -921,14 +902,24 @@ const ProductDetailPage = ({ products, theme, navigate, db, isLoaded }: { produc
     if (!newReview.user || !newReview.comment) return;
     setIsSubmittingReview(true);
     try {
-      const review = {
-        ...newReview,
-        id: Date.now(),
-        date: new Date().toISOString()
-      };
-      const updatedReviews = [...(product.reviews || []), review];
-      const productRef = doc(db, "products", product.docId || String(product.id));
-      await updateDoc(productRef, { reviews: updatedReviews });
+      const response = await fetch(`/api/products/${product.id}/reviews`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(newReview)
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit review");
+      }
+
+      const result = await response.json();
+      const review = result.review;
+
+      // Update product's reviews in local state so it displays immediately
+      product.reviews = [...(product.reviews || []), review];
+      
       setNewReview({ user: "", rating: 5, comment: "" });
 
       // Animate star rating components
@@ -4359,8 +4350,7 @@ export default function App() {
   const [postsError, setPostsError] = useState(false);
   const [productsError, setProductsError] = useState(false);
   const [blogsError, setBlogsError] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [isAdminUser, setIsAdminUser] = useState(false);
+  const [isAdminUser, setIsAdminUser] = useState(() => localStorage.getItem("rfh_admin_session") === "true");
   const [isSendingMessage, setIsSendingMessage] = useState(false);
 
   // Temporary states for Admin Panel
@@ -4639,106 +4629,102 @@ export default function App() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Auth Listener
+  // Load data from Supabase backend on mount and when admin status changes
   useEffect(() => {
-    // We keep the auth listener for potential future use, but admin is now handled by username/pass
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-    
-    // Check if admin was previously logged in (simple session)
-    const savedAdmin = localStorage.getItem("rfh_admin_session");
-    if (savedAdmin === "true") {
-      setIsAdminUser(true);
-    }
-    
-    return () => unsubscribe();
-  }, []);
+    let active = true;
 
-  // Load data from Firestore on mount
-  useEffect(() => {
-    // Real-time Profile
-    const unsubProfile = onSnapshot(doc(db, "settings", "profile"), (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data() as any;
-        setProfile({
-          name: data.name || "Renu Fashion Hub",
-          bio: data.bio || "",
-          avatar: data.avatar || "",
-          privacyPolicy: data.privacyPolicy || DEFAULT_PRIVACY_POLICY,
-          termsOfService: data.termsOfService || DEFAULT_TERMS_OF_SERVICE,
-        });
-        setIsDataLoaded(true);
+    async function loadData() {
+      // 1. Load Profile
+      try {
+        const res = await fetch("/api/settings/profile");
+        if (res.ok && active) {
+          const data = await res.json();
+          setProfile({
+            name: data.name || "Renu Fashion Hub",
+            bio: data.bio || "",
+            avatar: data.avatar || "",
+            privacyPolicy: data.privacyPolicy || DEFAULT_PRIVACY_POLICY,
+            termsOfService: data.termsOfService || DEFAULT_TERMS_OF_SERVICE,
+          });
+        }
+      } catch (err) {
+        console.error("Error loading profile:", err);
+      } finally {
+        if (active) setIsDataLoaded(true);
       }
-    }, (err) => {
-      console.error("Profile sync error:", err);
-      setIsDataLoaded(true); // Still mark as loaded to show something
-    });
 
-    // Real-time Posts
-    const unsubPosts = onSnapshot(query(collection(db, "posts"), orderBy("id", "desc")), (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ ...doc.data(), docId: doc.id }));
-      setPosts(data);
-      setIsPostsLoaded(true);
-      setPostsError(false);
-    }, (err) => {
-      console.error("Posts sync error:", err);
-      setIsPostsLoaded(true);
-      setPostsError(true);
-    });
+      // 2. Load Posts
+      try {
+        const res = await fetch("/api/posts");
+        if (res.ok && active) {
+          const data = await res.json();
+          setPosts(data);
+          setPostsError(false);
+        } else if (active) {
+          setPostsError(true);
+        }
+      } catch (err) {
+        console.error("Error loading posts:", err);
+        if (active) setPostsError(true);
+      } finally {
+        if (active) setIsPostsLoaded(true);
+      }
 
-    // Real-time Products
-    const unsubProducts = onSnapshot(query(collection(db, "products"), orderBy("id", "desc")), (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ ...doc.data(), docId: doc.id }));
-      setProducts(data);
-      setIsProductsLoaded(true);
-      setProductsError(false);
-    }, (err) => {
-      console.error("Products sync error:", err);
-      setIsProductsLoaded(true);
-      setProductsError(true);
-    });
+      // 3. Load Products
+      try {
+        const res = await fetch("/api/products");
+        if (res.ok && active) {
+          const data = await res.json();
+          setProducts(data);
+          setProductsError(false);
+        } else if (active) {
+          setProductsError(true);
+        }
+      } catch (err) {
+        console.error("Error loading products:", err);
+        if (active) setProductsError(true);
+      } finally {
+        if (active) setIsProductsLoaded(true);
+      }
 
-    // Real-time Blogs
-    const unsubBlogs = onSnapshot(query(collection(db, "blogs"), orderBy("id", "desc")), (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ ...doc.data(), docId: doc.id }));
-      setBlogs(data);
-      setIsBlogsLoaded(true);
-      setBlogsError(false);
-    }, (err) => {
-      console.error("Blogs sync error:", err);
-      setIsBlogsLoaded(true);
-      setBlogsError(true);
-    });
+      // 4. Load Blogs
+      try {
+        const res = await fetch("/api/blogs");
+        if (res.ok && active) {
+          const data = await res.json();
+          setBlogs(data);
+          setBlogsError(false);
+        } else if (active) {
+          setBlogsError(true);
+        }
+      } catch (err) {
+        console.error("Error loading blogs:", err);
+        if (active) setBlogsError(true);
+      } finally {
+        if (active) setIsBlogsLoaded(true);
+      }
 
-    // Real-time Messages (Admin only)
-    let unsubMessages = () => {};
-    if (isAdminUser) {
-      unsubMessages = onSnapshot(query(collection(db, "messages"), orderBy("id", "desc")), (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ ...doc.data(), docId: doc.id }));
-        setMessages(data);
-      }, (err) => console.error("Messages sync error:", err));
+      // 5. Load Messages (Admin only)
+      if (isAdminUser) {
+        try {
+          const res = await fetch("/api/messages");
+          if (res.ok && active) {
+            const data = await res.json();
+            setMessages(data);
+          }
+        } catch (err) {
+          console.error("Error loading messages:", err);
+        }
+      }
     }
+
+    loadData();
 
     return () => {
-      unsubProfile();
-      unsubPosts();
-      unsubProducts();
-      unsubBlogs();
-      unsubMessages();
+      active = false;
     };
   }, [isAdminUser]);
 
-  // Handle Login
-  const handleGoogleLogin = async () => {
-    try {
-      await signInWithGoogle();
-      handleNavigate("/");
-    } catch (error) {
-      console.error("Login failed:", error);
-      setLoginError("Login failed. Please try again.");
-    }
-  };
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [adminTab, setAdminTab] = useState("profile"); // 'profile', 'posts', 'products', 'messages'
@@ -5286,70 +5272,38 @@ export default function App() {
     setIsSaving(true);
     setIsNavigating(true);
     
-    // Helper to clean data for Firestore (remove docId)
-    const cleanData = (item: any) => {
-      const cleaned = { ...item };
-      delete cleaned.docId;
-      return cleaned;
-    };
-
     try {
-      const savePromises = [];
-
-      // Only save profile if it changed
+      // 1. Save Profile Settings if changed
       if (JSON.stringify(tempProfile) !== JSON.stringify(profile)) {
-        savePromises.push(setDoc(doc(db, "settings", "profile"), cleanData(tempProfile)));
-      }
-
-      // Save Posts (Only new or changed ones)
-      for (const post of tempPosts) {
-        const originalPost = posts.find(p => p.id === post.id);
-        if (!originalPost || JSON.stringify(originalPost) !== JSON.stringify(post)) {
-          const postRef = doc(db, "posts", post.docId || String(post.id));
-          savePromises.push(setDoc(postRef, cleanData(post)));
+        const profileRes = await fetch("/api/settings/profile", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(tempProfile)
+        });
+        if (!profileRes.ok) {
+          console.error("Failed to save profile settings:", profileRes.statusText);
         }
       }
 
-      // Save Products (Only new or changed ones)
-      for (const product of tempProducts) {
-        const originalProduct = products.find(p => p.id === product.id);
-        if (!originalProduct || JSON.stringify(originalProduct) !== JSON.stringify(product)) {
-          const productRef = doc(db, "products", product.docId || String(product.id));
-          savePromises.push(setDoc(productRef, cleanData(product)));
-        }
-      }
-
-      // Save Blogs (Only new or changed ones)
-      for (const blog of tempBlogs) {
-        const originalBlog = blogs.find(b => b.id === blog.id);
-        if (!originalBlog || JSON.stringify(originalBlog) !== JSON.stringify(blog)) {
-          const blogRef = doc(db, "blogs", blog.docId || String(blog.id));
-          savePromises.push(setDoc(blogRef, cleanData(blog)));
-        }
-      }
-
-      // Handle Deletions
-      for (const id of deletedPostIds) {
-        savePromises.push(deleteDoc(doc(db, "posts", id)));
-      }
-      for (const id of deletedProductIds) {
-        savePromises.push(deleteDoc(doc(db, "products", id)));
-      }
-      for (const id of deletedBlogIds) {
-        savePromises.push(deleteDoc(doc(db, "blogs", id)));
-      }
-
-      // Execute all necessary operations in parallel
-      if (savePromises.length > 0) {
-        // Use Promise.allSettled to handle individual failures better
-        const results = await Promise.allSettled(savePromises);
-        const failures = results.filter(r => r.status === 'rejected');
-        
-        if (failures.length > 0) {
-          console.error("Some operations failed:", failures);
-          // If some failed, we still update the UI with what we have, but warn the user
-          alert(`${failures.length} items failed to save. Please check your internet and try again.`);
-        }
+      // 2. Save and Sync Blogs, Products, Posts to Supabase via admin-sync proxy
+      const syncResponse = await fetch("/api/admin-sync", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          blogs: tempBlogs,
+          products: tempProducts,
+          posts: tempPosts,
+          deletedBlogIds,
+          deletedProductIds,
+          deletedPostIds
+        })
+      });
+      if (!syncResponse.ok) {
+        throw new Error("Failed to sync changes: " + syncResponse.statusText);
       }
 
       // Reset deletion trackers immediately
@@ -5367,9 +5321,8 @@ export default function App() {
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
     } catch (error) {
-      console.error("Failed to save to Firestore:", error);
+      console.error("Failed to save changes:", error);
       alert("Failed to save changes: " + (error instanceof Error ? error.message : "Unknown error"));
-      handleFirestoreError(error, OperationType.WRITE, "multiple");
     } finally {
       setIsSaving(false);
       setIsNavigating(false);
@@ -5389,14 +5342,24 @@ export default function App() {
         timestamp: new Date().toISOString()
       };
       
-      await addDoc(collection(db, "messages"), newMessage);
+      const response = await fetch("/api/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(newMessage)
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to submit message");
+      }
       
       setMessageSent(true);
       setContactData({ name: "", email: "", mobile: "", message: "" });
       setIsNavigating(false);
     } catch (error) {
       console.error("Failed to send message:", error);
-      handleFirestoreError(error, OperationType.CREATE, "messages");
+      alert("Failed to send message. Please try again.");
     } finally {
       setIsSendingMessage(false);
       setIsNavigating(false);
@@ -5406,13 +5369,17 @@ export default function App() {
   const handleDeleteMessage = async (id: number) => {
     if (!isAdminUser) return;
     try {
-      const msg = messages.find(m => m.id === id);
-      if (msg?.docId) {
-        await deleteDoc(doc(db, "messages", msg.docId));
+      const response = await fetch(`/api/messages/${id}`, {
+        method: "DELETE"
+      });
+      if (response.ok) {
+        setMessages(messages.filter(m => m.id !== id));
+      } else {
+        throw new Error("Failed to delete message");
       }
     } catch (error) {
       console.error("Delete failed:", error);
-      handleFirestoreError(error, OperationType.DELETE, "messages");
+      alert("Failed to delete message. Please try again.");
     }
   };
 
@@ -5515,10 +5482,9 @@ export default function App() {
             </div>
             <div className="flex items-center gap-3">
               <button 
-                onClick={async () => {
+                onClick={() => {
                   setIsAdminUser(false);
                   localStorage.removeItem("rfh_admin_session");
-                  await logout();
                   handleNavigate("/");
                 }}
                 className={`p-2 rounded-xl ${theme === "dark" ? "bg-red-500/10 border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white" : "bg-red-500/5 border-red-500/10 text-red-500 hover:bg-red-500 hover:text-white"} transition-all border`}
@@ -8270,7 +8236,7 @@ export default function App() {
           <Route path="/privacy-policy" element={<PrivacyPolicyPage profile={profile} theme={theme} navigate={handleNavigate} />} />
           <Route path="/terms-of-service" element={<TermsOfServicePage profile={profile} theme={theme} navigate={handleNavigate} />} />
           <Route path="/disclaimer" element={<DisclaimerPage profile={profile} theme={theme} navigate={handleNavigate} />} />
-          <Route path="/product/:id" element={<ProductDetailPage products={products} theme={theme} navigate={handleNavigate} db={db} isLoaded={isProductsLoaded} />} />
+          <Route path="/product/:id" element={<ProductDetailPage products={products} theme={theme} navigate={handleNavigate} isLoaded={isProductsLoaded} />} />
           <Route path="/post/:id" element={<PostDetailPage posts={posts} products={products} profile={profile} theme={theme} navigate={handleNavigate} isMuted={isMuted} setIsMuted={setIsMuted} isLoaded={isPostsLoaded} />} />
           <Route path="/blog" element={<BlogListPage blogs={blogs} theme={theme} navigate={handleNavigate} isLoaded={isBlogsLoaded} />} />
           <Route path="/blog/:id" element={<BlogDetailPage blogs={blogs} theme={theme} navigate={handleNavigate} isLoaded={isBlogsLoaded} />} />
