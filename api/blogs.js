@@ -34,7 +34,21 @@ export default async function handler(req, res) {
       .order('id', { ascending: false });
 
     if (error) throw error;
-    return res.status(200).json(data || []);
+
+    const mappedBlogs = (data || []).map(b => ({
+      id: b.id,
+      title: b.title,
+      excerpt: b.excerpt || "",
+      content: b.content || "",
+      category: b.category || "",
+      image: b.image_url || "",
+      seoTitle: b.seo_title || "",
+      metaDescription: b.meta_description || "",
+      focusKeyword: b.focus_keyword || "",
+      timestamp: b.timestamp || new Date().toISOString()
+    }));
+
+    return res.status(200).json(mappedBlogs);
   } catch (err) {
     console.error('Vercel API /api/blogs error:', err);
     return res.status(500).json({ error: err.message || String(err) });
