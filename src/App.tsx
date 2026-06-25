@@ -63,7 +63,8 @@ import {
   ShieldCheck,
   Clock,
   MapPin,
-  Edit
+  Edit,
+  Download
 } from "lucide-react";
 
 // Initial Mock Data
@@ -6202,7 +6203,49 @@ export default function App() {
                     />
                     <div className="flex-1">
                       <p className="text-sm font-bold">Profile Picture</p>
-                      <p className={`text-xs ${theme === "dark" ? "text-white/40" : "text-black/40"}`}>Recommended: 400x400px</p>
+                      <p className={`text-xs ${theme === "dark" ? "text-white/40" : "text-black/40"} mb-2`}>Recommended: 400x400px</p>
+                      {tempProfile.avatar && (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              const avatarUrl = tempProfile.avatar;
+                              if (avatarUrl.startsWith('data:')) {
+                                const link = document.createElement("a");
+                                link.href = avatarUrl;
+                                const match = avatarUrl.match(/^data:(image\/[a-zA-Z+]+);base64,/);
+                                const ext = match ? match[1].split('/')[1] : 'jpg';
+                                link.download = `profile_image.${ext}`;
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                              } else {
+                                const response = await fetch(avatarUrl);
+                                const blob = await response.blob();
+                                const url = window.URL.createObjectURL(blob);
+                                const link = document.createElement("a");
+                                link.href = url;
+                                link.download = "profile_image.jpg";
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                                window.URL.revokeObjectURL(url);
+                              }
+                            } catch (err) {
+                              console.error("Failed to download image:", err);
+                              window.open(tempProfile.avatar, '_blank');
+                            }
+                          }}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border cursor-pointer transition-all hover:scale-[1.02] active:scale-95 ${
+                            theme === "dark" 
+                              ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20" 
+                              : "bg-amber-500/10 border-amber-500/20 text-amber-700 hover:bg-amber-500/20"
+                          }`}
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          Download Image
+                        </button>
+                      )}
                     </div>
                   </div>
                   <div>
