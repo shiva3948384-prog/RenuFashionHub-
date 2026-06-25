@@ -4358,7 +4358,7 @@ export default function App() {
   const [tempProfile, setTempProfile] = useState(profile);
   const [tempPosts, setTempPosts] = useState(posts);
   const [tempProducts, setTempProducts] = useState(products);
-  const [tempBlogs, setTempBlogs] = useState<any[]>([]);
+  const [tempBlogs, setTempBlogs] = useState(blogs);
   const [deletedPostIds, setDeletedPostIds] = useState<string[]>([]);
   const [deletedProductIds, setDeletedProductIds] = useState<string[]>([]);
   const [deletedBlogIds, setDeletedBlogIds] = useState<string[]>([]);
@@ -4860,9 +4860,13 @@ export default function App() {
   const [contactData, setContactData] = useState({ name: "", email: "", mobile: "", message: "" });
   const [messageSent, setMessageSent] = useState(false);
 
-  // Reset temp states when entering admin
+  // Synchronize temp states with loaded data once they finish loading,
+  // or when entering `/admin` after loading has completed.
+  const isLoaded = isDataLoaded && isProductsLoaded && isPostsLoaded && isBlogsLoaded;
+  const [lastLoadedPath, setLastLoadedPath] = useState("");
+
   useEffect(() => {
-    if (location.pathname === "/admin") {
+    if (location.pathname === "/admin" && isLoaded && lastLoadedPath !== "/admin") {
       setTempProfile(profile);
       setTempPosts(posts);
       setTempProducts(products);
@@ -4870,8 +4874,11 @@ export default function App() {
       setDeletedPostIds([]);
       setDeletedProductIds([]);
       setDeletedBlogIds([]);
+      setLastLoadedPath("/admin");
+    } else if (location.pathname !== "/admin" && lastLoadedPath === "/admin") {
+      setLastLoadedPath("");
     }
-  }, [location.pathname, profile, posts, products, blogs]); // Added profile, posts, products, blogs to dependencies for safety
+  }, [location.pathname, isLoaded, profile, posts, products, blogs, lastLoadedPath]);
 
   const [newPost, setNewPost] = useState({ type: "image", url: "", taggedProducts: [] as number[] });
   const [newProduct, setNewProduct] = useState({ name: "", price: "", url: "", buyUrl: "", description: "" });
@@ -5537,18 +5544,18 @@ export default function App() {
                       if (itemToDelete.type === 'message') {
                         await handleDeleteMessage(itemToDelete.id);
                       } else if (itemToDelete.type === 'post') {
-                        if (itemToDelete.docId) {
-                          setDeletedPostIds(prev => [...prev, itemToDelete.docId!]);
+                        if (itemToDelete.id) {
+                          setDeletedPostIds(prev => [...prev, itemToDelete.id.toString()]);
                         }
                         setTempPosts(tempPosts.filter(p => p.id !== itemToDelete.id));
                       } else if (itemToDelete.type === 'product') {
-                        if (itemToDelete.docId) {
-                          setDeletedProductIds(prev => [...prev, itemToDelete.docId!]);
+                        if (itemToDelete.id) {
+                          setDeletedProductIds(prev => [...prev, itemToDelete.id.toString()]);
                         }
                         setTempProducts(tempProducts.filter(p => p.id !== itemToDelete.id));
                       } else if (itemToDelete.type === 'blog') {
-                        if (itemToDelete.docId) {
-                          setDeletedBlogIds(prev => [...prev, itemToDelete.docId!]);
+                        if (itemToDelete.id) {
+                          setDeletedBlogIds(prev => [...prev, itemToDelete.id.toString()]);
                         }
                         setTempBlogs(tempBlogs.filter(b => b.id !== itemToDelete.id));
                       }
@@ -6207,34 +6214,9 @@ export default function App() {
                       {tempProfile.avatar && (
                         <button
                           type="button"
-                          onClick={async () => {
-                            try {
-                              const avatarUrl = tempProfile.avatar;
-                              if (avatarUrl.startsWith('data:')) {
-                                const link = document.createElement("a");
-                                link.href = avatarUrl;
-                                const match = avatarUrl.match(/^data:(image\/[a-zA-Z+]+);base64,/);
-                                const ext = match ? match[1].split('/')[1] : 'jpg';
-                                link.download = `profile_image.${ext}`;
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
-                              } else {
-                                const response = await fetch(avatarUrl);
-                                const blob = await response.blob();
-                                const url = window.URL.createObjectURL(blob);
-                                const link = document.createElement("a");
-                                link.href = url;
-                                link.download = "profile_image.jpg";
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
-                                window.URL.revokeObjectURL(url);
-                              }
-                            } catch (err) {
-                              console.error("Failed to download image:", err);
-                              window.open(tempProfile.avatar, '_blank');
-                            }
+                          onClick={() => {
+                            const downloadUrl = `/api/download-image?url=${encodeURIComponent(tempProfile.avatar)}`;
+                            window.open(downloadUrl, '_blank');
                           }}
                           className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border cursor-pointer transition-all hover:scale-[1.02] active:scale-95 ${
                             theme === "dark" 
