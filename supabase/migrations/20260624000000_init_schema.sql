@@ -60,6 +60,19 @@ CREATE TABLE public.posts (
 -- Enable RLS on Posts
 ALTER TABLE public.posts ENABLE ROW LEVEL SECURITY;
 
+-- 5. Create Messages/Leads Table
+CREATE TABLE public.messages (
+  id BIGINT PRIMARY KEY,
+  name TEXT,
+  email TEXT,
+  mobile TEXT,
+  message TEXT,
+  timestamp TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Enable RLS on Messages
+ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+
 
 -- ========================================================
 -- HELPER FUNCTIONS FOR RLS & ROLE SECURITY
@@ -132,6 +145,16 @@ ON public.posts FOR ALL
 USING (public.is_admin_or_owner(auth.uid()))
 WITH CHECK (public.is_admin_or_owner(auth.uid()));
 
+-- Messages RLS
+CREATE POLICY "Allow public insert to messages"
+ON public.messages FOR INSERT
+WITH CHECK (true);
+
+CREATE POLICY "Allow admin and owner full control over messages"
+ON public.messages FOR ALL
+USING (public.is_admin_or_owner(auth.uid()))
+WITH CHECK (public.is_admin_or_owner(auth.uid()));
+
 
 -- ========================================================
 -- AUTOMATIC PROFILE CREATION TRIGGER
@@ -195,3 +218,4 @@ CREATE INDEX IF NOT EXISTS products_category_idx ON public.products (category);
 CREATE INDEX IF NOT EXISTS blogs_category_idx ON public.blogs (category);
 CREATE INDEX IF NOT EXISTS blogs_timestamp_idx ON public.blogs (timestamp DESC);
 CREATE INDEX IF NOT EXISTS posts_created_at_idx ON public.posts (created_at DESC);
+CREATE INDEX IF NOT EXISTS messages_timestamp_idx ON public.messages (timestamp DESC);
