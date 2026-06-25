@@ -49,7 +49,11 @@ export default async function handler(req, res) {
       if (fs.existsSync(MESSAGES_FILE_PATH)) {
         let currentMessages = JSON.parse(fs.readFileSync(MESSAGES_FILE_PATH, "utf8"));
         currentMessages = currentMessages.filter(m => m.id !== messageId);
-        fs.writeFileSync(MESSAGES_FILE_PATH, JSON.stringify(currentMessages, null, 2), "utf8");
+        try {
+          fs.writeFileSync(MESSAGES_FILE_PATH, JSON.stringify(currentMessages, null, 2), "utf8");
+        } catch (fErr) {
+          fs.writeFileSync("/tmp/messages.json", JSON.stringify(currentMessages, null, 2), "utf8");
+        }
       }
       return res.status(200).json({ success: true, source: "file" });
     } catch (err) {
@@ -73,7 +77,11 @@ export default async function handler(req, res) {
     }
 
     try {
-      if (fs.existsSync(MESSAGES_FILE_PATH)) {
+      const tmpPath = "/tmp/messages.json";
+      if (fs.existsSync(tmpPath)) {
+        const data = fs.readFileSync(tmpPath, "utf8");
+        return res.status(200).json(JSON.parse(data));
+      } else if (fs.existsSync(MESSAGES_FILE_PATH)) {
         const data = fs.readFileSync(MESSAGES_FILE_PATH, "utf8");
         return res.status(200).json(JSON.parse(data));
       }
@@ -104,11 +112,18 @@ export default async function handler(req, res) {
 
     try {
       let currentMessages = [];
-      if (fs.existsSync(MESSAGES_FILE_PATH)) {
+      const tmpPath = "/tmp/messages.json";
+      if (fs.existsSync(tmpPath)) {
+        currentMessages = JSON.parse(fs.readFileSync(tmpPath, "utf8"));
+      } else if (fs.existsSync(MESSAGES_FILE_PATH)) {
         currentMessages = JSON.parse(fs.readFileSync(MESSAGES_FILE_PATH, "utf8"));
       }
       currentMessages.unshift(newMessage);
-      fs.writeFileSync(MESSAGES_FILE_PATH, JSON.stringify(currentMessages, null, 2), "utf8");
+      try {
+        fs.writeFileSync(MESSAGES_FILE_PATH, JSON.stringify(currentMessages, null, 2), "utf8");
+      } catch (fErr) {
+        fs.writeFileSync(tmpPath, JSON.stringify(currentMessages, null, 2), "utf8");
+      }
       return res.status(200).json({ success: true, source: "file" });
     } catch (err) {
       return res.status(500).json({ error: err.message || String(err) });
