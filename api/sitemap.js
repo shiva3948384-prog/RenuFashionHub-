@@ -1,73 +1,96 @@
-// Dynamic sitemap generator for Renu Fashion Hub
-export default async function handler(req, res) {
-  const projectId = "ai-studio-applet-webapp-644f0";
-  const databaseId = "ai-studio-06f9cdf8-bcdb-4985-98dd-f7d34d6cf66c";
-  const baseRESTUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/${databaseId}/documents`;
-  const baseUrl = "https://www.renufashionhub.in";
+// Dynamic sitemap generator for Renu Fashion Hub via Supabase
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
 
-  // Helper to fetch collection items via Firestore REST API with full document fields
-  async function fetchCollectionDocs(collectionName) {
-    try {
-      const url = `${baseRESTUrl}/${collectionName}?pageSize=300`;
-      const response = await fetch(url);
-      if (!response.ok) {
-        console.error(`Error fetching ${collectionName}:`, response.statusText);
-        return [];
-      }
-      const data = await response.json();
-      if (!data.documents) return [];
-      
-      return data.documents.map(doc => {
-        const nameParts = doc.name.split('/');
-        const id = nameParts[nameParts.length - 1];
-        
-        let lastmod = "";
-        if (doc.updateTime) {
-          lastmod = doc.updateTime.split('.')[0] + 'Z';
-        }
+dotenv.config();
 
-        let category = "";
-        try {
-          if (doc.fields && doc.fields.category && doc.fields.category.stringValue) {
-            category = doc.fields.category.stringValue;
-          }
-        } catch (e) {
-          // ignore
-        }
+const baseUrl = "https://www.renufashionhub.in";
+const SUPABASE_URL = process.env.SUPABASE_URL || "";
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
-        return { id, lastmod, category };
-      });
-    } catch (err) {
-      console.error(`Failed to fetch collection ${collectionName}:`, err);
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false
+  }
+});
+
+// XML escaping utility to avoid SEMrush / structural parsing alerts
+function escapeXml(unsafe) {
+  if (!unsafe) return "";
+  return unsafe.replace(/[<>&'"]/g, (c) => {
+    switch (c) {
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+      case '&': return '&amp;';
+      case '\'': return '&apos;';
+      case '"': return '&quot;';
+      default: return c;
+    }
+  });
+}
+
+// Helper to fetch collection items via Supabase Client
+async function fetchCollectionDocs(tableName) {
+  try {
+    const { data, error } = await supabase.from(tableName).select('*');
+    if (error) {
+      console.error(`Failed to fetch ${tableName} from Supabase:`, error.message);
       return [];
     }
+    return (data || []).map((row) => {
+      let lastmod = new Date().toISOString().split('.')[0] + 'Z';
+      const timestampField = row.timestamp || row.created_at;
+      if (timestampField) {
+        try {
+          const d = new Date(timestampField);
+          if (!isNaN(d.getTime())) {
+            lastmod = d.toISOString().split('.')[0] + 'Z';
+          }
+        } catch (e) {
+          // Keep default
+        }
+      }
+
+      return {
+        id: String(row.id),
+        lastmod,
+        category: row.category ? String(row.category) : ""
+      };
+    });
+  } catch (err) {
+    console.error(`Failed to fetch ${tableName} via Supabase Client:`, err);
+    return [];
   }
+}
 
-  // Fetch collections in parallel
-  const [products, posts, blogs] = await Promise.all([
-    fetchCollectionDocs("products"),
-    fetchCollectionDocs("posts"),
-    fetchCollectionDocs("blogs")
-  ]);
+export default async function handler(req, res) {
+  try {
+    // Fetch collections in parallel
+    const [products, posts, blogs] = await Promise.all([
+      fetchCollectionDocs("products"),
+      fetchCollectionDocs("posts"),
+      fetchCollectionDocs("blogs")
+    ]);
 
-  // Aggregate unique active categories
-  const staticCategories = ["Sarees", "Kurtas", "Lehengas", "Dresses", "Jewelry"];
-  const dynamicCategories = new Set(staticCategories);
-  
-  products.forEach(p => {
-    if (p.category && p.category.toLowerCase() !== "other") {
-      dynamicCategories.add(p.category.charAt(0).toUpperCase() + p.category.slice(1).toLowerCase());
-    }
-  });
+    // Aggregate unique active categories
+    const staticCategories = ["Sarees", "Kurtas", "Lehengas", "Dresses", "Jewelry"];
+    const dynamicCategories = new Set(staticCategories);
+    
+    products.forEach(p => {
+      if (p.category && p.category.toLowerCase() !== "other") {
+        dynamicCategories.add(p.category.charAt(0).toUpperCase() + p.category.slice(1).toLowerCase());
+      }
+    });
 
-  posts.forEach(p => {
-    if (p.category && p.category.toLowerCase() !== "other") {
-      dynamicCategories.add(p.category.charAt(0).toUpperCase() + p.category.slice(1).toLowerCase());
-    }
-  });
+    posts.forEach(p => {
+      if (p.category && p.category.toLowerCase() !== "other") {
+        dynamicCategories.add(p.category.charAt(0).toUpperCase() + p.category.slice(1).toLowerCase());
+      }
+    });
 
-  // Start constructing the sitemap XML
-  let xml = `<?xml version="1.0" encoding="UTF-8"?>
+    // Start constructing the sitemap XML
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Core Static Pages -->
   <url>
@@ -77,12 +100,12 @@ export default async function handler(req, res) {
   </url>
   <url>
     <loc>${baseUrl}/about</loc>
-    <changefreq>monthly</changefreq>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>${baseUrl}/contact</loc>
-    <changefreq>monthly</changefreq>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
@@ -112,49 +135,68 @@ export default async function handler(req, res) {
   </url>
 `;
 
-  // Categories query URLs
-  Array.from(dynamicCategories).forEach(cat => {
-    xml += `  <url>
-    <loc>${baseUrl}/?category=${encodeURIComponent(cat)}</loc>
+    // Categories query URLs
+    Array.from(dynamicCategories).forEach(cat => {
+      const escapedCat = escapeXml(encodeURIComponent(cat));
+      xml += `  <url>
+    <loc>${baseUrl}/?category=${escapedCat}</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>\n`;
-  });
+    });
 
-  // Dynamic Products
-  products.forEach(p => {
-    xml += `  <url>
-    <loc>${baseUrl}/product/${p.id}</loc>
+    // Dynamic Products
+    products.forEach(p => {
+      const escapedId = escapeXml(encodeURIComponent(p.id));
+      xml += `  <url>
+    <loc>${baseUrl}/product/${escapedId}</loc>
+    <lastmod>${p.lastmod || "2026-06-22T00:00:00Z"}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>\n`;
+    });
+
+    // Dynamic Posts/Vlogs
+    posts.forEach(p => {
+      const escapedId = escapeXml(encodeURIComponent(p.id));
+      xml += `  <url>
+    <loc>${baseUrl}/post/${escapedId}</loc>
     <lastmod>${p.lastmod || "2026-06-22T00:00:00Z"}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>\n`;
-  });
+    });
 
-  // Dynamic Posts/Vlogs
-  posts.forEach(p => {
-    xml += `  <url>
-    <loc>${baseUrl}/post/${p.id}</loc>
-    <lastmod>${p.lastmod || "2026-06-22T00:00:00Z"}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>\n`;
-  });
-
-  // Dynamic Blogs
-  blogs.forEach(b => {
-    xml += `  <url>
-    <loc>${baseUrl}/blog/${b.id}</loc>
+    // Dynamic Blogs
+    blogs.forEach(b => {
+      const escapedId = escapeXml(encodeURIComponent(b.id));
+      xml += `  <url>
+    <loc>${baseUrl}/blog/${escapedId}</loc>
     <lastmod>${b.lastmod || "2026-06-22T00:00:00Z"}</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
   </url>\n`;
-  });
+    });
 
-  xml += `</urlset>`;
+    xml += `</urlset>`;
 
-  // Serve as XML content type
-  res.setHeader("Content-Type", "application/xml");
-  res.setHeader("Cache-Control", "s-maxage=3600, stale-while-revalidate");
-  res.status(200).send(xml);
+    res.setHeader("Content-Type", "application/xml");
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+    res.status(200).send(xml);
+  } catch (err) {
+    console.error("Critical error in sitemap generation:", err);
+    // Fallback simple sitemap in the rare case of overall failure so Google bots get a valid response
+    const fallbackXml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${baseUrl}/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>`;
+    res.setHeader("Content-Type", "application/xml");
+    res.status(200).send(fallbackXml);
+  }
 }
