@@ -492,12 +492,6 @@ const CustomCursor = ({ theme, isMobile }: { theme: string, isMobile: boolean })
       }
     };
 
-    const handleTouchStartGlobal = (e: TouchEvent) => {
-      if (e.touches.length > 0) {
-        addRippleRef.current(e.touches[0].clientX, e.touches[0].clientY);
-      }
-    };
-
     const handleCustomRippleGlobal = (e: any) => {
       if (e.detail) {
         addRippleRef.current(e.detail.x, e.detail.y);
@@ -505,12 +499,10 @@ const CustomCursor = ({ theme, isMobile }: { theme: string, isMobile: boolean })
     };
 
     window.addEventListener("mousedown", handleMouseDownGlobal, { passive: true });
-    window.addEventListener("touchstart", handleTouchStartGlobal, { passive: true });
     window.addEventListener("custom-ripple", handleCustomRippleGlobal);
 
     return () => {
       window.removeEventListener("mousedown", handleMouseDownGlobal);
-      window.removeEventListener("touchstart", handleTouchStartGlobal);
       window.removeEventListener("custom-ripple", handleCustomRippleGlobal);
     };
   }, []);
@@ -6083,9 +6075,7 @@ export default function App() {
                         ref={editEditorRef}
                         contentEditable
                         suppressContentEditableWarning={true}
-                        onInput={(e) => {
-                          const html = e.currentTarget.innerHTML;
-                          setEditingBlog((prev: any) => ({ ...prev, content: html }));
+                        onInput={() => {
                           updateEditorSelectionState();
                         }}
                         onMouseUp={updateEditorSelectionState}
@@ -6969,9 +6959,7 @@ export default function App() {
                       <div
                         id="blogRichEditor"
                         contentEditable
-                        onInput={(e) => {
-                          const html = e.currentTarget.innerHTML;
-                          setNewBlog(prev => ({ ...prev, content: html }));
+                        onInput={() => {
                           updateEditorSelectionState();
                         }}
                         onMouseUp={updateEditorSelectionState}
@@ -7021,7 +7009,9 @@ export default function App() {
                         <button 
                           type="button"
                           onClick={() => {
-                            if (!newBlog.title || !newBlog.content) {
+                            const editor = document.getElementById("blogRichEditor");
+                            const content = editor ? editor.innerHTML : newBlog.content;
+                            if (!newBlog.title || !content) {
                               alert("Please write a Title and Article content before publishing.");
                               return;
                             }
@@ -7030,7 +7020,7 @@ export default function App() {
                               title: newBlog.title,
                               category: newBlog.category || "Fashion",
                               excerpt: newBlog.excerpt || "Check out our latest fashion updates...",
-                              content: newBlog.content,
+                              content: content,
                               image: newBlog.image || "",
                               timestamp: new Date().toISOString(),
                               seoTitle: newBlog.seoTitle || "",
@@ -7039,7 +7029,6 @@ export default function App() {
                             };
                             setTempBlogs([blogPost, ...tempBlogs]);
                             setNewBlog({ title: "", category: "", excerpt: "", content: "", image: "", seoTitle: "", metaDescription: "", focusKeyword: "" });
-                            const editor = document.getElementById("blogRichEditor");
                             if (editor) editor.innerHTML = "";
                           }}
                           className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 text-stone-950 font-black uppercase text-xs tracking-wider transition-all flex items-center justify-center gap-2 hover:opacity-95"
