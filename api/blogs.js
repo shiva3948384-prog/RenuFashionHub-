@@ -35,18 +35,20 @@ export default async function handler(req, res) {
 
     if (error) throw error;
 
-    const mappedBlogs = (data || []).map(b => ({
-      id: b.id,
-      title: b.title,
-      excerpt: b.excerpt || "",
-      content: b.content || "",
-      category: b.category || "",
-      image: b.image_url || "",
-      seoTitle: b.seo_title || "",
-      metaDescription: b.meta_description || "",
-      focusKeyword: b.focus_keyword || "",
-      timestamp: b.timestamp || new Date().toISOString()
-    }));
+    const mappedBlogs = (data || [])
+      .filter(b => b.id !== 999999 && b.category !== "site_settings")
+      .map(b => ({
+        id: b.id,
+        title: b.title,
+        excerpt: b.excerpt || "",
+        content: b.content || "",
+        category: b.category || "",
+        image: b.image_url || "",
+        seoTitle: b.seo_title || "",
+        metaDescription: b.meta_description || "",
+        focusKeyword: b.focus_keyword || "",
+        timestamp: b.timestamp || new Date().toISOString()
+      }));
 
     return res.status(200).json(mappedBlogs);
   } catch (err) {
