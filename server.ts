@@ -228,7 +228,9 @@ async function startServer() {
         console.error(`Failed to fetch ${tableName} from Supabase:`, error.message);
         return [];
       }
-      return (data || []).map((row: any) => {
+      return (data || [])
+        .filter((row: any) => row.id !== 999999 && row.category !== "site_settings")
+        .map((row: any) => {
         let lastmod = new Date().toISOString().split('.')[0] + 'Z';
         const timestampField = row.timestamp || row.created_at;
         if (timestampField) {
@@ -895,11 +897,6 @@ async function startServer() {
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>${baseUrl}/login</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  <url>
     <loc>${baseUrl}/privacy-policy</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -989,10 +986,10 @@ async function startServer() {
 
   // Dynamic SEO and metadata injector for specific route requests
   async function serveSeoHtml(req: any, res: any, type: string) {
-    let title = "Renu Fashion Hub";
+    let title = "Renu Fashion Hub | Premium Fashion & Style Hub";
     let description = "Premium Fashion • Latest Trends • Style Hub. Elevating your style every day ✨";
-    let image = `${baseUrl}/favicon.png`;
-    let url = `${baseUrl}`;
+    let image = `${baseUrl}/favicon.svg`;
+    let url = `${baseUrl}/`;
 
     try {
       const { id } = req.params;
