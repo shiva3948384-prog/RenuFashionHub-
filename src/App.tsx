@@ -4333,7 +4333,7 @@ export default function App() {
   const [postsError, setPostsError] = useState(false);
   const [productsError, setProductsError] = useState(false);
   const [blogsError, setBlogsError] = useState(false);
-  const [isAdminUser, setIsAdminUser] = useState(() => localStorage.getItem("rfh_admin_session") === "true");
+  const [isAdminUser, setIsAdminUser] = useState(false);
   const [isSendingMessage, setIsSendingMessage] = useState(false);
 
   // Temporary states for Admin Panel
@@ -4603,6 +4603,29 @@ export default function App() {
       document.documentElement.classList.remove("dark");
     }
   }, [theme]);
+
+  useEffect(() => {
+    let active = true;
+    async function checkAdminSession() {
+      try {
+        const res = await fetch("/api/admin-auth", { cache: "no-store" });
+        if (!active) return;
+        if (res.ok) {
+          const data = await res.json();
+          setIsAdminUser(Boolean(data.authenticated));
+        } else {
+          setIsAdminUser(false);
+        }
+      } catch {
+        if (active) setIsAdminUser(false);
+      }
+    }
+
+    checkAdminSession();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // Splash Screen Timer
   useEffect(() => {
@@ -5389,13 +5412,26 @@ export default function App() {
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
-    if (loginData.username === "renufashionhub" && loginData.password === "gh12mn909") {
+    try {
+      const res = await fetch("/api/admin-auth", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ username: loginData.username, password: loginData.password })
+      });
+
+      if (!res.ok) {
+        setLoginError("Invalid username or password");
+        return;
+      }
+
       setIsAdminUser(true);
-      localStorage.setItem("rfh_admin_session", "true");
       handleNavigate("/admin");
       setLoginError("");
-    } else {
-      setLoginError("Invalid username or password");
+      setLoginData({ username: "", password: "" });
+    } catch {
+      setLoginError("Login failed. Please try again.");
     }
   };
 
@@ -5486,9 +5522,13 @@ export default function App() {
             </div>
             <div className="flex items-center gap-3">
               <button 
-                onClick={() => {
+                onClick={async () => {
+                  try {
+                    await fetch("/api/admin-auth", { method: "DELETE" });
+                  } catch {
+                    // Client state is still cleared below.
+                  }
                   setIsAdminUser(false);
-                  localStorage.removeItem("rfh_admin_session");
                   handleNavigate("/");
                 }}
                 className={`p-2 rounded-xl ${theme === "dark" ? "bg-red-500/10 border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white" : "bg-red-500/5 border-red-500/10 text-red-500 hover:bg-red-500 hover:text-white"} transition-all border`}
@@ -7196,6 +7236,7 @@ export default function App() {
               <input 
                 type="text" 
                 required
+                autoComplete="username"
                 value={loginData.username}
                 onChange={(e) => setLoginData({...loginData, username: e.target.value})}
                 className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-stone-50 border-stone-200 text-stone-900"} border rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500/50 transition-colors text-sm`}
@@ -7208,6 +7249,7 @@ export default function App() {
                 <input 
                   type={showPassword ? "text" : "password"} 
                   required
+                  autoComplete="current-password"
                   value={loginData.password}
                   onChange={(e) => setLoginData({...loginData, password: e.target.value})}
                   className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-stone-50 border-stone-200 text-stone-900"} border rounded-xl px-4 py-3 pr-12 focus:outline-none focus:border-amber-500/50 transition-colors text-sm`}
