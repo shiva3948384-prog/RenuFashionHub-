@@ -37,6 +37,12 @@ export default async function handler(req, res) {
       if (!user || !comment) {
         return res.status(400).json({ error: "Missing required fields: user or comment" });
       }
+      const safeUser = String(user).trim().slice(0, 80);
+      const safeComment = String(comment).trim().slice(0, 1000);
+      const safeRating = Math.min(5, Math.max(1, Number(rating) || 5));
+      if (!safeUser || !safeComment) {
+        return res.status(400).json({ error: "Invalid review content" });
+      }
 
       // 1. Fetch current product reviews
       const { data: product, error: fetchErr } = await supabase
@@ -52,9 +58,9 @@ export default async function handler(req, res) {
       const reviews = Array.isArray(product.reviews) ? product.reviews : [];
       const newReview = {
         id: Date.now(),
-        user,
-        rating: typeof rating === 'number' ? rating : 5,
-        comment,
+        user: safeUser,
+        rating: safeRating,
+        comment: safeComment,
         date: new Date().toISOString()
       };
 
