@@ -41,7 +41,9 @@ async function fetchCollectionDocsSupabase(tableName) {
       console.error(`Failed to fetch ${tableName} from Supabase:`, error.message);
       return [];
     }
-    return (data || []).map((row) => {
+    return (data || [])
+      .filter((row) => row.id !== 999999 && row.category !== "site_settings")
+      .map((row) => {
       let lastmod = new Date().toISOString().split('.')[0] + 'Z';
       const timestampField = row.timestamp || row.created_at;
       if (timestampField) {
@@ -115,11 +117,6 @@ export default async function handler(req, res) {
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>${baseUrl}/login</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  <url>
     <loc>${baseUrl}/privacy-policy</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -187,9 +184,7 @@ export default async function handler(req, res) {
     xml += `</urlset>`;
 
     res.setHeader("Content-Type", "application/xml");
-    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-    res.setHeader("Pragma", "no-cache");
-    res.setHeader("Expires", "0");
+    res.setHeader("Cache-Control", "public, max-age=300, s-maxage=3600");
     res.status(200).send(xml);
   } catch (err) {
     console.error("Critical error in sitemap generation:", err);
