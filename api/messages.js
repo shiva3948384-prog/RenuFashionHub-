@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
+import { applySameOriginHeaders, requireAdmin } from './_auth.js';
 
 dotenv.config();
 
@@ -18,10 +19,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
 const MESSAGES_FILE_PATH = path.join(process.cwd(), "backups", "messages.json");
 
 export default async function handler(req, res) {
-  // CORS setup
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,DELETE,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  applySameOriginHeaders(req, res, 'GET,POST,DELETE,OPTIONS');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -31,6 +29,8 @@ export default async function handler(req, res) {
 
   // 1. DELETE: Delete a message by ID
   if (req.method === 'DELETE' && id) {
+    if (!requireAdmin(req, res)) return;
+
     const messageId = parseInt(id, 10);
     if (isNaN(messageId)) {
       return res.status(400).json({ error: "Invalid message ID" });
@@ -63,6 +63,8 @@ export default async function handler(req, res) {
 
   // 2. GET: Retrieve messages
   if (req.method === 'GET') {
+    if (!requireAdmin(req, res)) return;
+
     try {
       const { data, error } = await supabase
         .from("messages")
