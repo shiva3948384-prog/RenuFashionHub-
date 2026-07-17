@@ -5516,7 +5516,7 @@ export default function App() {
                 <Settings className="w-5 h-5 text-amber-500 animate-spin-slow" />
               </div>
               <div>
-                <h1 className="text-lg font-bold">Admin Panel</h1>
+                <h2 className="text-lg font-bold">Admin Panel</h2>
                 <p className={`text-[10px] ${theme === "dark" ? "text-white/40" : "text-black/40"} uppercase tracking-widest`}>Control Center</p>
               </div>
             </div>
@@ -7226,7 +7226,7 @@ export default function App() {
             <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 mb-4">
               <Settings className="w-8 h-8 text-amber-500 animate-spin-slow" />
             </div>
-            <h1 className="text-2xl font-serif font-black tracking-tight text-amber-950 dark:text-amber-100">Admin Login</h1>
+            <h2 className="text-2xl font-serif font-black tracking-tight text-amber-950 dark:text-amber-100">Admin Login</h2>
             <p className={`${theme === "dark" ? "text-stone-400" : "text-stone-500"} text-xs mt-1 tracking-wide`}>Enter your credentials to continue</p>
           </div>
 
@@ -7307,9 +7307,9 @@ export default function App() {
                 <span className="text-[10px] uppercase tracking-[0.25em] font-semibold text-amber-600 dark:text-amber-400 block mb-1 group-hover:text-amber-500 transition-colors">
                   Styling Consultant Lounge
                 </span>
-                <h1 className="text-3xl font-serif font-semibold tracking-tight text-amber-950 dark:text-amber-100 flex items-center gap-2 group-hover:opacity-85 transition-opacity">
+                <h2 className="text-3xl font-serif font-semibold tracking-tight text-amber-950 dark:text-amber-100 flex items-center gap-2 group-hover:opacity-85 transition-opacity">
                   Contact Renu Fashion Hub <Sparkles className="w-5 h-5 text-amber-500 animate-pulse group-hover:scale-110 transition-transform" />
-                </h1>
+                </h2>
               </div>
               <button 
                 onClick={() => {
