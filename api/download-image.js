@@ -1,4 +1,22 @@
 // CORS-free image download proxy for both CDN URLs and Base64 Data-URLs
+const ALLOWED_IMAGE_HOSTS = new Set([
+  "renufashionhub.in",
+  "www.renufashionhub.in",
+  "api.iconify.design",
+  "images.unsplash.com",
+]);
+
+function isAllowedImageUrl(rawUrl) {
+  try {
+    const parsed = new URL(rawUrl);
+    if (parsed.protocol !== "https:") return false;
+    if (ALLOWED_IMAGE_HOSTS.has(parsed.hostname)) return true;
+    return parsed.hostname.endsWith(".supabase.co") || parsed.hostname.endsWith(".supabase.in");
+  } catch {
+    return false;
+  }
+}
+
 export default async function handler(req, res) {
   const { url } = req.query || {};
   if (!url) {
@@ -23,14 +41,30 @@ export default async function handler(req, res) {
     }
 
     // 2. Handle external URLs (CDN / Storage / etc.)
+    if (!isAllowedImageUrl(url)) {
+      return res.status(400).json({ error: "Image host is not allowed" });
+    }
+
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`Failed to fetch image: ${response.statusText}`);
     }
 
+    const contentType = response.headers.get('content-type') || 'image/jpeg';
+    if (!contentType.startsWith("image/")) {
+      return res.status(400).json({ error: "URL did not return an image" });
+    }
+
+    const contentLength = Number(response.headers.get("content-length") || 0);
+    if (contentLength > 5 * 1024 * 1024) {
+      return res.status(413).json({ error: "Image is too large" });
+    }
+
     const arrayBuffer = await response.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    const contentType = response.headers.get('content-type') || 'image/jpeg';
+    if (buffer.length > 5 * 1024 * 1024) {
+      return res.status(413).json({ error: "Image is too large" });
+    }
     const ext = contentType.split('/')[1] || 'jpg';
 
     res.setHeader('Content-Type', contentType);
