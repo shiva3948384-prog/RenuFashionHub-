@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
+import { applySameOriginHeaders, requireAdmin } from './_auth.js';
 
 dotenv.config();
 
@@ -66,10 +67,7 @@ async function uploadImageToStorage(bucket, id, base64Str) {
 }
 
 export default async function handler(req, res) {
-  // CORS setup
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  applySameOriginHeaders(req, res, 'GET,POST,OPTIONS');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -112,6 +110,8 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'POST') {
+    if (!requireAdmin(req, res)) return;
+
     try {
       const data = req.body || {};
 
