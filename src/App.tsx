@@ -2598,7 +2598,7 @@ const DisclaimerPage = ({ profile, theme, navigate }: { profile: any; theme: str
       canonicalLink.setAttribute('rel', 'canonical');
       document.head.appendChild(canonicalLink);
     }
-    canonicalLink.setAttribute('href', 'https://renufashionhub.in/disclaimer');
+    canonicalLink.setAttribute('href', 'https://www.renufashionhub.in/disclaimer');
   }, []);
 
   const disclaimerListItems = [
@@ -2629,7 +2629,7 @@ const DisclaimerPage = ({ profile, theme, navigate }: { profile: any; theme: str
     "@type": "WebPage",
     "name": "Disclaimer Policy - Renu Fashion Hub",
     "description": "Official legal limitations, no purchase obligations statement, and affiliate commission relationships disclosure of Renu Fashion Hub.",
-    "url": "https://renufashionhub.in/disclaimer",
+    "url": "https://www.renufashionhub.in/disclaimer",
     "publisher": {
       "@type": "Organization",
       "name": "Renu Fashion Hub",
