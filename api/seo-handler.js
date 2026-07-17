@@ -1,4 +1,4 @@
-// Serverless dynamic SEO and metadata injector for Renu Fashion Hub supporting both Firestore & Supabase
+// Serverless dynamic SEO and metadata injector for Renu Fashion Hub.
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import fs from 'fs';
@@ -7,6 +7,8 @@ import path from 'path';
 dotenv.config();
 
 const baseUrl = "https://www.renufashionhub.in";
+const defaultTitle = "Renu Fashion Hub | Premium Fashion & Style Hub";
+const defaultDescription = "Renu Fashion Hub brings women's fashion inspiration, sarees, kurtis, jewellery, outfit ideas, shopping guides, and style tips curated by Renu Agarwal.";
 const SUPABASE_URL = process.env.SUPABASE_URL || "";
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
@@ -17,7 +19,6 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   }
 });
 
-// Load config or set default metadata
 function escapeHtmlAttr(str) {
   if (!str) return "";
   return String(str)
@@ -28,87 +29,70 @@ function escapeHtmlAttr(str) {
     .replace(/>/g, '&gt;');
 }
 
+function stripHtml(str) {
+  return String(str || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function truncate(str, max = 155) {
+  const clean = stripHtml(str);
+  if (clean.length <= max) return clean;
+  return `${clean.slice(0, max - 1).trim()}...`;
+}
+
 export default async function handler(req, res) {
   const { type, id } = req.query;
 
-  let title = "Renu Fashion Hub";
-  let description = "Premium Fashion • Latest Trends • Style Hub. Elevating your style every day ✨";
-  let image = `${baseUrl}/favicon.png`;
-  let url = `${baseUrl}`;
+  let title = defaultTitle;
+  let description = defaultDescription;
+  let image = `${baseUrl}/favicon.svg`;
+  let url = `${baseUrl}/`;
+  let ogType = "website";
 
   try {
     if (type && id) {
-      const cleanId = String(id).split('?')[0];
+      const cleanId = String(id).split("?")[0];
 
-      if (type === "blog") {
-        let blog = null;
-        if (!isNaN(parseInt(cleanId, 10))) {
-          const { data, error } = await supabase
-            .from('blogs')
-            .select('*')
-            .eq('id', parseInt(cleanId, 10))
-            .single();
-          if (!error && data) {
-            blog = {
-              id: String(data.id),
-              title: data.title,
-              excerpt: data.excerpt,
-              image_url: data.image_url,
-              seo_title: data.seo_title,
-              meta_description: data.meta_description
-            };
-          }
-        }
+      if (type === "blog" && !isNaN(parseInt(cleanId, 10))) {
+        const { data, error } = await supabase
+          .from("blogs")
+          .select("*")
+          .eq("id", parseInt(cleanId, 10))
+          .single();
 
-        if (blog) {
-          title = blog.seo_title || `${blog.title} - Renu Fashion Hub`;
-          description = blog.meta_description || blog.excerpt || description;
-          image = blog.image_url || image;
+        if (!error && data && data.id !== 999999 && data.category !== "site_settings") {
+          title = data.seo_title || `${data.title} - Renu Fashion Hub`;
+          description = truncate(data.meta_description || data.excerpt || data.content || defaultDescription);
+          image = data.image_url || image;
           url = `${baseUrl}/blog/${cleanId}`;
+          ogType = "article";
         }
-      } else if (type === "product") {
-        let product = null;
-        if (!isNaN(parseInt(cleanId, 10))) {
-          const { data, error } = await supabase
-            .from('products')
-            .select('*')
-            .eq('id', parseInt(cleanId, 10))
-            .single();
-          if (!error && data) {
-            product = {
-              id: String(data.id),
-              name: data.name,
-              description: data.description,
-              image_url: data.image_url
-            };
-          }
-        }
+      } else if (type === "product" && !isNaN(parseInt(cleanId, 10))) {
+        const { data, error } = await supabase
+          .from("products")
+          .select("*")
+          .eq("id", parseInt(cleanId, 10))
+          .single();
 
-        if (product) {
-          title = `${product.name} - Renu Fashion Hub`;
-          description = product.description || description;
-          image = product.image_url || image;
+        if (!error && data) {
+          title = `${data.name} - Renu Fashion Hub`;
+          description = truncate(data.description || `${data.name} fashion pick, price, reviews, styling details, and shopping guide at Renu Fashion Hub.`);
+          image = data.image_url || image;
           url = `${baseUrl}/product/${cleanId}`;
+          ogType = "product";
         }
-      } else if (type === "post") {
-        let post = null;
-        if (!isNaN(parseInt(cleanId, 10))) {
-          const { data, error } = await supabase
-            .from('posts')
-            .select('*')
-            .eq('id', parseInt(cleanId, 10))
-            .single();
-          if (!error && data) {
-            post = {
-              id: String(data.id)
-            };
-          }
-        }
+      } else if (type === "post" && !isNaN(parseInt(cleanId, 10))) {
+        const { data, error } = await supabase
+          .from("posts")
+          .select("*")
+          .eq("id", parseInt(cleanId, 10))
+          .single();
 
-        if (post) {
-          title = `Post #${cleanId} - Renu Fashion Hub`;
+        if (!error && data) {
+          title = `Fashion Style Post ${cleanId} - Renu Fashion Hub`;
           description = "Watch the latest outfit style, custom lookbook, and collection recommendation video at Renu Fashion Hub.";
+          image = data.type === "image" && data.url ? data.url : image;
           url = `${baseUrl}/post/${cleanId}`;
+          ogType = "article";
         }
       }
     }
@@ -116,15 +100,14 @@ export default async function handler(req, res) {
     console.error("Database lookup error inside seo-handler:", dbErr);
   }
 
-  // Read index.html as template
   let html = "";
   try {
-    const distPath = path.join(process.cwd(), 'dist', 'index.html');
+    const distPath = path.join(process.cwd(), "dist", "index.html");
     if (fs.existsSync(distPath)) {
-      html = fs.readFileSync(distPath, 'utf8');
+      html = fs.readFileSync(distPath, "utf8");
     } else {
-      const rootPath = path.join(process.cwd(), 'index.html');
-      html = fs.readFileSync(rootPath, 'utf8');
+      const rootPath = path.join(process.cwd(), "index.html");
+      html = fs.readFileSync(rootPath, "utf8");
     }
   } catch (fileErr) {
     console.error("Failed to read HTML template in seo-handler:", fileErr);
@@ -133,8 +116,6 @@ export default async function handler(req, res) {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>${escapeHtmlAttr(title)}</title>
-    <meta name="description" content="${escapeHtmlAttr(description)}" />
   </head>
   <body>
     <div id="root"></div>
@@ -142,20 +123,20 @@ export default async function handler(req, res) {
 </html>`;
   }
 
-  // Inject/Replace HTML Metadata Tags with robust clean-and-inject strategy
   try {
-    html = html.replace(/<title>.*?<\/title>/gi, '');
-    html = html.replace(/<meta\s+[^>]*name=["']description["'][^>]*>/gi, '');
-    html = html.replace(/<meta\s+[^>]*name=["']keywords["'][^>]*>/gi, '');
-    html = html.replace(/<meta\s+[^>]*property=["']og:title["'][^>]*>/gi, '');
-    html = html.replace(/<meta\s+[^>]*property=["']og:description["'][^>]*>/gi, '');
-    html = html.replace(/<meta\s+[^>]*property=["']og:image["'][^>]*>/gi, '');
-    html = html.replace(/<meta\s+[^>]*property=["']og:url["'][^>]*>/gi, '');
-    html = html.replace(/<meta\s+[^>]*name=["']twitter:card["'][^>]*>/gi, '');
-    html = html.replace(/<meta\s+[^>]*name=["']twitter:title["'][^>]*>/gi, '');
-    html = html.replace(/<meta\s+[^>]*name=["']twitter:description["'][^>]*>/gi, '');
-    html = html.replace(/<meta\s+[^>]*name=["']twitter:image["'][^>]*>/gi, '');
-    html = html.replace(/<link\s+[^>]*rel=["']canonical["'][^>]*>/gi, '');
+    html = html.replace(/<title>.*?<\/title>/gi, "");
+    html = html.replace(/<meta\s+[^>]*name=["']description["'][^>]*>/gi, "");
+    html = html.replace(/<meta\s+[^>]*name=["']keywords["'][^>]*>/gi, "");
+    html = html.replace(/<meta\s+[^>]*property=["']og:title["'][^>]*>/gi, "");
+    html = html.replace(/<meta\s+[^>]*property=["']og:description["'][^>]*>/gi, "");
+    html = html.replace(/<meta\s+[^>]*property=["']og:type["'][^>]*>/gi, "");
+    html = html.replace(/<meta\s+[^>]*property=["']og:image["'][^>]*>/gi, "");
+    html = html.replace(/<meta\s+[^>]*property=["']og:url["'][^>]*>/gi, "");
+    html = html.replace(/<meta\s+[^>]*name=["']twitter:card["'][^>]*>/gi, "");
+    html = html.replace(/<meta\s+[^>]*name=["']twitter:title["'][^>]*>/gi, "");
+    html = html.replace(/<meta\s+[^>]*name=["']twitter:description["'][^>]*>/gi, "");
+    html = html.replace(/<meta\s+[^>]*name=["']twitter:image["'][^>]*>/gi, "");
+    html = html.replace(/<link\s+[^>]*rel=["']canonical["'][^>]*>/gi, "");
 
     const cleanMeta = `
     <title>${escapeHtmlAttr(title)}</title>
@@ -163,6 +144,7 @@ export default async function handler(req, res) {
     <link rel="canonical" href="${escapeHtmlAttr(url)}" />
     <meta property="og:title" content="${escapeHtmlAttr(title)}" />
     <meta property="og:description" content="${escapeHtmlAttr(description)}" />
+    <meta property="og:type" content="${escapeHtmlAttr(ogType)}" />
     <meta property="og:image" content="${escapeHtmlAttr(image)}" />
     <meta property="og:url" content="${escapeHtmlAttr(url)}" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -171,7 +153,6 @@ export default async function handler(req, res) {
     <meta name="twitter:image" content="${escapeHtmlAttr(image)}" />
 `;
     html = html.replace(/<\/head>/i, `${cleanMeta}\n</head>`);
-
   } catch (replaceErr) {
     console.error("Regex replacement failed in seo-handler:", replaceErr);
   }
