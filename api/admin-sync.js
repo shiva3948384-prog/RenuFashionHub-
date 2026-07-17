@@ -1,6 +1,7 @@
 // Serverless helper to synchronize frontend changes directly to Supabase
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
+import { applySameOriginHeaders, requireAdmin } from './_auth.js';
 
 dotenv.config();
 
@@ -56,21 +57,17 @@ async function uploadImageToStorage(bucket, id, base64Str) {
 }
 
 export default async function handler(req, res) {
-  // Allow OPTIONS pre-flight request for CORS if needed
+  applySameOriginHeaders(req, res, 'POST,OPTIONS');
+
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-    res.setHeader(
-      'Access-Control-Allow-Headers',
-      'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-    );
     return res.status(200).end();
   }
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: "Method not allowed. Use POST." });
   }
+
+  if (!requireAdmin(req, res)) return;
 
   try {
     const {
@@ -239,7 +236,6 @@ export default async function handler(req, res) {
     }
 
     // Return final response
-    res.setHeader('Access-Control-Allow-Origin', '*');
     if (results.errors.length > 0) {
       return res.status(207).json({
         message: "Synchronization completed with some errors",
@@ -254,7 +250,6 @@ export default async function handler(req, res) {
 
   } catch (err) {
     console.error("Critical error in admin-sync handler:", err);
-    res.setHeader('Access-Control-Allow-Origin', '*');
     return res.status(500).json({
       error: "Internal server error during synchronization",
       details: err.message || String(err)
