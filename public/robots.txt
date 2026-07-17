@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /login
 
-Sitemap: https://.renufashionhub.in/sitemap.xml
+Sitemap: https://www.renufashionhub.in/sitemap.xml
