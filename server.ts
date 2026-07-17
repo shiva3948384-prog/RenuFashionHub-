@@ -6,6 +6,7 @@ import compression from "compression";
 import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
 import fs from "fs";
+import crypto from "crypto";
 
 dotenv.config();
 
@@ -23,18 +24,141 @@ async function startServer() {
   const app = express();
   app.use(compression());
   app.use(express.json({ limit: "50mb" }));
+  app.use((req, res, next) => {
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
+    res.setHeader(
+      "Content-Security-Policy",
+      "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; media-src 'self' data: blob: https:; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://www.instagram.com https://www.facebook.com https://googleads.g.doubleclick.net; connect-src 'self' https:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+    );
+    if (req.secure || req.headers["x-forwarded-proto"] === "https") {
+      res.setHeader("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+    }
+    next();
+  });
   const PORT = 3000;
 
   const baseUrl = "https://www.renufashionhub.in";
 
   const SUPABASE_URL = process.env.SUPABASE_URL || "";
   const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+  const ADMIN_COOKIE_NAME = "rfh_admin_session";
+  const ADMIN_SESSION_TTL_SECONDS = 60 * 60 * 8;
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
     },
+  });
+
+  function getAdminSecret() {
+    return process.env.ADMIN_SESSION_SECRET || SUPABASE_SERVICE_ROLE_KEY || "";
+  }
+
+  function signAdminPayload(value: string) {
+    return crypto.createHmac("sha256", getAdminSecret()).update(value).digest("hex");
+  }
+
+  function parseCookies(cookieHeader: string | undefined) {
+    return Object.fromEntries(
+      (cookieHeader || "")
+        .split(";")
+        .map((part) => part.trim())
+        .filter(Boolean)
+        .map((part) => {
+          const index = part.indexOf("=");
+          if (index === -1) return [part, ""];
+          return [part.slice(0, index), decodeURIComponent(part.slice(index + 1))];
+        })
+    );
+  }
+
+  function safeEqual(a: string, b: string) {
+    const left = Buffer.from(a || "");
+    const right = Buffer.from(b || "");
+    return left.length === right.length && crypto.timingSafeEqual(left, right);
+  }
+
+  function createAdminCookie() {
+    const expiresAt = Math.floor(Date.now() / 1000) + ADMIN_SESSION_TTL_SECONDS;
+    const nonce = crypto.randomBytes(16).toString("hex");
+    const payload = `${expiresAt}.${nonce}`;
+    const token = `${payload}.${signAdminPayload(payload)}`;
+    return `${ADMIN_COOKIE_NAME}=${encodeURIComponent(token)}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${ADMIN_SESSION_TTL_SECONDS}`;
+  }
+
+  function clearAdminCookie() {
+    return `${ADMIN_COOKIE_NAME}=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0`;
+  }
+
+  function isAdminRequest(req: any) {
+    const secret = getAdminSecret();
+    if (!secret || secret.length < 32) return false;
+
+    const token = parseCookies(req.headers.cookie)[ADMIN_COOKIE_NAME];
+    if (!token) return false;
+
+    const parts = token.split(".");
+    if (parts.length !== 3) return false;
+
+    const [expiresAtRaw, nonce, signature] = parts;
+    const expiresAt = Number(expiresAtRaw);
+    if (!Number.isFinite(expiresAt) || expiresAt < Math.floor(Date.now() / 1000)) return false;
+    if (!/^[a-f0-9]{32}$/i.test(nonce)) return false;
+
+    return safeEqual(signature, signAdminPayload(`${expiresAtRaw}.${nonce}`));
+  }
+
+  function requireAdmin(req: any, res: any) {
+    if (isAdminRequest(req)) return true;
+    res.setHeader("Cache-Control", "no-store");
+    res.status(401).json({ error: "Unauthorized" });
+    return false;
+  }
+
+  function hashAdminPassword(password: string, salt: string) {
+    return crypto.scryptSync(password, salt, 64).toString("hex");
+  }
+
+  function verifyAdminPassword(password: string) {
+    const salt = process.env.ADMIN_PASSWORD_SALT || "";
+    const expectedHash = process.env.ADMIN_PASSWORD_HASH || "";
+    if (!password || !salt || !expectedHash) return false;
+    const computed = hashAdminPassword(password, salt);
+    const left = Buffer.from(computed, "hex");
+    const right = Buffer.from(expectedHash, "hex");
+    return left.length === right.length && crypto.timingSafeEqual(left, right);
+  }
+
+  function verifyAdminCredentials(username: string, password: string) {
+    const expectedUsername = process.env.ADMIN_USERNAME || "";
+    if (!username || !expectedUsername || !safeEqual(username, expectedUsername)) return false;
+    return verifyAdminPassword(password);
+  }
+
+  app.get("/api/admin-auth", (req, res) => {
+    res.setHeader("Cache-Control", "no-store");
+    res.json({ authenticated: isAdminRequest(req) });
+  });
+
+  app.post("/api/admin-auth", (req, res) => {
+    res.setHeader("Cache-Control", "no-store");
+    const { username, password } = req.body || {};
+    if (!verifyAdminCredentials(username, password)) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    res.setHeader("Set-Cookie", createAdminCookie());
+    return res.json({ success: true });
+  });
+
+  app.delete("/api/admin-auth", (req, res) => {
+    res.setHeader("Cache-Control", "no-store");
+    res.setHeader("Set-Cookie", clearAdminCookie());
+    res.json({ success: true });
   });
 
   // Helper to parse base64 image strings
@@ -207,6 +331,12 @@ async function startServer() {
       if (!user || !comment) {
         return res.status(400).json({ error: "Missing required fields: user or comment" });
       }
+      const safeUser = String(user).trim().slice(0, 80);
+      const safeComment = String(comment).trim().slice(0, 1000);
+      const safeRating = Math.min(5, Math.max(1, Number(rating) || 5));
+      if (!safeUser || !safeComment) {
+        return res.status(400).json({ error: "Invalid review content" });
+      }
 
       // 1. Fetch current product reviews
       const { data: product, error: fetchErr } = await supabase
@@ -222,9 +352,9 @@ async function startServer() {
       const reviews = Array.isArray(product.reviews) ? product.reviews : [];
       const newReview = {
         id: Date.now(),
-        user,
-        rating: typeof rating === "number" ? rating : 5,
-        comment,
+        user: safeUser,
+        rating: safeRating,
+        comment: safeComment,
         date: new Date().toISOString()
       };
 
@@ -311,6 +441,8 @@ async function startServer() {
   });
 
   app.post("/api/settings/profile", async (req, res) => {
+    if (!requireAdmin(req, res)) return;
+
     try {
       const data = req.body || {};
       
@@ -358,6 +490,24 @@ async function startServer() {
     }
   });
 
+  const ALLOWED_IMAGE_HOSTS = new Set([
+    "renufashionhub.in",
+    "www.renufashionhub.in",
+    "api.iconify.design",
+    "images.unsplash.com",
+  ]);
+
+  function isAllowedImageUrl(rawUrl: string) {
+    try {
+      const parsed = new URL(rawUrl);
+      if (parsed.protocol !== "https:") return false;
+      if (ALLOWED_IMAGE_HOSTS.has(parsed.hostname)) return true;
+      return parsed.hostname.endsWith(".supabase.co") || parsed.hostname.endsWith(".supabase.in");
+    } catch {
+      return false;
+    }
+  }
+
   // CORS-free image download proxy for both CDN URLs and Base64 Data-URLs
   app.get("/api/download-image", async (req, res) => {
     const { url } = req.query || {};
@@ -383,14 +533,31 @@ async function startServer() {
       }
 
       // 2. Handle external URLs (CDN / Storage / etc.)
+      if (!isAllowedImageUrl(url)) {
+        return res.status(400).json({ error: "Image host is not allowed" });
+      }
+
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`Failed to fetch image: ${response.statusText}`);
       }
 
+      const contentType = response.headers.get('content-type') || 'image/jpeg';
+      if (!contentType.startsWith("image/")) {
+        return res.status(400).json({ error: "URL did not return an image" });
+      }
+
+      const contentLength = Number(response.headers.get("content-length") || 0);
+      if (contentLength > 5 * 1024 * 1024) {
+        return res.status(413).json({ error: "Image is too large" });
+      }
+
       const arrayBuffer = await response.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
-      const contentType = response.headers.get('content-type') || 'image/jpeg';
+      if (buffer.length > 5 * 1024 * 1024) {
+        return res.status(413).json({ error: "Image is too large" });
+      }
+
       const ext = contentType.split('/')[1] || 'jpg';
 
       res.setHeader('Content-Type', contentType);
@@ -407,6 +574,8 @@ async function startServer() {
   const MESSAGES_FILE_PATH = path.join(process.cwd(), "backups", "messages.json");
 
   app.get("/api/messages", async (req, res) => {
+    if (!requireAdmin(req, res)) return;
+
     try {
       const { data, error } = await supabase
         .from("messages")
@@ -465,6 +634,8 @@ async function startServer() {
   });
 
   app.delete("/api/messages/:id", async (req, res) => {
+    if (!requireAdmin(req, res)) return;
+
     const id = parseInt(req.params.id, 10);
     try {
       const { error } = await supabase.from("messages").delete().eq("id", id);
@@ -489,6 +660,8 @@ async function startServer() {
 
   // Secure admin-sync proxy to keep Supabase and Firestore aligned
   app.post("/api/admin-sync", async (req, res) => {
+    if (!requireAdmin(req, res)) return;
+
     try {
       const {
         blogs,
