@@ -6411,7 +6411,7 @@ export default function App() {
               <button
                 key={tab.id}
                 onClick={() => setAdminTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all whitespace-nowrap border ${
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all whitespace-nowrap border hover-scale ${
                   adminTab === tab.id 
                     ? `${theme === "dark" ? "bg-rose-500 text-stone-950 border-rose-500 shadow-md shadow-rose-500/10" : "bg-rose-950 text-white border-[#1c1b18] shadow-md shadow-rose-950/10"}` 
                     : `${theme === "dark" ? "bg-stone-900/40 text-stone-400 border-rose-500/10 hover:bg-stone-900/60" : "bg-white/60 text-stone-600 border-rose-500/10 hover:bg-white"}`
@@ -6428,7 +6428,7 @@ export default function App() {
             ))}
           </div>
 
-          <div className="space-y-8">
+          <div key={adminTab} className="space-y-8 animate-fade-in-up">
             {adminTab === "profile" && (
               <section className={`p-6 rounded-3xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border`}>
                 <h2 className="text-lg font-black font-serif text-rose-950 dark:text-rose-100 mb-6 flex items-center gap-2">
@@ -7961,11 +7961,11 @@ export default function App() {
                 </PremiumButton>
                 <PremiumButton
                   onClick={() => handleNavigate("/blog")}
-                  className="w-full"
-                  variant={theme === "dark" ? "primary" : "secondary"}
+                  className="w-full animate-pulse-glow"
+                  variant="primary"
                 >
                   <span className="flex items-center justify-center gap-2">
-                    <BookOpen className="w-4 h-4 text-rose-500 animate-pulse" />
+                    <BookOpen className="w-4 h-4 text-white animate-pulse" />
                     Fashion Blog
                   </span>
                 </PremiumButton>
