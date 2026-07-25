@@ -5230,6 +5230,113 @@ export default function App() {
     input.click();
   };
 
+  // ============= SMART PASTE (Blogger/Patreon-style) =============
+  // Preserves headings/bold/italic/lists from ChatGPT, Google Docs, Word, Notion.
+  // Also converts markdown-style plain text (## Heading, **bold**, - list) to HTML.
+  const sanitizePastedHtml = (html: string): string => {
+    const allowedTags = new Set(["H1","H2","H3","H4","H5","H6","P","BR","STRONG","B","EM","I","U","A","UL","OL","LI","BLOCKQUOTE","CODE","PRE","IMG","DIV","SPAN"]);
+    const allowedAttrs: Record<string,string[]> = { A: ["href","title","target","rel"], IMG: ["src","alt","title"] };
+    const doc = new DOMParser().parseFromString(`<div id="__root__">${html}</div>`, "text/html");
+    const root = doc.getElementById("__root__");
+    if (!root) return "";
+    const walk = (node: Element) => {
+      Array.from(node.children).forEach(walk);
+      const tag = node.tagName;
+      if (!allowedTags.has(tag)) {
+        // unwrap unknown tag but keep its text/children
+        const parent = node.parentNode;
+        if (parent) {
+          while (node.firstChild) parent.insertBefore(node.firstChild, node);
+          parent.removeChild(node);
+        }
+        return;
+      }
+      // strip disallowed attributes (removes styles, classes, spans of colors, etc.)
+      const keep = allowedAttrs[tag] || [];
+      Array.from(node.attributes).forEach(attr => {
+        if (!keep.includes(attr.name.toLowerCase())) node.removeAttribute(attr.name);
+      });
+      // force safe link targets
+      if (tag === "A") {
+        const href = node.getAttribute("href") || "";
+        if (/^\s*javascript:/i.test(href)) node.removeAttribute("href");
+        if (node.getAttribute("target") === "_blank") node.setAttribute("rel","noopener noreferrer");
+      }
+    };
+    walk(root);
+    return root.innerHTML;
+  };
+
+  const markdownToHtml = (text: string): string => {
+    const escape = (s: string) => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    const lines = text.replace(/\r\n/g,"\n").split("\n");
+    const out: string[] = [];
+    let listType: "ul" | "ol" | null = null;
+    const closeList = () => { if (listType) { out.push(`</${listType}>`); listType = null; } };
+    const inline = (s: string) => escape(s)
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/__(.+?)__/g, "<strong>$1</strong>")
+      .replace(/(^|\s)\*(?!\s)([^*]+?)\*(?!\w)/g, "$1<em>$2</em>")
+      .replace(/(^|\s)_(?!\s)([^_]+?)_(?!\w)/g, "$1<em>$2</em>")
+      .replace(/`([^`]+)`/g, "<code>$1</code>")
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+    for (const raw of lines) {
+      const line = raw.trimEnd();
+      const h = line.match(/^(#{1,6})\s+(.*)$/);
+      const ul = line.match(/^\s*[-*+]\s+(.*)$/);
+      const ol = line.match(/^\s*\d+[.)]\s+(.*)$/);
+      if (h) {
+        closeList();
+        const lvl = Math.min(h[1].length, 6);
+        out.push(`<h${lvl}>${inline(h[2])}</h${lvl}>`);
+      } else if (ul) {
+        if (listType !== "ul") { closeList(); out.push("<ul>"); listType = "ul"; }
+        out.push(`<li>${inline(ul[1])}</li>`);
+      } else if (ol) {
+        if (listType !== "ol") { closeList(); out.push("<ol>"); listType = "ol"; }
+        out.push(`<li>${inline(ol[1])}</li>`);
+      } else if (line.trim() === "") {
+        closeList();
+      } else {
+        closeList();
+        out.push(`<p>${inline(line)}</p>`);
+      }
+    }
+    closeList();
+    return out.join("");
+  };
+
+  const handleSmartPaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const cd = e.clipboardData;
+    if (!cd) return;
+    const html = cd.getData("text/html");
+    const text = cd.getData("text/plain");
+    let insert = "";
+    if (html && html.trim()) {
+      insert = sanitizePastedHtml(html);
+    } else if (text) {
+      // Detect markdown-ish syntax; else fall back to line-broken paragraphs
+      if (/(^|\n)\s*(#{1,6}\s|[-*+]\s|\d+[.)]\s)|(\*\*|__|`|\[.+\]\(.+\))/.test(text)) {
+        insert = markdownToHtml(text);
+      } else {
+        const esc = text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+        insert = esc.split(/\n{2,}/).map(p => `<p>${p.replace(/\n/g,"<br>")}</p>`).join("");
+      }
+    }
+    if (!insert) return;
+    document.execCommand("insertHTML", false, insert);
+    const editor = e.currentTarget;
+    if (editor.id === "editBlogRichEditor") {
+      setEditingBlog((prev: any) => prev ? { ...prev, content: editor.innerHTML } : prev);
+    } else {
+      setNewBlog((prev: any) => ({ ...prev, content: editor.innerHTML }));
+    }
+    updateEditorSelectionState();
+  };
+
+
+
   const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>, target: "avatar" | "post" | "product" | "blog") => {
     const file = e.target.files?.[0];
     if (file) {
@@ -5990,6 +6097,18 @@ export default function App() {
                         {/* Format Blocks */}
                         <button
                           type="button"
+                          onMouseDown={(e) => { e.preventDefault(); document.execCommand('formatBlock', false, '<h1>'); }}
+                          className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          title="Heading 1"
+                        >H1</button>
+                        <button
+                          type="button"
+                          onMouseDown={(e) => { e.preventDefault(); document.execCommand('formatBlock', false, '<h2>'); }}
+                          className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          title="Heading 2"
+                        >H2</button>
+                        <button
+                          type="button"
                           onMouseDown={(e) => {
                             e.preventDefault();
                             document.execCommand('formatBlock', false, '<h3>');
@@ -5999,6 +6118,7 @@ export default function App() {
                         >
                           H3
                         </button>
+
                         <button
                           type="button"
                           onMouseDown={(e) => {
@@ -6122,6 +6242,7 @@ export default function App() {
                         onKeyUp={updateEditorSelectionState}
                         onFocus={updateEditorSelectionState}
                         onBlur={updateEditorSelectionState}
+                        onPaste={handleSmartPaste}
                         className={`w-full min-h-[220px] p-4 text-sm font-semibold focus:outline-none blog-content ${theme === "dark" ? "text-stone-100" : "text-stone-850"}`}
                       />
                     </div>
@@ -6876,6 +6997,18 @@ export default function App() {
                         {/* CMS Visual Block styles */}
                         <button
                           type="button"
+                          onMouseDown={(e) => { e.preventDefault(); document.execCommand('formatBlock', false, '<h1>'); }}
+                          className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          title="Heading 1"
+                        >H1</button>
+                        <button
+                          type="button"
+                          onMouseDown={(e) => { e.preventDefault(); document.execCommand('formatBlock', false, '<h2>'); }}
+                          className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          title="Heading 2"
+                        >H2</button>
+                        <button
+                          type="button"
                           onMouseDown={(e) => {
                             e.preventDefault();
                             document.execCommand('formatBlock', false, '<h3>');
@@ -6885,6 +7018,7 @@ export default function App() {
                         >
                           H3
                         </button>
+
                         <button
                           type="button"
                           onMouseDown={(e) => {
@@ -7006,6 +7140,7 @@ export default function App() {
                         onKeyUp={updateEditorSelectionState}
                         onFocus={updateEditorSelectionState}
                         onBlur={updateEditorSelectionState}
+                        onPaste={handleSmartPaste}
                         placeholder="Share your fashion tips, style stories, and lifestyle updates... Highlight keywords to italicize, bold, or link them!"
                         className={`w-full min-h-[220px] p-4 text-sm font-semibold focus:outline-none blog-content ${theme === "dark" ? "text-stone-100" : "text-stone-850"}`}
                       />

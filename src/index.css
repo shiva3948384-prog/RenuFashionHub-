@@ -81,6 +81,42 @@
 .blog-content {
   line-height: 1.75;
 }
+.blog-content h1, .blog-content h2, .blog-content h3,
+.blog-content h4, .blog-content h5, .blog-content h6 {
+  font-weight: 800;
+  line-height: 1.25;
+  margin: 1.4rem 0 0.75rem;
+  color: inherit;
+}
+.blog-content h1 { font-size: 2rem; }
+.blog-content h2 { font-size: 1.6rem; }
+.blog-content h3 { font-size: 1.3rem; }
+.blog-content h4 { font-size: 1.15rem; }
+.blog-content h5 { font-size: 1rem; }
+.blog-content h6 { font-size: 0.9rem; opacity: 0.85; }
+.blog-content code {
+  background: rgba(245,158,11,0.12);
+  color: #f59e0b;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.35rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em;
+}
+.blog-content pre {
+  background: rgba(0,0,0,0.35);
+  color: #fef3c7;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+.blog-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+  margin: 1rem 0;
+}
+
 .blog-content strong {
   font-weight: 800;
   color: #f59e0b; /* Amber */
