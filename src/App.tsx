@@ -2826,144 +2826,237 @@ const TermsOfServicePage = ({ profile, theme, navigate }: { profile: any; theme:
 
 const BlogListPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; theme: string; navigate: any; isLoaded: boolean }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  
-  const filteredBlogs = blogs.filter(blog => 
-    blog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (blog.excerpt && blog.excerpt.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (blog.category && blog.category.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const [activeCategory, setActiveCategory] = useState<string>("All");
+  const dark = theme === "dark";
 
-  const featuredBlog = filteredBlogs[0];
-  const gridBlogs = featuredBlog ? filteredBlogs.slice(1) : [];
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    blogs.forEach(b => { if (b.category) set.add(b.category); });
+    return ["All", ...Array.from(set)];
+  }, [blogs]);
+
+  const sortedBlogs = useMemo(() =>
+    [...blogs].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+  , [blogs]);
+
+  const filteredBlogs = sortedBlogs.filter(blog => {
+    const q = searchQuery.toLowerCase();
+    const matchesQuery = !q ||
+      blog.title.toLowerCase().includes(q) ||
+      (blog.excerpt && blog.excerpt.toLowerCase().includes(q)) ||
+      (blog.category && blog.category.toLowerCase().includes(q));
+    const matchesCat = activeCategory === "All" || blog.category === activeCategory;
+    return matchesQuery && matchesCat;
+  });
+
+  const featuredBlog = !searchQuery && activeCategory === "All" ? filteredBlogs[0] : null;
+  const gridBlogs = featuredBlog ? filteredBlogs.slice(1) : filteredBlogs;
+
+  const formatDate = (t: number) => new Date(t || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const readTime = (b: any) => {
+    const words = (b.content || b.excerpt || "").replace(/<[^>]+>/g, " ").split(/\s+/).filter(Boolean).length;
+    return Math.max(1, Math.round(words / 220));
+  };
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-amber-50" : "bg-[#FDFBF7] text-[#1C1B18]"} p-6 pb-24`}
+      className={`min-h-screen ${dark ? "bg-[#0B1512] text-amber-50" : "bg-[#FDFBF7] text-[#1C1B18]"} pb-24`}
     >
-      <div className="max-w-5xl lg:max-w-6xl mx-auto">
-        {/* Back button and App Title */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <button 
-            onClick={() => navigate("/")} 
-            className={`p-3 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border flex items-center gap-2 group transition-all hover:bg-amber-500/10 hover:border-amber-500/50 w-fit`}
+      {/* Editorial Masthead */}
+      <div className={`relative overflow-hidden border-b ${dark ? "border-white/10" : "border-black/10"}`}>
+        <div className="absolute inset-0 opacity-[0.08] pointer-events-none" style={{
+          backgroundImage: `radial-gradient(circle at 20% 20%, #f59e0b 0, transparent 40%), radial-gradient(circle at 80% 70%, #f59e0b 0, transparent 40%)`
+        }} />
+        <div className="max-w-6xl mx-auto px-6 pt-8 pb-10 relative">
+          <button
+            onClick={() => navigate("/")}
+            className={`mb-8 p-2.5 rounded-xl ${dark ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border inline-flex items-center gap-2 group transition-all hover:bg-amber-500/10 hover:border-amber-500/50`}
           >
             <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-            <span className="text-xs font-bold uppercase tracking-wider">Back to Home</span>
+            <span className="text-[11px] font-bold uppercase tracking-widest">Home</span>
           </button>
-          
-          <div className="text-right">
-            <h1 className="text-2xl font-black font-serif tracking-tight text-amber-600 dark:text-amber-400">FASHION STORIES</h1>
-            <p className={`text-[9px] ${theme === "dark" ? "text-white/40" : "text-black/40"} uppercase tracking-widest font-black`}>Renu Agarwal Vlogs & Blog Hub</p>
+
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+            <div>
+              <p className={`text-[10px] font-black uppercase tracking-[0.3em] mb-3 ${dark ? "text-amber-400/70" : "text-amber-700/80"}`}>
+                Renu Fashion Hub • Editorial
+              </p>
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-black font-serif tracking-tight leading-[0.95]">
+                Fashion <span className="italic text-amber-500">Stories</span>
+              </h1>
+              <p className={`mt-3 text-sm max-w-xl ${dark ? "text-white/50" : "text-black/55"} font-medium leading-relaxed`}>
+                Curated style journals, styling notes and behind-the-scenes vlogs from Renu Agarwal's atelier.
+              </p>
+            </div>
+            <div className={`text-right text-[10px] font-black uppercase tracking-widest ${dark ? "text-white/40" : "text-black/40"}`}>
+              <p>Volume {new Date().getFullYear()}</p>
+              <p className="mt-1">{sortedBlogs.length} Articles</p>
+            </div>
           </div>
-        </div>
 
-        {/* Search */}
-        <div className="relative mb-8">
-          <Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 ${theme === "dark" ? "text-white/30" : "text-black/30"}`} />
-          <input 
-            type="text" 
-            placeholder="Search fashion articles, trends..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white placeholder-white/30" : "bg-black/5 border-black/10 text-black placeholder-black/40"} border rounded-2xl pl-12 pr-4 py-3 focus:outline-none focus:border-amber-500/50 transition-colors text-sm font-bold shadow-inner`}
-          />
-        </div>
+          {/* Search */}
+          <div className="relative mt-8 max-w-2xl">
+            <Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 ${dark ? "text-white/30" : "text-black/30"}`} />
+            <input
+              type="text"
+              placeholder="Search stories, trends, categories..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={`w-full ${dark ? "bg-white/[0.06] border-white/10 text-white placeholder-white/30" : "bg-white border-black/10 text-black placeholder-black/40"} border rounded-2xl pl-12 pr-4 py-3.5 focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20 transition-all text-sm font-medium shadow-sm`}
+            />
+          </div>
 
+          {/* Category chips */}
+          {categories.length > 1 && (
+            <div className="mt-5 flex flex-wrap gap-2">
+              {categories.map(cat => {
+                const active = activeCategory === cat;
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveCategory(cat)}
+                    className={`px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border ${
+                      active
+                        ? "bg-amber-500 text-stone-950 border-amber-500 shadow-md shadow-amber-500/25"
+                        : dark
+                          ? "bg-white/5 border-white/10 text-white/60 hover:border-amber-500/40 hover:text-amber-400"
+                          : "bg-white border-black/10 text-black/60 hover:border-amber-500/40 hover:text-amber-600"
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="max-w-6xl mx-auto px-6 pt-10">
         {!isLoaded ? (
-          <div className="py-20 flex flex-col items-center justify-center">
+          <div className="py-24 flex flex-col items-center justify-center">
             <Loader2 className="w-8 h-8 text-amber-500 animate-spin" />
-            <p className="text-xs text-stone-500 font-bold uppercase tracking-widest mt-4">Loading Blogs...</p>
+            <p className="text-xs text-stone-500 font-bold uppercase tracking-widest mt-4">Loading Stories...</p>
           </div>
         ) : filteredBlogs.length === 0 ? (
-          <div className="py-20 text-center">
-            <p className={`text-sm ${theme === "dark" ? "text-white/40" : "text-black/40"} font-black uppercase tracking-widest`}>No articles found</p>
+          <div className="py-24 text-center">
+            <BookOpen className={`w-12 h-12 mx-auto mb-4 ${dark ? "text-white/20" : "text-black/20"}`} />
+            <p className={`text-sm ${dark ? "text-white/50" : "text-black/50"} font-black uppercase tracking-widest`}>No articles found</p>
+            <p className={`text-xs mt-2 ${dark ? "text-white/30" : "text-black/40"} font-medium`}>Try a different search or category</p>
           </div>
         ) : (
-          <div className="space-y-10">
-            {/* Featured Post */}
-            {featuredBlog && !searchQuery && (
-              <motion.div 
+          <div className="space-y-14">
+            {/* Featured Post — magazine hero */}
+            {featuredBlog && (
+              <motion.article
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`group cursor-pointer overflow-hidden rounded-3xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border p-6 flex flex-col md:flex-row gap-6 hover:border-amber-405/40 transition-all`}
                 onClick={() => navigate(`/blog/${featuredBlog.id}`)}
+                className={`group cursor-pointer relative overflow-hidden rounded-[2rem] border ${dark ? "bg-white/[0.03] border-white/10" : "bg-white border-black/8"} shadow-lg hover:shadow-2xl hover:shadow-amber-500/10 transition-all`}
               >
-                {featuredBlog.image && (
-                  <div className="w-full md:w-1/2 h-64 md:h-80 overflow-hidden rounded-2xl relative">
-                    <MediaImage 
-                      url={featuredBlog.image} 
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
-                      alt={featuredBlog.title}
-                    />
+                <div className="grid md:grid-cols-5 gap-0">
+                  {featuredBlog.image && (
+                    <div className="md:col-span-3 relative h-72 md:h-[440px] overflow-hidden">
+                      <MediaImage
+                        url={featuredBlog.image}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        alt={featuredBlog.title}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:via-transparent md:to-black/10" />
+                      <span className="absolute top-5 left-5 text-[10px] font-black uppercase tracking-[0.2em] bg-amber-500 text-stone-950 px-3 py-1.5 rounded-full shadow-lg">
+                        ★ Featured
+                      </span>
+                    </div>
+                  )}
+                  <div className="md:col-span-2 p-6 md:p-10 flex flex-col justify-center">
                     {featuredBlog.category && (
-                      <span className="absolute top-4 left-4 text-[9px] font-black uppercase tracking-widest bg-amber-500 text-stone-950 px-2.5 py-1 rounded-full shadow-lg">
+                      <span className={`self-start text-[10px] font-black uppercase tracking-[0.25em] mb-4 px-2.5 py-1 rounded-full ${dark ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" : "bg-amber-50 text-amber-700 border border-amber-200"}`}>
                         {featuredBlog.category}
                       </span>
                     )}
-                  </div>
-                )}
-                <div className="flex-1 flex flex-col justify-center py-2 h-full">
-                  <p className={`text-[10px] ${theme === "dark" ? "text-amber-400/60" : "text-amber-800/80"} font-black uppercase tracking-widest mb-2`}>
-                    FEATURED ENTRY • {new Date(featuredBlog.timestamp || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                  </p>
-                  <h2 className={`text-2xl md:text-3xl font-bold font-serif leading-tight mb-4 group-hover:text-amber-500 transition-colors`}>
-                    {featuredBlog.title}
-                  </h2>
-                  <p className={`text-sm ${theme === "dark" ? "text-white/60" : "text-black/60"} leading-relaxed mb-6 font-medium`}>
-                    {featuredBlog.excerpt || "Dive into this wonderful story directly from our creative collection of trends and insights."}
-                  </p>
-                  <div className="flex items-center gap-2 group-hover:gap-3 transition-all font-black text-xs uppercase tracking-widest text-amber-500 mt-auto">
-                    <span>Read Article</span>
-                    <span className="text-sm">→</span>
+                    <h2 className="text-2xl md:text-4xl font-black font-serif leading-[1.05] mb-4 group-hover:text-amber-500 transition-colors">
+                      {featuredBlog.title}
+                    </h2>
+                    <p className={`text-sm md:text-base ${dark ? "text-white/60" : "text-black/60"} leading-relaxed mb-6 line-clamp-3`}>
+                      {featuredBlog.excerpt || "A signature story from the editorial desk."}
+                    </p>
+                    <div className={`flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest ${dark ? "text-white/40" : "text-black/40"} mb-6`}>
+                      <span>{formatDate(featuredBlog.timestamp)}</span>
+                      <span>•</span>
+                      <span>{readTime(featuredBlog)} min read</span>
+                    </div>
+                    <div className="inline-flex items-center gap-2 group-hover:gap-3 transition-all font-black text-xs uppercase tracking-widest text-amber-500">
+                      <span>Read Story</span>
+                      <span className="text-base">→</span>
+                    </div>
                   </div>
                 </div>
-              </motion.div>
+              </motion.article>
             )}
 
-            {/* Grid of Other Posts */}
+            {/* Section label */}
             {gridBlogs.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="flex items-end justify-between border-b pb-3 border-dashed border-current/15">
+                <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-amber-500">
+                  {searchQuery ? "Search Results" : activeCategory !== "All" ? activeCategory : "Latest Journal"}
+                </h3>
+                <span className={`text-[10px] font-black uppercase tracking-widest ${dark ? "text-white/40" : "text-black/40"}`}>
+                  {gridBlogs.length} {gridBlogs.length === 1 ? "story" : "stories"}
+                </span>
+              </div>
+            )}
+
+            {/* Grid */}
+            {gridBlogs.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                 {gridBlogs.map((blog, idx) => (
-                  <motion.div 
+                  <motion.article
                     key={blog.id}
-                    initial={{ opacity: 0, y: 30 }}
+                    initial={{ opacity: 0, y: 24 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.1 }}
-                    className={`group cursor-pointer overflow-hidden rounded-3xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border p-4 flex flex-col hover:border-amber-400/40 transition-all`}
+                    transition={{ delay: Math.min(idx * 0.06, 0.4) }}
                     onClick={() => navigate(`/blog/${blog.id}`)}
+                    className={`group cursor-pointer overflow-hidden rounded-2xl border transition-all hover:-translate-y-1 hover:shadow-xl ${dark ? "bg-white/[0.03] border-white/10 hover:border-amber-500/40 hover:shadow-amber-500/10" : "bg-white border-black/8 hover:border-amber-500/40 hover:shadow-amber-500/10"}`}
                   >
-                    {blog.image && (
-                      <div className="w-full h-48 overflow-hidden rounded-2xl relative mb-4">
-                        <MediaImage 
-                          url={blog.image} 
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                    {blog.image ? (
+                      <div className="relative w-full h-52 overflow-hidden">
+                        <MediaImage
+                          url={blog.image}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                           alt={blog.title}
                         />
                         {blog.category && (
-                          <span className="absolute top-3 left-3 text-[8px] font-black uppercase tracking-widest bg-amber-500 text-stone-950 px-2 py-0.5 rounded-full shadow-lg">
+                          <span className="absolute top-3 left-3 text-[9px] font-black uppercase tracking-widest bg-white/95 text-stone-900 px-2.5 py-1 rounded-full shadow-md backdrop-blur">
                             {blog.category}
                           </span>
                         )}
                       </div>
+                    ) : (
+                      <div className={`h-52 flex items-center justify-center ${dark ? "bg-white/[0.02]" : "bg-stone-100"}`}>
+                        <BookOpen className={`w-10 h-10 ${dark ? "text-white/15" : "text-black/15"}`} />
+                      </div>
                     )}
-                    <div className="flex-1 flex flex-col">
-                      <p className={`text-[9px] ${theme === "dark" ? "text-white/40" : "text-black/40"} uppercase tracking-widest mb-1.5 font-bold`}>
-                        {new Date(blog.timestamp || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                      </p>
-                      <h3 className={`text-lg font-bold font-serif mb-2 group-hover:text-amber-500 transition-colors line-clamp-2 leading-snug`}>
+                    <div className="p-5 flex flex-col">
+                      <div className={`flex items-center gap-2 text-[9px] font-black uppercase tracking-widest mb-2 ${dark ? "text-white/40" : "text-black/45"}`}>
+                        <span>{formatDate(blog.timestamp)}</span>
+                        <span>•</span>
+                        <span>{readTime(blog)} min</span>
+                      </div>
+                      <h4 className="text-lg font-black font-serif mb-2 group-hover:text-amber-500 transition-colors line-clamp-2 leading-snug">
                         {blog.title}
-                      </h3>
-                      <p className={`text-xs ${theme === "dark" ? "text-white/50" : "text-black/50"} line-clamp-3 leading-relaxed mb-4`}>
-                        {blog.excerpt || "Read more details about this boutique selection..."}
+                      </h4>
+                      <p className={`text-[13px] leading-relaxed line-clamp-3 mb-4 ${dark ? "text-white/55" : "text-black/55"}`}>
+                        {blog.excerpt || "Read more from this edition..."}
                       </p>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-amber-500 group-hover:translate-x-1 transition-transform inline-flex items-center gap-1 mt-auto">
-                        Read Story <span className="text-xs">→</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-amber-500 inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all mt-auto">
+                        Read Story <span>→</span>
                       </span>
                     </div>
-                  </motion.div>
+                  </motion.article>
                 ))}
               </div>
             )}
@@ -2973,6 +3066,7 @@ const BlogListPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; them
     </motion.div>
   );
 };
+
 
 const BlogDetailPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; theme: string; navigate: any; isLoaded: boolean }) => {
   const { id } = useParams();
@@ -6243,7 +6337,7 @@ export default function App() {
                         onFocus={updateEditorSelectionState}
                         onBlur={updateEditorSelectionState}
                         onPaste={handleSmartPaste}
-                        className={`w-full min-h-[220px] p-4 text-sm font-semibold focus:outline-none blog-content ${theme === "dark" ? "text-stone-100" : "text-stone-850"}`}
+                        className={`w-full min-h-[220px] p-4 text-sm font-normal focus:outline-none blog-content ${theme === "dark" ? "text-stone-100" : "text-stone-850"}`}
                       />
                     </div>
                   </div>
@@ -6851,15 +6945,30 @@ export default function App() {
             )}
 
             {adminTab === "blogs" && (
-              <section className={`p-6 rounded-3xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border space-y-8`}>
-                <h2 className="text-lg font-black font-serif text-amber-950 dark:text-amber-100 mb-6 flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-amber-500" />
-                  Blog Management
-                </h2>
+              <section className={`p-6 md:p-8 rounded-3xl ${theme === "dark" ? "bg-gradient-to-br from-white/[0.04] to-white/[0.01] border-white/10" : "bg-gradient-to-br from-white to-stone-50 border-black/8"} border shadow-sm space-y-8`}>
+                <div className={`flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-6 border-b ${theme === "dark" ? "border-white/10" : "border-black/8"}`}>
+                  <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${theme === "dark" ? "bg-amber-500/10 border border-amber-500/20" : "bg-amber-50 border border-amber-200"}`}>
+                      <BookOpen className="w-6 h-6 text-amber-500" />
+                    </div>
+                    <div>
+                      <p className={`text-[10px] font-black uppercase tracking-[0.25em] ${theme === "dark" ? "text-amber-400/70" : "text-amber-700/70"}`}>Editorial Studio</p>
+                      <h2 className="text-2xl font-black font-serif tracking-tight">Blog Management</h2>
+                    </div>
+                  </div>
+                  <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${theme === "dark" ? "bg-white/5 border border-white/10 text-white/60" : "bg-white border border-black/10 text-black/60"}`}>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    {blogs.length} Published
+                  </div>
+                </div>
 
                 {/* Form to add blogs */}
                 <div className={`p-6 rounded-2xl ${theme === "dark" ? "bg-stone-900/40 border-white/5" : "bg-white border-black/0"} border space-y-4`}>
-                  <h3 className="text-sm font-black uppercase tracking-wider text-amber-500">Create New Fashion Post</h3>
+                  <div className="flex items-center gap-2.5 pb-2 border-b border-dashed border-current/10">
+                    <div className="w-1 h-6 bg-amber-500 rounded-full" />
+                    <h3 className="text-sm font-black uppercase tracking-wider text-amber-500">Create New Fashion Post</h3>
+                  </div>
+
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -7142,7 +7251,7 @@ export default function App() {
                         onBlur={updateEditorSelectionState}
                         onPaste={handleSmartPaste}
                         placeholder="Share your fashion tips, style stories, and lifestyle updates... Highlight keywords to italicize, bold, or link them!"
-                        className={`w-full min-h-[220px] p-4 text-sm font-semibold focus:outline-none blog-content ${theme === "dark" ? "text-stone-100" : "text-stone-850"}`}
+                        className={`w-full min-h-[220px] p-4 text-sm font-normal focus:outline-none blog-content ${theme === "dark" ? "text-stone-100" : "text-stone-850"}`}
                       />
                     </div>
                   </div>
