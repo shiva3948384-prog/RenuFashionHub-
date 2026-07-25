@@ -9,67 +9,61 @@
 
 @layer base {
   body {
-    @apply bg-[#0B1512] text-amber-50;
+    @apply bg-[#FFF7F9] text-[#1c1917];
   }
 
   * {
     cursor: none !important;
   }
-  
-  /* Show cursor on mobile/touch devices where custom cursor might be weird */
+
   @media (hover: none) and (pointer: coarse) {
     * {
       cursor: auto !important;
     }
   }
-  
-  /* Reusable Global Heading Style System to ensure excellent mobile & desktop contrast */
+
   h1, h2, h3, h4, h5, h6, .heading-system {
     @apply transition-colors duration-200;
-    opacity: 1 !important; /* Force 100% solid opacity across all viewports to block fading */
+    opacity: 1 !important;
   }
 
-  /* Dark theme header visibility fallbacks */
   .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6,
   [data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3, [data-theme="dark"] h4, [data-theme="dark"] h5, [data-theme="dark"] h6 {
-    color: #f5f5f4 !important; /* High contrast Warm Stone 100 */
+    color: #fdf2f8 !important;
     text-shadow: 0 1px 3px rgba(0,0,0,0.4);
   }
 
-  /* Light theme header visibility fallbacks */
   .light h1, .light h2, .light h3, .light h4, .light h5, .light h6,
   [data-theme="light"] h1, [data-theme="light"] h2, [data-theme="light"] h3, [data-theme="light"] h4, [data-theme="light"] h5, [data-theme="light"] h6 {
-    color: #1c1917 !important; /* Rich High Contrast Stone 900 */
+    color: #1c1917 !important;
     text-shadow: none;
   }
 
-  /* Clear amber highlighted headings should remain their color but maintain solid opacity */
-  .text-amber-500 { color: #f59e0b !important; }
-  .text-amber-600 { color: #d97706 !important; }
-  .text-amber-700 { color: #b45309 !important; }
+  .text-rose-500 { color: #F43F5E !important; }
+  .text-rose-600 { color: #E11D48 !important; }
+  .text-rose-700 { color: #BE123C !important; }
 }
 
 .gold-grain-dark {
-  background-color: #0B1512 !important; /* Premium Obsidian Velvet Black */
-  background-image: 
-    radial-gradient(rgba(245, 158, 11, 0.08) 1.2px, transparent 1.2px),
-    radial-gradient(rgba(245, 158, 11, 0.03) 0.8px, transparent 0.8px);
+  background-color: #1B0F14 !important;
+  background-image:
+    radial-gradient(rgba(244, 63, 94, 0.08) 1.2px, transparent 1.2px),
+    radial-gradient(rgba(244, 63, 94, 0.03) 0.8px, transparent 0.8px);
   background-size: 24px 24px, 12px 12px;
   background-position: 0 0, 12px 12px;
   position: relative;
 }
 
 .gold-grain-light {
-  background-color: #FDFBF7 !important; /* Premium Royal Alabaster Silk */
-  background-image: 
-    radial-gradient(rgba(180, 130, 20, 0.05) 1.2px, transparent 1.2px),
-    radial-gradient(rgba(180, 130, 20, 0.02) 0.8px, transparent 0.8px);
+  background-color: #FFF7F9 !important;
+  background-image:
+    radial-gradient(rgba(244, 63, 94, 0.06) 1.2px, transparent 1.2px),
+    radial-gradient(rgba(244, 63, 94, 0.02) 0.8px, transparent 0.8px);
   background-size: 24px 24px, 12px 12px;
   background-position: 0 0, 12px 12px;
   position: relative;
 }
 
-/* GPU acceleration class for ultra-smooth buttery movements */
 .gpu-accelerated {
   will-change: transform, opacity;
   transform: translateZ(0);
@@ -77,10 +71,7 @@
   perspective: 1000px;
 }
 
-/* Custom formatting for user-generated blogs in contentEditable */
-.blog-content {
-  line-height: 1.75;
-}
+.blog-content { line-height: 1.75; }
 .blog-content h1, .blog-content h2, .blog-content h3,
 .blog-content h4, .blog-content h5, .blog-content h6 {
   font-weight: 800;
@@ -95,16 +86,16 @@
 .blog-content h5 { font-size: 1rem; }
 .blog-content h6 { font-size: 0.9rem; opacity: 0.85; }
 .blog-content code {
-  background: rgba(245,158,11,0.12);
-  color: #f59e0b;
+  background: rgba(244,63,94,0.10);
+  color: #E11D48;
   padding: 0.15rem 0.4rem;
   border-radius: 0.35rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.9em;
 }
 .blog-content pre {
-  background: rgba(0,0,0,0.35);
-  color: #fef3c7;
+  background: rgba(0,0,0,0.75);
+  color: #ffe4e6;
   padding: 1rem;
   border-radius: 0.75rem;
   overflow-x: auto;
@@ -116,34 +107,22 @@
   border-radius: 0.75rem;
   margin: 1rem 0;
 }
-
-.blog-content strong {
-  font-weight: 800;
-  color: #f59e0b; /* Amber */
-}
-.blog-content em {
-  font-style: italic;
-}
-.blog-content u {
-  text-decoration: underline;
-}
+.blog-content strong { font-weight: 800; color: #E11D48; }
+.blog-content em { font-style: italic; }
+.blog-content u { text-decoration: underline; }
 .blog-content a {
-  color: #f59e0b;
+  color: #E11D48;
   text-decoration: underline;
   font-weight: bold;
   transition: color 0.15s ease-out;
 }
-.blog-content a:hover {
-  color: #fbbf24;
-}
-.blog-content p {
-  margin-bottom: 1.25rem;
-}
+.blog-content a:hover { color: #F43F5E; }
+.blog-content p { margin-bottom: 1.25rem; }
 .blog-content blockquote {
-  border-left: 4px solid #f59e0b;
+  border-left: 4px solid #F43F5E;
   padding-left: 1rem;
   font-style: italic;
-  opacity: 0.8;
+  opacity: 0.85;
 }
 .blog-content ul {
   list-style-type: disc;
@@ -156,7 +135,6 @@
   margin-bottom: 1rem;
 }
 
-/* contentEditable empty state placeholder support */
 div[contentEditable]:empty:before {
   content: attr(placeholder);
   color: #78716c;
@@ -166,4 +144,3 @@ div[contentEditable]:empty:before {
 [theme="dark"] div[contentEditable]:empty:before {
   color: #a8a29e;
 }
-

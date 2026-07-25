@@ -514,12 +514,12 @@ const CustomCursor = ({ theme, isMobile }: { theme: string, isMobile: boolean })
           <div
             ref={dotRef}
             style={{ opacity: 0, position: 'fixed', left: 0, top: 0, width: '12px', height: '12px' }}
-            className="bg-amber-500 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.5)] transition-[opacity] duration-150 ease-out gpu-accelerated"
+            className="bg-rose-500 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.5)] transition-[opacity] duration-150 ease-out gpu-accelerated"
           />
           <div
             ref={ringRef}
             style={{ opacity: 0, position: 'fixed', left: 0, top: 0, width: '40px', height: '40px' }}
-            className="border-2 border-amber-500/40 rounded-full transition-[opacity] duration-200 ease-out gpu-accelerated"
+            className="border-2 border-rose-500/40 rounded-full transition-[opacity] duration-200 ease-out gpu-accelerated"
           />
         </div>
       )}
@@ -534,7 +534,7 @@ const CustomCursor = ({ theme, isMobile }: { theme: string, isMobile: boolean })
               animate={{ opacity: 0, scale: isMobile ? 4 : 6 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5, ease: "easeOut" }}
-              className="absolute w-12 h-12 border-4 border-amber-500 rounded-full shadow-[0_0_30px_rgba(245,158,11,0.6)] gpu-accelerated"
+              className="absolute w-12 h-12 border-4 border-rose-500 rounded-full shadow-[0_0_30px_rgba(245,158,11,0.6)] gpu-accelerated"
               style={{ 
                 left: ripple.x,
                 top: ripple.y,
@@ -558,7 +558,7 @@ const PremiumButton = ({ children, onClick, className = "", variant = "primary",
       initial="initial"
       className={`group relative overflow-hidden px-6 py-4 rounded-2xl font-black text-sm transition-all duration-500 will-change-transform ${className} ${
         variant === "primary" 
-          ? "border-2 border-amber-500 text-amber-500" 
+          ? "border-2 border-rose-500 text-rose-500" 
           : "border-2 border-white/20 text-white"
       }`}
     >
@@ -569,11 +569,11 @@ const PremiumButton = ({ children, onClick, className = "", variant = "primary",
           tap: { scale: 0.95 }
         }}
         transition={{ type: "tween", ease: [0.22, 1, 0.36, 1], duration: 0.4 }}
-        className={`absolute inset-0 -z-10 ${variant === "primary" ? "bg-amber-500" : "bg-white"}`}
+        className={`absolute inset-0 -z-10 ${variant === "primary" ? "bg-rose-500" : "bg-white"}`}
       />
       <motion.div
         variants={{
-          initial: { color: variant === "primary" ? "#f59e0b" : "#ffffff" },
+          initial: { color: variant === "primary" ? "#F43F5E" : "#ffffff" },
           hover: { color: variant === "primary" ? "#0b1512" : "#000000" }
         }}
         transition={{ duration: 0.3 }}
@@ -636,11 +636,11 @@ const InteractiveStarRating = ({ rating, onChange, theme, triggerSuccess }: { ra
             animate={triggerSuccess ? {
               scale: [1, 1.4, 1.1, 1],
               rotate: [0, 15, -15, 0],
-              color: "#eab308"
+              color: "#F43F5E"
             } : { 
               scale: isCurrentActive ? 1.8 : 1,
               y: isCurrentActive ? -12 : 0,
-              color: isActive ? "#eab308" : (theme === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)")
+              color: isActive ? "#F43F5E" : (theme === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)")
             }}
             transition={triggerSuccess ? {
               duration: 0.5,
@@ -675,34 +675,34 @@ const PageNotFoundPage = ({ theme, navigate }: { theme: string; navigate: any })
       theme === "dark" ? "gold-grain-dark text-stone-100" : "gold-grain-light text-stone-900"
     }`}>
       {/* luxury background visual elements */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-amber-500/10 dark:bg-amber-500/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-rose-500/10 dark:bg-rose-500/5 rounded-full blur-[120px] pointer-events-none" />
       
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-        className="max-w-md w-full relative z-10 flex flex-col items-center p-8 rounded-3xl border border-amber-500/15 bg-white/[0.02] dark:bg-white/[0.04] backdrop-blur-xl shadow-2xl"
+        className="max-w-md w-full relative z-10 flex flex-col items-center p-8 rounded-3xl border border-rose-500/15 bg-white/[0.02] dark:bg-white/[0.04] backdrop-blur-xl shadow-2xl"
       >
-        <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center mb-6">
-          <svg className="w-8 h-8 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/25 flex items-center justify-center mb-6">
+          <svg className="w-8 h-8 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
         </div>
 
-        <span className="text-[11px] uppercase tracking-[0.25em] font-black text-amber-600 dark:text-amber-400 mb-2 select-none">
+        <span className="text-[11px] uppercase tracking-[0.25em] font-black text-rose-600 dark:text-rose-400 mb-2 select-none">
           RENU FASHION HUB
         </span>
 
         {/* Big 404 display */}
         <motion.h1 
-          className="text-5xl font-sans font-black tracking-tight text-amber-950 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-amber-400 dark:to-yellow-200 mb-3 select-none 404-not-found-text"
+          className="text-5xl font-sans font-black tracking-tight text-rose-950 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-rose-400 dark:to-yellow-200 mb-3 select-none 404-not-found-text"
           animate={{ y: [0, -8, 0] }}
           transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
         >
           404 Not Found
         </motion.h1>
 
-        <div className="h-0.5 w-16 bg-amber-500/30 mb-4" />
+        <div className="h-0.5 w-16 bg-rose-500/30 mb-4" />
 
         <p className="text-stone-500 dark:text-stone-300 font-sans text-sm leading-relaxed tracking-wide mb-8">
           The requested page does not exist on this website. Please return to Renu Fashion Hub's homepage to explore the boutique creations!
@@ -713,7 +713,7 @@ const PageNotFoundPage = ({ theme, navigate }: { theme: string; navigate: any })
           whileHover={{ scale: 1.02, y: -1 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => navigate("/")}
-          className="w-full py-4 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 text-stone-950 font-sans font-black text-xs uppercase tracking-widest shadow-[0_10px_25px_rgba(217,119,6,0.3)] hover:from-amber-500 hover:to-amber-400 transition-all cursor-pointer"
+          className="w-full py-4 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 text-stone-950 font-sans font-black text-xs uppercase tracking-widest shadow-[0_10px_25px_rgba(217,119,6,0.3)] hover:from-rose-500 hover:to-rose-400 transition-all cursor-pointer"
           id="notfound-back-home-btn"
         >
           Back To Homepage ✨
@@ -755,16 +755,16 @@ const ContactSupportAndFaq = ({ theme }: { theme: string }) => {
         className={`p-6 rounded-3xl border text-center relative overflow-hidden ${
           theme === "dark" 
             ? "bg-white/[0.03] border-white/10 text-stone-200" 
-            : "bg-white border-amber-500/15 text-stone-700 shadow-sm"
+            : "bg-white border-rose-500/15 text-stone-700 shadow-sm"
         } transition-all duration-300`}
       >
-        <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full blur-3xl pointer-events-none" />
         <div className="flex flex-col items-center gap-3 relative z-10">
-          <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
-            <Mail className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+          <div className="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center border border-rose-500/20">
+            <Mail className="w-5 h-5 text-rose-600 dark:text-rose-400" />
           </div>
           <div>
-            <span className="text-[10px] uppercase font-black tracking-[0.25em] text-amber-600 dark:text-amber-400 block mb-1">
+            <span className="text-[10px] uppercase font-black tracking-[0.25em] text-rose-600 dark:text-rose-400 block mb-1">
               Direct Mail Boutique Support
             </span>
             <span className="text-xs text-stone-400 block mb-2">
@@ -772,7 +772,7 @@ const ContactSupportAndFaq = ({ theme }: { theme: string }) => {
             </span>
             <a 
               href="mailto:support@renufashionhub.in"
-              className="text-lg font-serif font-bold text-amber-800 dark:text-amber-100 hover:text-amber-500 dark:hover:text-amber-300 transition-colors inline-block"
+              className="text-lg font-serif font-bold text-rose-800 dark:text-rose-100 hover:text-rose-500 dark:hover:text-rose-300 transition-colors inline-block"
               id="contact-support-email-badge"
             >
               support@renufashionhub.in
@@ -783,7 +783,7 @@ const ContactSupportAndFaq = ({ theme }: { theme: string }) => {
 
       {/* FAQ Label */}
       <div className="pt-4 pb-2 text-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/15 text-[10px] uppercase font-bold tracking-widest text-amber-600 dark:text-amber-400">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/15 text-[10px] uppercase font-bold tracking-widest text-rose-600 dark:text-rose-400">
           <HelpCircle className="w-3.5 h-3.5" />
           <span>Consultation Lounge FAQs</span>
         </div>
@@ -802,30 +802,30 @@ const ContactSupportAndFaq = ({ theme }: { theme: string }) => {
               className={`rounded-2xl border transition-all duration-300 shadow-xs overflow-hidden ${
                 theme === "dark" 
                   ? isOpen 
-                    ? "bg-[#0E1F1A] border-amber-500/35 shadow-md"
+                    ? "bg-[#0E1F1A] border-rose-500/35 shadow-md"
                     : "bg-white/[0.02] border-white/5 hover:bg-white/[0.04] hover:border-white/10"
                   : isOpen
-                    ? "bg-amber-50/40 border-amber-500/30 shadow-md"
-                    : "bg-white border-stone-200 hover:bg-stone-50/60 hover:border-amber-500/20"
+                    ? "bg-rose-50/40 border-rose-500/30 shadow-md"
+                    : "bg-white border-stone-200 hover:bg-stone-50/60 hover:border-rose-500/20"
               }`}
             >
               <button
                 type="button"
                 onClick={() => setOpenIndex(isOpen ? null : idx)}
-                className="w-full text-left px-5 py-4.5 sm:px-6 sm:py-5 flex items-center justify-between gap-4 cursor-pointer focus:outline-none focus:ring-1 focus:ring-amber-500/30 rounded-t-2xl"
+                className="w-full text-left px-5 py-4.5 sm:px-6 sm:py-5 flex items-center justify-between gap-4 cursor-pointer focus:outline-none focus:ring-1 focus:ring-rose-500/30 rounded-t-2xl"
               >
                 <span className={`text-sm sm:text-base font-sans font-bold tracking-tight leading-snug transition-colors duration-200 ${
                   theme === "dark" 
-                    ? isOpen ? "text-amber-300" : "text-amber-100 hover:text-amber-300" 
-                    : isOpen ? "text-amber-950 font-extrabold" : "text-stone-900 hover:text-amber-900"
+                    ? isOpen ? "text-rose-300" : "text-rose-100 hover:text-rose-300" 
+                    : isOpen ? "text-rose-950 font-extrabold" : "text-stone-900 hover:text-rose-900"
                 }`}>
                   {faq.q}
                 </span>
                 <ChevronDown 
                   className={`w-4 h-4 shrink-0 transition-transform duration-300 ${
                     theme === "dark" 
-                      ? isOpen ? "text-amber-300 rotate-180" : "text-amber-400"
-                      : isOpen ? "text-amber-700 rotate-180" : "text-amber-600"
+                      ? isOpen ? "text-rose-300 rotate-180" : "text-rose-400"
+                      : isOpen ? "text-rose-700 rotate-180" : "text-rose-600"
                   }`} 
                 />
               </button>
@@ -841,7 +841,7 @@ const ContactSupportAndFaq = ({ theme }: { theme: string }) => {
                     <div className={`px-5 pb-5 sm:px-6 sm:pb-6 text-xs sm:text-sm leading-relaxed border-t pt-4 ${
                       theme === "dark" 
                         ? "text-stone-200 bg-stone-950/20 border-white/5" 
-                        : "text-stone-700 bg-stone-50/40 border-amber-500/10"
+                        : "text-stone-700 bg-stone-50/40 border-rose-500/10"
                     }`}>
                       {faq.a}
                     </div>
@@ -871,10 +871,10 @@ const ProductDetailPage = ({ products, theme, navigate, isLoaded }: { products: 
       return <PageLoader theme={theme} />;
     }
     return (
-      <div className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-amber-50" : "bg-[#FDFBF7] text-[#1C1B18]"} flex items-center justify-center p-6`}>
+      <div className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-rose-50" : "bg-[#FFF7F9] text-[#1C1B18]"} flex items-center justify-center p-6`}>
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Product Not Found</h1>
-          <button onClick={() => navigate("/")} className="px-6 py-2 bg-gradient-to-r from-amber-600 to-amber-500 rounded-xl text-stone-950 font-bold hover:opacity-90">Back to Home</button>
+          <button onClick={() => navigate("/")} className="px-6 py-2 bg-gradient-to-r from-rose-600 to-rose-500 rounded-xl text-stone-950 font-bold hover:opacity-90">Back to Home</button>
         </div>
       </div>
     );
@@ -941,12 +941,12 @@ const ProductDetailPage = ({ products, theme, navigate, isLoaded }: { products: 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-amber-50" : "bg-[#FDFBF7] text-[#1C1B18]"} p-4 sm:p-6 pb-24`}
+      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-rose-50" : "bg-[#FFF7F9] text-[#1C1B18]"} p-4 sm:p-6 pb-24`}
     >
       <div className="max-w-4xl lg:max-w-6xl mx-auto">
         <button 
           onClick={() => navigate("/")} 
-          className={`mb-6 p-2.5 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border flex items-center gap-2 group transition-all hover:bg-amber-500/10 hover:border-amber-500/50 w-fit cursor-pointer`}
+          className={`mb-6 p-2.5 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border flex items-center gap-2 group transition-all hover:bg-rose-500/10 hover:border-rose-500/50 w-fit cursor-pointer`}
         >
           <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> 
           <span className="text-xs font-bold uppercase tracking-wider">Back to Showcase</span>
@@ -968,12 +968,12 @@ const ProductDetailPage = ({ products, theme, navigate, isLoaded }: { products: 
             
             {/* Header info */}
             <div className={`p-6 rounded-2xl ${theme === "dark" ? "bg-white/[0.02] border-white/5" : "bg-white border-stone-150"} border shadow-sm space-y-2`}>
-              <span className="text-[9px] font-black uppercase tracking-[0.25em] text-amber-600 dark:text-amber-400">
+              <span className="text-[9px] font-black uppercase tracking-[0.25em] text-rose-600 dark:text-rose-400">
                 Premium Apparel Curation
               </span>
               <h1 className="text-2xl sm:text-3xl font-black font-serif tracking-tight leading-tight">{product.name}</h1>
               <div className="flex items-center gap-3 pt-2">
-                <p className="text-2xl font-black text-amber-600 dark:text-amber-400">₹{product.price}</p>
+                <p className="text-2xl font-black text-rose-600 dark:text-rose-400">₹{product.price}</p>
                 <span className="text-[10px] font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-500 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
                   In stock
                 </span>
@@ -991,7 +991,7 @@ const ProductDetailPage = ({ products, theme, navigate, isLoaded }: { products: 
             )}
 
             {/* CTA action card */}
-            <div className={`p-4 rounded-2xl ${theme === "dark" ? "bg-amber-500/[0.01] border-amber-500/10" : "bg-amber-500/[0.03] border-amber-500/15"} border shadow-sm flex flex-col sm:flex-row gap-3`}>
+            <div className={`p-4 rounded-2xl ${theme === "dark" ? "bg-rose-500/[0.01] border-rose-500/10" : "bg-rose-500/[0.03] border-rose-500/15"} border shadow-sm flex flex-col sm:flex-row gap-3`}>
               {product.buyUrl && (
                 <PremiumButton
                   onClick={() => window.open(product.buyUrl, "_blank")}
@@ -1005,7 +1005,7 @@ const ProductDetailPage = ({ products, theme, navigate, isLoaded }: { products: 
                 onClick={() => setShowShareModal(true)}
                 className={`flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl border font-bold text-xs uppercase tracking-wider transition-all duration-300 hover:scale-[1.02] active:scale-95 ${
                   theme === "dark" 
-                    ? "bg-white/5 hover:bg-white/10 border-white/10 text-amber-50" 
+                    ? "bg-white/5 hover:bg-white/10 border-white/10 text-rose-50" 
                     : "bg-black/5 hover:bg-black/10 border-black/10 text-[#1C1B18]"
                 } ${product.buyUrl ? 'flex-1' : 'w-full'} cursor-pointer`}
                 title="Share & Copy Link"
@@ -1017,7 +1017,7 @@ const ProductDetailPage = ({ products, theme, navigate, isLoaded }: { products: 
 
             {/* Reviews Block */}
             <div ref={reviewsContainerRef} className="space-y-6 pt-2 scroll-mt-24">
-              <div className="flex items-center justify-between border-b border-amber-500/10 pb-3">
+              <div className="flex items-center justify-between border-b border-rose-500/10 pb-3">
                 <h3 className="text-base font-black uppercase tracking-wider font-serif">Customer Reviews</h3>
                 <div className="flex items-center gap-1.5 bg-yellow-500/5 px-2.5 py-1 rounded-lg border border-yellow-500/10">
                   <motion.div
@@ -1056,7 +1056,7 @@ const ProductDetailPage = ({ products, theme, navigate, isLoaded }: { products: 
                     required
                     value={newReview.user}
                     onChange={(e) => setNewReview({ ...newReview, user: e.target.value })}
-                    className={`w-full text-xs ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-white border-stone-200"} border rounded-xl px-3 py-2.5 focus:outline-none focus:border-amber-500/50`}
+                    className={`w-full text-xs ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-white border-stone-200"} border rounded-xl px-3 py-2.5 focus:outline-none focus:border-rose-500/50`}
                   />
                   <textarea 
                     placeholder="Describe your styling experience..."
@@ -1064,12 +1064,12 @@ const ProductDetailPage = ({ products, theme, navigate, isLoaded }: { products: 
                     value={newReview.comment}
                     onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
                     rows={2}
-                    className={`w-full text-xs ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-white border-stone-200"} border rounded-xl px-3 py-2.5 focus:outline-none focus:border-amber-500/50 resize-none`}
+                    className={`w-full text-xs ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-white border-stone-200"} border rounded-xl px-3 py-2.5 focus:outline-none focus:border-rose-500/50 resize-none`}
                   />
                   <button 
                     type="submit"
                     disabled={isSubmittingReview || !newReview.user || !newReview.comment}
-                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-[#09100E] font-black text-xs uppercase tracking-widest transition-all disabled:opacity-50 cursor-pointer"
+                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-700 hover:to-rose-600 text-[#09100E] font-black text-xs uppercase tracking-widest transition-all disabled:opacity-50 cursor-pointer"
                   >
                     {isSubmittingReview ? "Submitting..." : "Submit"}
                   </button>
@@ -1090,7 +1090,7 @@ const ProductDetailPage = ({ products, theme, navigate, isLoaded }: { products: 
                         >
                           <div className="flex justify-between items-start mb-1.5">
                             <div>
-                              <p className="text-xs font-bold text-stone-900 dark:text-amber-50 leading-none">{review.user}</p>
+                              <p className="text-xs font-bold text-stone-900 dark:text-rose-50 leading-none">{review.user}</p>
                               <div className="flex gap-0.5 mt-1">
                                 {[1, 2, 3, 4, 5].map((s) => (
                                   <Star key={s} className={`w-2.5 h-2.5 ${s <= review.rating ? "text-yellow-500 fill-yellow-500" : "text-white/10"}`} />
@@ -1128,7 +1128,7 @@ const ProductDetailPage = ({ products, theme, navigate, isLoaded }: { products: 
             exit={{ opacity: 0, y: 25, scale: 0.95 }}
             className={`fixed bottom-24 left-1/2 -translate-x-1/2 z-[150] px-6 py-3.5 rounded-full ${
               theme === "dark" 
-                ? "bg-amber-500 text-stone-950 shadow-amber-500/20 border border-amber-400/20" 
+                ? "bg-rose-500 text-stone-950 shadow-rose-500/20 border border-rose-400/20" 
                 : "bg-stone-900 text-stone-50 shadow-black/20 border border-stone-800"
             } font-extrabold text-xs tracking-wider uppercase flex items-center gap-2 shadow-2xl transition-all`}
           >
@@ -1768,7 +1768,7 @@ const AboutPage = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-amber-50" : "bg-[#FDFBF7] text-[#1C1B18]"} p-4 sm:p-6 pb-24 font-sans selection:bg-amber-500/30 overflow-x-hidden`}
+      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-rose-50" : "bg-[#FFF7F9] text-[#1C1B18]"} p-4 sm:p-6 pb-24 font-sans selection:bg-rose-500/30 overflow-x-hidden`}
     >
       {/* Insert JSON-LD Schema dynamically inside the document */}
       <script type="application/ld+json">
@@ -1777,17 +1777,17 @@ const AboutPage = ({
 
       <div className="max-w-5xl lg:max-w-6xl mx-auto">
         {/* Back button and App Title */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10 border-b border-amber-500/10 pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10 border-b border-rose-500/10 pb-6">
           <button 
             onClick={() => navigate("/")} 
-            className={`p-3 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border flex items-center gap-2 group transition-all hover:bg-amber-500/10 hover:border-amber-500/50 w-fit cursor-pointer`}
+            className={`p-3 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border flex items-center gap-2 group transition-all hover:bg-rose-500/10 hover:border-rose-500/50 w-fit cursor-pointer`}
           >
             <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
             <span className="text-xs font-bold uppercase tracking-wider">Back to Home</span>
           </button>
           
           <div className="text-right">
-            <p className="text-xl font-black uppercase tracking-wider font-serif text-amber-500">
+            <p className="text-xl font-black uppercase tracking-wider font-serif text-rose-500">
               Renu Fashion Hub
             </p>
             <p className={`text-[10px] uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"} font-bold`}>
@@ -1799,7 +1799,7 @@ const AboutPage = ({
         {/* 1. HERO SECTION */}
         <section className="text-center mb-16 relative">
           <div className="absolute inset-0 -z-10 flex items-center justify-center opacity-10">
-            <Sparkles className="w-48 h-48 text-amber-500 blur-sm animate-pulse" />
+            <Sparkles className="w-48 h-48 text-rose-500 blur-sm animate-pulse" />
           </div>
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
@@ -1807,7 +1807,7 @@ const AboutPage = ({
             transition={{ duration: 0.6 }}
             className="space-y-4"
           >
-            <span className="inline-block text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-amber-600 dark:text-amber-400 bg-amber-500/10 px-4 py-1.5 rounded-full border border-amber-500/15">
+            <span className="inline-block text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-rose-600 dark:text-rose-400 bg-rose-500/10 px-4 py-1.5 rounded-full border border-rose-500/15">
               Welcome to Renu Fashion Hub
             </span>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight font-serif text-stone-900 dark:text-stone-50 leading-tight max-w-2xl mx-auto">
@@ -1819,7 +1819,7 @@ const AboutPage = ({
             <div className="pt-4">
               <button
                 onClick={() => navigate("/blog")}
-                className="px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-stone-950 font-black text-xs uppercase tracking-widest transition-all shadow-[0_10px_25px_rgba(217,119,6,0.25)] hover:shadow-[0_15px_30px_rgba(217,119,6,0.35)] active:scale-95 flex items-center gap-2 mx-auto cursor-pointer"
+                className="px-8 py-4 rounded-2xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-700 hover:to-rose-600 text-stone-950 font-black text-xs uppercase tracking-widest transition-all shadow-[0_10px_25px_rgba(217,119,6,0.25)] hover:shadow-[0_15px_30px_rgba(217,119,6,0.35)] active:scale-95 flex items-center gap-2 mx-auto cursor-pointer"
               >
                 <BookOpen className="w-4 h-4" />
                 Explore Fashion Trends
@@ -1836,15 +1836,15 @@ const AboutPage = ({
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className={`p-8 md:p-12 rounded-3xl ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-white border-stone-200"} border shadow-xl mb-12`}
         >
-          <div className="flex items-center gap-3 border-b border-amber-500/25 pb-6 mb-8">
-            <div className={`p-3 rounded-2xl ${theme === "dark" ? "bg-amber-500/10 text-amber-400" : "bg-amber-500/5 text-amber-600"} border border-amber-500/20`}>
-              <Sparkles className="w-6 h-6 text-amber-600" />
+          <div className="flex items-center gap-3 border-b border-rose-500/25 pb-6 mb-8">
+            <div className={`p-3 rounded-2xl ${theme === "dark" ? "bg-rose-500/10 text-rose-400" : "bg-rose-500/5 text-rose-600"} border border-rose-500/20`}>
+              <Sparkles className="w-6 h-6 text-rose-600" />
             </div>
             <div>
               <h3 className="text-xl font-black font-serif text-stone-900 dark:text-stone-100 uppercase tracking-tight">
                 Our Story
               </h3>
-              <p className={`text-[10px] uppercase tracking-widest font-bold ${theme === "dark" ? "text-amber-400/60" : "text-amber-600/70"}`}>
+              <p className={`text-[10px] uppercase tracking-widest font-bold ${theme === "dark" ? "text-rose-400/60" : "text-rose-600/70"}`}>
                 Behind Renu Fashion Hub
               </p>
             </div>
@@ -1873,7 +1873,7 @@ const AboutPage = ({
           {/* Mission */}
           <div className={`p-8 rounded-3xl ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-white border-stone-200"} border shadow-md flex flex-col justify-between`}>
             <div className="space-y-4">
-              <div className="flex items-center gap-2.5 text-amber-500">
+              <div className="flex items-center gap-2.5 text-rose-500">
                 <CheckCircle2 className="w-5 h-5" />
                 <h3 className="text-xs font-bold uppercase tracking-widest">Our Mission</h3>
               </div>
@@ -1892,7 +1892,7 @@ const AboutPage = ({
                   "To simplify and refine the chaotic online fashion discovery process"
                 ].map((item, index) => (
                   <li key={index} className="flex items-start gap-2 text-xs">
-                    <span className="text-amber-500 mt-1">✔</span>
+                    <span className="text-rose-500 mt-1">✔</span>
                     <span className={theme === "dark" ? "text-stone-300" : "text-stone-700"}>{item}</span>
                   </li>
                 ))}
@@ -1903,7 +1903,7 @@ const AboutPage = ({
           {/* Vision */}
           <div className={`p-8 rounded-3xl ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-white border-stone-200"} border shadow-md flex flex-col justify-between`}>
             <div className="space-y-4">
-              <div className="flex items-center gap-2.5 text-amber-500">
+              <div className="flex items-center gap-2.5 text-rose-500">
                 <Globe className="w-5 h-5" />
                 <h3 className="text-xs font-bold uppercase tracking-widest">Our Vision</h3>
               </div>
@@ -1913,7 +1913,7 @@ const AboutPage = ({
               <p className={`text-xs sm:text-sm leading-relaxed ${theme === "dark" ? "text-stone-300" : "text-stone-600"}`}>
                 Renu Fashion Hub envisions becoming the chief premium style guide and online fashion platform trusted globally. We seek to foster lifestyle literacy by constantly upgrading our editorial practices, providing unparalleled trend breakdowns, and continuing with a strict quality-first curation.
               </p>
-              <p className={`text-xs leading-relaxed italic ${theme === "dark" ? "text-amber-200/50" : "text-amber-900/60"}`}>
+              <p className={`text-xs leading-relaxed italic ${theme === "dark" ? "text-rose-200/50" : "text-rose-900/60"}`}>
                 "We envisage a platform where users don't just shop, but learn the core mechanics of personal branding, dressing aesthetics, and seasonal wardrobe balance."
               </p>
             </div>
@@ -1929,7 +1929,7 @@ const AboutPage = ({
           className="mb-12"
         >
           <div className="text-center mb-8">
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-600">Dynamic Deliverables</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-rose-600">Dynamic Deliverables</span>
             <h3 className="text-2xl font-black font-serif uppercase tracking-tight text-stone-900 dark:text-stone-200 mt-1">
               What We Offer
             </h3>
@@ -1957,7 +1957,7 @@ const AboutPage = ({
                   theme === "dark" ? "bg-white/[0.01] hover:bg-white/[0.03] border-white/5" : "bg-white hover:bg-stone-50/50 border-stone-200"
                 }`}
               >
-                <div className={`p-2 rounded-xl w-fit ${theme === "dark" ? "bg-amber-500/10 text-amber-400" : "bg-amber-500/5 text-amber-600"} border border-amber-500/10 mb-3`}>
+                <div className={`p-2 rounded-xl w-fit ${theme === "dark" ? "bg-rose-500/10 text-rose-400" : "bg-rose-500/5 text-rose-600"} border border-rose-500/10 mb-3`}>
                   <offer.icon className="w-4 h-4" />
                 </div>
                 <h4 className="text-sm font-black uppercase text-stone-900 dark:text-stone-200 tracking-tight mb-1.5">{offer.title}</h4>
@@ -1973,17 +1973,17 @@ const AboutPage = ({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className={`p-8 md:p-12 rounded-3xl ${theme === "dark" ? "bg-gradient-to-br from-emerald-950/10 via-[#0B1512] to-amber-950/10 border-white/10" : "bg-white border-stone-200"} border shadow-xl mb-12`}
+          className={`p-8 md:p-12 rounded-3xl ${theme === "dark" ? "bg-gradient-to-br from-emerald-950/10 via-[#0B1512] to-rose-950/10 border-white/10" : "bg-white border-stone-200"} border shadow-xl mb-12`}
         >
-          <div className="flex items-center gap-3 border-b border-amber-500/25 pb-6 mb-8">
-            <div className={`p-3 rounded-2xl ${theme === "dark" ? "bg-amber-500/10 text-amber-400" : "bg-amber-500/5 text-amber-600"} border border-amber-500/20`}>
-              <ShieldCheck className="w-6 h-6 text-amber-500 animate-pulse" />
+          <div className="flex items-center gap-3 border-b border-rose-500/25 pb-6 mb-8">
+            <div className={`p-3 rounded-2xl ${theme === "dark" ? "bg-rose-500/10 text-rose-400" : "bg-rose-500/5 text-rose-600"} border border-rose-500/20`}>
+              <ShieldCheck className="w-6 h-6 text-rose-500 animate-pulse" />
             </div>
             <div>
               <h3 className="text-xl font-black font-serif text-stone-900 dark:text-stone-100 uppercase tracking-tight">
                 Our Editorial Standards & E-E-A-T
               </h3>
-              <p className={`text-[10px] uppercase tracking-widest font-bold ${theme === "dark" ? "text-amber-400/60" : "text-amber-600/70"}`}>
+              <p className={`text-[10px] uppercase tracking-widest font-bold ${theme === "dark" ? "text-rose-400/60" : "text-rose-600/70"}`}>
                 Experience, Expertise, Authoritativeness & Trustworthiness
               </p>
             </div>
@@ -1991,39 +1991,39 @@ const AboutPage = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm leading-relaxed text-stone-600 dark:text-stone-300">
             <div className="space-y-4">
-              <h4 className="text-xs font-bold uppercase tracking-widest text-amber-500">Why Trust Us?</h4>
+              <h4 className="text-xs font-bold uppercase tracking-widest text-rose-500">Why Trust Us?</h4>
               <p className="text-xs sm:text-sm">
                 Renu Fashion Hub keeps you, the reader, at the center of everything. We do not accept sponsorship deals that compromise our integrity. Every style advice is compiled through:
               </p>
               <ul className="space-y-2 text-xs">
                 <li className="flex items-start gap-2">
-                  <span className="text-amber-500">•</span>
+                  <span className="text-rose-500">•</span>
                   <span><strong>User-Focused Content:</strong> Formulated solely to answer real reader questions.</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-amber-500">•</span>
+                  <span className="text-rose-500">•</span>
                   <span><strong>Honest Recommendations:</strong> Unbiased evaluation of fit, craftsmanship, and materials.</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-amber-500">•</span>
+                  <span className="text-rose-500">•</span>
                   <span><strong>Research-Based Articles:</strong> Spending hours analyzing materials, user sentiment, and retail history.</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-amber-500">•</span>
+                  <span className="text-rose-500">•</span>
                   <span><strong>Affiliate disclosures:</strong> Clear, honest declarations of how platform funding operates.</span>
                 </li>
               </ul>
             </div>
 
-            <div className="space-y-4 border-t md:border-t-0 md:border-l border-amber-500/15 pt-6 md:pt-0 md:pl-8">
-              <h4 className="text-xs font-bold uppercase tracking-widest text-amber-500">Editorial Integrity</h4>
+            <div className="space-y-4 border-t md:border-t-0 md:border-l border-rose-500/15 pt-6 md:pt-0 md:pl-8">
+              <h4 className="text-xs font-bold uppercase tracking-widest text-rose-500">Editorial Integrity</h4>
               <p className="text-xs sm:text-sm">
                 Every fashion insights column, luxury trend review, and shopping guides catalog is held to severe standards. We write with close visual comparisons to assure absolute precision.
               </p>
               <p className="text-xs sm:text-sm">
                 Our content focuses closely on:
               </p>
-              <div className="grid grid-cols-2 gap-2 text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+              <div className="grid grid-cols-2 gap-2 text-[11px] font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">
                 <div className="flex items-center gap-1.5 hover:scale-105 transition-transform">
                   <span>✨ Accuracy</span>
                 </div>
@@ -2044,7 +2044,7 @@ const AboutPage = ({
         {/* 7. OUR VALUES */}
         <section className="mb-12">
           <div className="text-center mb-10">
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400">Core Foundations</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-rose-600 dark:text-rose-400">Core Foundations</span>
             <h3 className="text-2xl font-black font-serif uppercase text-stone-900 dark:text-stone-100">Our Core Values</h3>
             <p className={`text-xs ${theme === "dark" ? "text-stone-400" : "text-stone-500"} mt-1 max-w-md mx-auto`}>
               The underlying pillars that govern our fashion research curation, trend reviews, and editorial excellence.
@@ -2068,9 +2068,9 @@ const AboutPage = ({
                 }`}
               >
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-amber-500 font-bold text-sm tracking-tight">
+                  <div className="flex items-center gap-2 text-rose-500 font-bold text-sm tracking-tight">
                     <span>✦</span>
-                    <h4 className="font-serif font-bold text-stone-900 dark:text-amber-50 uppercase tracking-wide">{item.val}</h4>
+                    <h4 className="font-serif font-bold text-stone-900 dark:text-rose-50 uppercase tracking-wide">{item.val}</h4>
                   </div>
                   <p className={`text-xs leading-relaxed ${theme === "dark" ? "text-stone-400" : "text-stone-600"}`}>
                     {item.desc}
@@ -2082,8 +2082,8 @@ const AboutPage = ({
         </section>
 
         {/* 8. AFFILIATE TRANSPARENCY SECTION */}
-        <section className={`p-8 rounded-3xl ${theme === "dark" ? "bg-amber-500/[0.02] border-amber-500/10 text-amber-100" : "bg-amber-500/5 border-amber-500/15 text-[#1C1B18]"} border shadow-inner mb-12`}>
-          <div className="flex items-center gap-2.5 text-amber-500 mb-4">
+        <section className={`p-8 rounded-3xl ${theme === "dark" ? "bg-rose-500/[0.02] border-rose-500/10 text-rose-100" : "bg-rose-500/5 border-rose-500/15 text-[#1C1B18]"} border shadow-inner mb-12`}>
+          <div className="flex items-center gap-2.5 text-rose-500 mb-4">
             <ShieldCheck className="w-5 h-5 flex-shrink-0" />
             <h3 className="text-xs font-bold uppercase tracking-[0.2em]">Affiliate Curation & Disclaimer</h3>
           </div>
@@ -2091,17 +2091,17 @@ const AboutPage = ({
             <p>
               Some outbound links published across Renu Fashion Hub represent secure <strong>affiliate links</strong>. If you decide to complete a purchase through these retail networks, our platform may receive a direct commission from the merchant at no additional cost or premium to you. These relationships help keep our styling team funded and our articles completely free and accessible.
             </p>
-            <div className={`p-4 rounded-2xl border ${theme === "dark" ? "bg-[#09100E] border-white/5" : "bg-white border-dashed border-amber-500/20"} space-y-3 font-semibold`}>
+            <div className={`p-4 rounded-2xl border ${theme === "dark" ? "bg-[#09100E] border-white/5" : "bg-white border-dashed border-rose-500/20"} space-y-3 font-semibold`}>
               <div className="flex items-start gap-2">
-                <span className="text-amber-500">✦</span>
+                <span className="text-rose-500">✦</span>
                 <p>"We never force, pressure, or require users to purchase any product."</p>
               </div>
               <div className="flex items-start gap-2">
-                <span className="text-amber-500">✦</span>
+                <span className="text-rose-500">✦</span>
                 <p>"The final purchase decision always belongs to the user."</p>
               </div>
               <div className="flex items-start gap-2">
-                <span className="text-amber-500">✦</span>
+                <span className="text-rose-500">✦</span>
                 <p>"We encourage users to conduct their own thorough research before making any purchase."</p>
               </div>
             </div>
@@ -2112,14 +2112,14 @@ const AboutPage = ({
         <section className={`p-8 md:p-12 rounded-3xl ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-white border-stone-200"} border shadow-xl mb-12`}>
           <div className="flex flex-col md:flex-row gap-8 items-center">
             <div className="relative flex-shrink-0">
-              <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-full p-1 bg-gradient-to-tr from-amber-600 via-amber-400 to-yellow-300 shadow-xl overflow-hidden">
+              <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-full p-1 bg-gradient-to-tr from-rose-600 via-rose-400 to-yellow-300 shadow-xl overflow-hidden">
                 <MediaImage 
                   url={profile.avatar} 
                   alt="Renu Agarwal" 
                   className={`w-full h-full rounded-full object-cover border-4 ${theme === "dark" ? "border-[#0B1512]" : "border-white"}`}
                   fallback={
-                    <div className={`w-full h-full rounded-full ${theme === "dark" ? "bg-[#0B1512]" : "bg-[#FDFBF7]"} flex items-center justify-center`}>
-                      <User className="w-16 h-16 text-amber-500" />
+                    <div className={`w-full h-full rounded-full ${theme === "dark" ? "bg-[#0B1512]" : "bg-[#FFF7F9]"} flex items-center justify-center`}>
+                      <User className="w-16 h-16 text-rose-500" />
                     </div>
                   }
                 />
@@ -2127,12 +2127,12 @@ const AboutPage = ({
             </div>
 
             <div className="space-y-4 text-center md:text-left">
-              <span className="inline-block text-[9px] font-black uppercase tracking-widest text-[#f5f5f4] bg-gradient-to-r from-amber-600 to-amber-500 px-3 py-1 rounded-md">Founder & Curator</span>
+              <span className="inline-block text-[9px] font-black uppercase tracking-widest text-[#FFF1F5] bg-gradient-to-r from-rose-600 to-rose-500 px-3 py-1 rounded-md">Founder & Curator</span>
               <h3 className="text-2xl sm:text-3xl font-bold tracking-tight font-serif text-stone-900 dark:text-stone-50">Meet Our Founder: Renu Agarwal</h3>
               <p className={`text-sm leading-relaxed ${theme === "dark" ? "text-stone-300" : "text-stone-600"}`}>
                 <strong>Renu Agarwal</strong> founded Renu Fashion Hub out of an uncompromised passion for styling, garment craftsmanship, and clean consumer choice. Driven by a wish to establish a premier style destination, Renu dedicates her daily schedules to evaluating fit styles, researching upcoming palettes, and organizing shopping reviews.
               </p>
-              <p className={`text-xs italic ${theme === "dark" ? "text-amber-300/80" : "text-amber-700"}`}>
+              <p className={`text-xs italic ${theme === "dark" ? "text-rose-300/80" : "text-rose-700"}`}>
                 "True style is not about spending; it's about smart curation, fit coordination, and dressing with ultimate authenticity." — Renu Agarwal
               </p>
             </div>
@@ -2156,7 +2156,7 @@ const AboutPage = ({
         {/* 12. FAQ SECTION */}
         <section className="mb-12">
           <div className="text-center mb-8">
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-600">Frequently Asked Inquiries</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-rose-600">Frequently Asked Inquiries</span>
             <h3 className="text-2xl font-black font-serif uppercase tracking-tight text-stone-900 dark:text-stone-200 mt-1">
               Questions & Answers
             </h3>
@@ -2191,20 +2191,20 @@ const AboutPage = ({
                   key={idx} 
                   className={`border rounded-2xl transition-all duration-300 overflow-hidden shadow-sm ${
                     theme === "dark" 
-                      ? "bg-[#0E1A16] border-stone-800 hover:border-amber-500/30 hover:shadow-md" 
-                      : "bg-white border-stone-200 hover:border-amber-500/30 hover:shadow-md"
+                      ? "bg-[#0E1A16] border-stone-800 hover:border-rose-500/30 hover:shadow-md" 
+                      : "bg-white border-stone-200 hover:border-rose-500/30 hover:shadow-md"
                   }`}
                 >
                   <button
                     onClick={() => toggleFaq(idx)}
-                    className={`w-full p-5 text-left flex justify-between items-center font-bold text-sm transition-colors duration-200 gap-4 focus:outline-none focus:ring-1 focus:ring-amber-500 ${
+                    className={`w-full p-5 text-left flex justify-between items-center font-bold text-sm transition-colors duration-200 gap-4 focus:outline-none focus:ring-1 focus:ring-rose-500 ${
                       theme === "dark"
-                        ? "text-amber-100 hover:text-amber-400 bg-stone-900/10 hover:bg-[#12231E]/40"
-                        : "text-stone-900 hover:text-amber-950 bg-stone-50/10 hover:bg-stone-50/60"
+                        ? "text-rose-100 hover:text-rose-400 bg-stone-900/10 hover:bg-[#12231E]/40"
+                        : "text-stone-900 hover:text-rose-950 bg-stone-50/10 hover:bg-stone-50/60"
                     }`}
                   >
                     <span className="font-serif text-sm sm:text-base font-bold tracking-wide">{faq.q}</span>
-                    <ChevronDown className={`w-4 h-4 text-amber-500 transition-transform duration-300 flex-shrink-0 ${isOpen ? "rotate-180" : ""}`} />
+                    <ChevronDown className={`w-4 h-4 text-rose-500 transition-transform duration-300 flex-shrink-0 ${isOpen ? "rotate-180" : ""}`} />
                   </button>
                   <AnimatePresence initial={false}>
                     {isOpen && (
@@ -2213,7 +2213,7 @@ const AboutPage = ({
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.25 }}
-                        className={`px-5 pb-5 text-xs sm:text-sm leading-relaxed border-t border-amber-500/10 pt-4 ${
+                        className={`px-5 pb-5 text-xs sm:text-sm leading-relaxed border-t border-rose-500/10 pt-4 ${
                           theme === "dark"
                             ? "text-stone-300 bg-[#07100D]/30"
                             : "text-stone-600 bg-stone-50/30"
@@ -2231,7 +2231,7 @@ const AboutPage = ({
 
         {/* 13. CONTACT SECTION */}
         <section className={`p-8 rounded-3xl ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-white border-stone-200"} border text-center shadow-lg mb-12 max-w-2xl mx-auto`}>
-          <div className="inline-flex p-3 rounded-2xl bg-amber-500/10 text-amber-500 mb-4 border border-amber-500/15">
+          <div className="inline-flex p-3 rounded-2xl bg-rose-500/10 text-rose-500 mb-4 border border-rose-500/15">
             <Mail className="w-5 h-5" />
           </div>
           <h3 className="text-xl font-bold font-serif text-stone-900 dark:text-stone-50 mb-1">Get In Touch With Renu Fashion Hub</h3>
@@ -2241,13 +2241,13 @@ const AboutPage = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md mx-auto">
             <div className={`p-4 rounded-2xl border ${theme === "dark" ? "bg-black/20 border-white/5" : "bg-stone-50 border-stone-150"} space-y-1`}>
               <span className={`block text-[8px] font-black uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"}`}>Support Inquiries</span>
-              <a href="mailto:support@renufashionhub.in" className="block text-xs sm:text-sm font-bold text-amber-600 dark:text-amber-400 hover:underline">
+              <a href="mailto:support@renufashionhub.in" className="block text-xs sm:text-sm font-bold text-rose-600 dark:text-rose-400 hover:underline">
                 support@renufashionhub.in
               </a>
             </div>
             <div className={`p-4 rounded-2xl border ${theme === "dark" ? "bg-black/20 border-white/5" : "bg-stone-50 border-stone-150"} space-y-1`}>
               <span className={`block text-[8px] font-black uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"}`}>General Information</span>
-              <a href="mailto:info@renufashionhub.in" className="block text-xs sm:text-sm font-bold text-[#b45309] dark:text-amber-400 hover:underline">
+              <a href="mailto:info@renufashionhub.in" className="block text-xs sm:text-sm font-bold text-[#BE123C] dark:text-rose-400 hover:underline">
                 info@renufashionhub.in
               </a>
             </div>
@@ -2265,13 +2265,13 @@ const AboutPage = ({
           <div className="flex justify-center gap-4 pt-2">
             <button
               onClick={() => navigate("/")}
-              className="px-6 py-3.5 rounded-xl border border-amber-500/30 text-amber-600 dark:text-amber-400 font-bold hover:bg-amber-500/10 active:scale-95 text-xs uppercase tracking-widest transition-all cursor-pointer"
+              className="px-6 py-3.5 rounded-xl border border-rose-500/30 text-rose-600 dark:text-rose-400 font-bold hover:bg-rose-500/10 active:scale-95 text-xs uppercase tracking-widest transition-all cursor-pointer"
             >
               Back to Showroom
             </button>
             <button
               onClick={() => navigate("/blog")}
-              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-[#09100E] font-black hover:scale-105 active:scale-95 text-xs uppercase tracking-widest transition-all shadow-[0_4px_16px_rgba(217,119,6,0.15)] cursor-pointer"
+              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-700 hover:to-rose-600 text-[#09100E] font-black hover:scale-105 active:scale-95 text-xs uppercase tracking-widest transition-all shadow-[0_4px_16px_rgba(217,119,6,0.15)] cursor-pointer"
             >
               Browse Style Guides
             </button>
@@ -2301,7 +2301,7 @@ const renderLegaleseMarkup = (text: string, theme: string, listItems: string[]) 
           viewport={{ once: true, margin: "-40px" }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           className={`text-base md:text-lg font-black uppercase tracking-wide mt-8 mb-3 pt-6 border-t first:border-0 first:pt-0 ${
-            theme === "dark" ? "text-amber-400 border-white/5" : "text-amber-700 border-black/5"
+            theme === "dark" ? "text-rose-400 border-white/5" : "text-rose-700 border-black/5"
           }`}
         >
           {trimmed}
@@ -2318,7 +2318,7 @@ const renderLegaleseMarkup = (text: string, theme: string, listItems: string[]) 
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className={`text-xs font-black uppercase tracking-wider mb-4 ${
-            theme === "dark" ? "text-amber-400/80" : "text-amber-600/80"
+            theme === "dark" ? "text-rose-400/80" : "text-rose-600/80"
           }`}
         >
           {trimmed}
@@ -2342,7 +2342,7 @@ const renderLegaleseMarkup = (text: string, theme: string, listItems: string[]) 
           viewport={{ once: true, margin: "-20px" }}
           transition={{ duration: 0.4 }}
           className={`text-sm md:text-base font-extrabold tracking-tight mt-5 mb-2 block ${
-            theme === "dark" ? "text-amber-200" : "text-amber-900"
+            theme === "dark" ? "text-rose-200" : "text-rose-900"
           }`}
         >
           {trimmed}
@@ -2387,7 +2387,7 @@ const renderLegaleseMarkup = (text: string, theme: string, listItems: string[]) 
             <a 
               key={m.index} 
               href={`mailto:${m.text}`} 
-              className="underline font-bold transition-all text-amber-500 hover:text-amber-400"
+              className="underline font-bold transition-all text-rose-500 hover:text-rose-400"
             >
               {m.text}
             </a>
@@ -2399,7 +2399,7 @@ const renderLegaleseMarkup = (text: string, theme: string, listItems: string[]) 
               href={m.text} 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="underline font-bold transition-all text-amber-500 hover:text-amber-400"
+              className="underline font-bold transition-all text-rose-500 hover:text-rose-400"
             >
               {m.text}
             </a>
@@ -2414,7 +2414,7 @@ const renderLegaleseMarkup = (text: string, theme: string, listItems: string[]) 
 
       const content = elements.length > 0 ? elements : part;
       if (isBold) {
-        return <strong key={index} className="font-extrabold text-amber-600 dark:text-amber-400">{content}</strong>;
+        return <strong key={index} className="font-extrabold text-rose-600 dark:text-rose-400">{content}</strong>;
       }
       return content;
     });
@@ -2429,7 +2429,7 @@ const renderLegaleseMarkup = (text: string, theme: string, listItems: string[]) 
           transition={{ duration: 0.4 }}
           className="flex items-start gap-2.5 pl-5 py-1"
         >
-          <span className={`text-[12px] mt-1.5 flex-shrink-0 w-1.5 h-1.5 rounded-full ${theme === "dark" ? "bg-amber-400/80" : "bg-amber-600/80"}`} />
+          <span className={`text-[12px] mt-1.5 flex-shrink-0 w-1.5 h-1.5 rounded-full ${theme === "dark" ? "bg-rose-400/80" : "bg-rose-600/80"}`} />
           <span className={`text-sm ${theme === "dark" ? "text-stone-300" : "text-stone-700"} font-medium`}>
             {inlineFormatted}
           </span>
@@ -2523,7 +2523,7 @@ const PrivacyPolicyPage = ({ profile, theme, navigate }: { profile: any; theme: 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512]" : "bg-[#FDFBF7]"} p-6 pb-24 font-sans`}
+      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512]" : "bg-[#FFF7F9]"} p-6 pb-24 font-sans`}
     >
       <div className="max-w-4xl mx-auto">
         <motion.div 
@@ -2534,14 +2534,14 @@ const PrivacyPolicyPage = ({ profile, theme, navigate }: { profile: any; theme: 
         >
           <button 
             onClick={() => navigate("/")} 
-            className={`p-3 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border flex items-center gap-2 group transition-all hover:bg-amber-500/10 hover:border-amber-500/50 w-fit cursor-pointer`}
+            className={`p-3 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border flex items-center gap-2 group transition-all hover:bg-rose-500/10 hover:border-rose-500/50 w-fit cursor-pointer`}
           >
             <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
             <span className="text-xs font-bold uppercase tracking-wider">Back to Home</span>
           </button>
           
           <div className="text-right">
-            <p className="text-xl font-black uppercase tracking-wider font-serif text-amber-500">
+            <p className="text-xl font-black uppercase tracking-wider font-serif text-rose-500">
               Renu Fashion Hub
             </p>
             <p className={`text-[10px] uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"} font-bold`}>
@@ -2556,15 +2556,15 @@ const PrivacyPolicyPage = ({ profile, theme, navigate }: { profile: any; theme: 
           transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
           className={`p-8 md:p-12 rounded-3xl ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-white border-stone-200"} border shadow-xl`}
         >
-          <div className="flex items-center gap-3 border-b border-amber-500/25 pb-6 mb-8">
-            <div className={`p-3 rounded-2xl ${theme === "dark" ? "bg-amber-500/10 text-amber-400" : "bg-amber-500/5 text-amber-600"} border border-amber-500/20`}>
+          <div className="flex items-center gap-3 border-b border-rose-500/25 pb-6 mb-8">
+            <div className={`p-3 rounded-2xl ${theme === "dark" ? "bg-rose-500/10 text-rose-400" : "bg-rose-500/5 text-rose-600"} border border-rose-500/20`}>
               <ShieldCheck className="w-6 h-6 animate-pulse" />
             </div>
             <div>
-              <h1 className="text-2xl font-black font-serif text-amber-950 dark:text-amber-100 uppercase tracking-tight">
+              <h1 className="text-2xl font-black font-serif text-rose-950 dark:text-rose-100 uppercase tracking-tight">
                 Privacy Policy
               </h1>
-              <p className={`text-[10.5px] uppercase tracking-widest font-bold ${theme === "dark" ? "text-amber-400/60" : "text-amber-600/70"}`}>
+              <p className={`text-[10.5px] uppercase tracking-widest font-bold ${theme === "dark" ? "text-rose-400/60" : "text-rose-600/70"}`}>
                 Transparency & Trust Statement
               </p>
             </div>
@@ -2642,7 +2642,7 @@ const DisclaimerPage = ({ profile, theme, navigate }: { profile: any; theme: str
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512]" : "bg-[#FDFBF7]"} p-4 sm:p-6 pb-24 font-sans`}
+      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512]" : "bg-[#FFF7F9]"} p-4 sm:p-6 pb-24 font-sans`}
     >
       {/* Dynamic structured JSON-LD data for maximum SEO impact */}
       <script type="application/ld+json">
@@ -2658,14 +2658,14 @@ const DisclaimerPage = ({ profile, theme, navigate }: { profile: any; theme: str
         >
           <button 
             onClick={() => navigate("/")} 
-            className={`p-3 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border flex items-center gap-2 group transition-all hover:bg-amber-500/10 hover:border-amber-500/50 w-fit cursor-pointer`}
+            className={`p-3 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border flex items-center gap-2 group transition-all hover:bg-rose-500/10 hover:border-rose-500/50 w-fit cursor-pointer`}
           >
             <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
             <span className="text-xs font-bold uppercase tracking-wider">Back to Home</span>
           </button>
           
           <div className="text-right">
-            <p className="text-xl font-black uppercase tracking-wider font-serif text-amber-500">
+            <p className="text-xl font-black uppercase tracking-wider font-serif text-rose-500">
               Renu Fashion Hub
             </p>
             <p className={`text-[10px] uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"} font-bold`}>
@@ -2680,15 +2680,15 @@ const DisclaimerPage = ({ profile, theme, navigate }: { profile: any; theme: str
           transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
           className={`p-8 md:p-12 rounded-3xl ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-white border-stone-200"} border shadow-xl`}
         >
-          <div className="flex items-center gap-3 border-b border-amber-500/25 pb-6 mb-8">
-            <div className={`p-3 rounded-2xl ${theme === "dark" ? "bg-amber-500/10 text-amber-400" : "bg-amber-500/5 text-amber-600"} border border-amber-500/20`}>
+          <div className="flex items-center gap-3 border-b border-rose-500/25 pb-6 mb-8">
+            <div className={`p-3 rounded-2xl ${theme === "dark" ? "bg-rose-500/10 text-rose-400" : "bg-rose-500/5 text-rose-600"} border border-rose-500/20`}>
               <ShieldCheck className="w-6 h-6 animate-pulse" />
             </div>
             <div>
-              <h1 className="text-2xl font-black font-serif text-amber-950 dark:text-amber-100 uppercase tracking-tight">
+              <h1 className="text-2xl font-black font-serif text-rose-950 dark:text-rose-100 uppercase tracking-tight">
                 Disclaimer
               </h1>
-              <p className={`text-[10.5px] uppercase tracking-widest font-bold ${theme === "dark" ? "text-amber-400/60" : "text-amber-600/70"}`}>
+              <p className={`text-[10.5px] uppercase tracking-widest font-bold ${theme === "dark" ? "text-rose-400/60" : "text-rose-600/70"}`}>
                 Legal Limitations & Disclosures
               </p>
             </div>
@@ -2764,7 +2764,7 @@ const TermsOfServicePage = ({ profile, theme, navigate }: { profile: any; theme:
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512]" : "bg-[#FDFBF7]"} p-6 pb-24 font-sans`}
+      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512]" : "bg-[#FFF7F9]"} p-6 pb-24 font-sans`}
     >
       <div className="max-w-4xl mx-auto">
         <motion.div 
@@ -2775,14 +2775,14 @@ const TermsOfServicePage = ({ profile, theme, navigate }: { profile: any; theme:
         >
           <button 
             onClick={() => navigate("/")} 
-            className={`p-3 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border flex items-center gap-2 group transition-all hover:bg-amber-500/10 hover:border-amber-500/50 w-fit cursor-pointer`}
+            className={`p-3 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border flex items-center gap-2 group transition-all hover:bg-rose-500/10 hover:border-rose-500/50 w-fit cursor-pointer`}
           >
             <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
             <span className="text-xs font-bold uppercase tracking-wider">Back to Home</span>
           </button>
           
           <div className="text-right">
-            <p className="text-xl font-black uppercase tracking-wider font-serif text-amber-500">
+            <p className="text-xl font-black uppercase tracking-wider font-serif text-rose-500">
               Renu Fashion Hub
             </p>
             <p className={`text-[10px] uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"} font-bold`}>
@@ -2797,15 +2797,15 @@ const TermsOfServicePage = ({ profile, theme, navigate }: { profile: any; theme:
           transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
           className={`p-8 md:p-12 rounded-3xl ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-white border-stone-200"} border shadow-xl`}
         >
-          <div className="flex items-center gap-3 border-b border-amber-500/25 pb-6 mb-8">
-            <div className={`p-3 rounded-2xl ${theme === "dark" ? "bg-amber-500/10 text-amber-400" : "bg-amber-500/5 text-amber-600"} border border-amber-500/20`}>
+          <div className="flex items-center gap-3 border-b border-rose-500/25 pb-6 mb-8">
+            <div className={`p-3 rounded-2xl ${theme === "dark" ? "bg-rose-500/10 text-rose-400" : "bg-rose-500/5 text-rose-600"} border border-rose-500/20`}>
               <ShieldCheck className="w-6 h-6 animate-pulse" />
             </div>
             <div>
-              <h1 className="text-2xl font-black font-serif text-amber-950 dark:text-amber-100 uppercase tracking-tight">
+              <h1 className="text-2xl font-black font-serif text-rose-950 dark:text-rose-100 uppercase tracking-tight">
                 Terms of Service
               </h1>
-              <p className={`text-[10.5px] uppercase tracking-widest font-bold ${theme === "dark" ? "text-amber-400/60" : "text-amber-600/70"}`}>
+              <p className={`text-[10.5px] uppercase tracking-widest font-bold ${theme === "dark" ? "text-rose-400/60" : "text-rose-600/70"}`}>
                 Legal Agreement & User Obligations
               </p>
             </div>
@@ -2863,17 +2863,17 @@ const BlogListPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; them
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`min-h-screen ${dark ? "bg-[#0B1512] text-amber-50" : "bg-[#FDFBF7] text-[#1C1B18]"} pb-24`}
+      className={`min-h-screen ${dark ? "bg-[#0B1512] text-rose-50" : "bg-[#FFF7F9] text-[#1C1B18]"} pb-24`}
     >
       {/* Editorial Masthead */}
       <div className={`relative overflow-hidden border-b ${dark ? "border-white/10" : "border-black/10"}`}>
         <div className="absolute inset-0 opacity-[0.08] pointer-events-none" style={{
-          backgroundImage: `radial-gradient(circle at 20% 20%, #f59e0b 0, transparent 40%), radial-gradient(circle at 80% 70%, #f59e0b 0, transparent 40%)`
+          backgroundImage: `radial-gradient(circle at 20% 20%, #F43F5E 0, transparent 40%), radial-gradient(circle at 80% 70%, #F43F5E 0, transparent 40%)`
         }} />
         <div className="max-w-6xl mx-auto px-6 pt-8 pb-10 relative">
           <button
             onClick={() => navigate("/")}
-            className={`mb-8 p-2.5 rounded-xl ${dark ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border inline-flex items-center gap-2 group transition-all hover:bg-amber-500/10 hover:border-amber-500/50`}
+            className={`mb-8 p-2.5 rounded-xl ${dark ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border inline-flex items-center gap-2 group transition-all hover:bg-rose-500/10 hover:border-rose-500/50`}
           >
             <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
             <span className="text-[11px] font-bold uppercase tracking-widest">Home</span>
@@ -2881,11 +2881,11 @@ const BlogListPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; them
 
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
             <div>
-              <p className={`text-[10px] font-black uppercase tracking-[0.3em] mb-3 ${dark ? "text-amber-400/70" : "text-amber-700/80"}`}>
+              <p className={`text-[10px] font-black uppercase tracking-[0.3em] mb-3 ${dark ? "text-rose-400/70" : "text-rose-700/80"}`}>
                 Renu Fashion Hub • Editorial
               </p>
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-black font-serif tracking-tight leading-[0.95]">
-                Fashion <span className="italic text-amber-500">Stories</span>
+                Fashion <span className="italic text-rose-500">Stories</span>
               </h1>
               <p className={`mt-3 text-sm max-w-xl ${dark ? "text-white/50" : "text-black/55"} font-medium leading-relaxed`}>
                 Curated style journals, styling notes and behind-the-scenes vlogs from Renu Agarwal's atelier.
@@ -2905,7 +2905,7 @@ const BlogListPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; them
               placeholder="Search stories, trends, categories..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className={`w-full ${dark ? "bg-white/[0.06] border-white/10 text-white placeholder-white/30" : "bg-white border-black/10 text-black placeholder-black/40"} border rounded-2xl pl-12 pr-4 py-3.5 focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20 transition-all text-sm font-medium shadow-sm`}
+              className={`w-full ${dark ? "bg-white/[0.06] border-white/10 text-white placeholder-white/30" : "bg-white border-black/10 text-black placeholder-black/40"} border rounded-2xl pl-12 pr-4 py-3.5 focus:outline-none focus:border-rose-500/60 focus:ring-2 focus:ring-rose-500/20 transition-all text-sm font-medium shadow-sm`}
             />
           </div>
 
@@ -2920,10 +2920,10 @@ const BlogListPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; them
                     onClick={() => setActiveCategory(cat)}
                     className={`px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border ${
                       active
-                        ? "bg-amber-500 text-stone-950 border-amber-500 shadow-md shadow-amber-500/25"
+                        ? "bg-rose-500 text-stone-950 border-rose-500 shadow-md shadow-rose-500/25"
                         : dark
-                          ? "bg-white/5 border-white/10 text-white/60 hover:border-amber-500/40 hover:text-amber-400"
-                          : "bg-white border-black/10 text-black/60 hover:border-amber-500/40 hover:text-amber-600"
+                          ? "bg-white/5 border-white/10 text-white/60 hover:border-rose-500/40 hover:text-rose-400"
+                          : "bg-white border-black/10 text-black/60 hover:border-rose-500/40 hover:text-rose-600"
                     }`}
                   >
                     {cat}
@@ -2939,7 +2939,7 @@ const BlogListPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; them
       <div className="max-w-6xl mx-auto px-6 pt-10">
         {!isLoaded ? (
           <div className="py-24 flex flex-col items-center justify-center">
-            <Loader2 className="w-8 h-8 text-amber-500 animate-spin" />
+            <Loader2 className="w-8 h-8 text-rose-500 animate-spin" />
             <p className="text-xs text-stone-500 font-bold uppercase tracking-widest mt-4">Loading Stories...</p>
           </div>
         ) : filteredBlogs.length === 0 ? (
@@ -2956,7 +2956,7 @@ const BlogListPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; them
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 onClick={() => navigate(`/blog/${featuredBlog.id}`)}
-                className={`group cursor-pointer relative overflow-hidden rounded-[2rem] border ${dark ? "bg-white/[0.03] border-white/10" : "bg-white border-black/8"} shadow-lg hover:shadow-2xl hover:shadow-amber-500/10 transition-all`}
+                className={`group cursor-pointer relative overflow-hidden rounded-[2rem] border ${dark ? "bg-white/[0.03] border-white/10" : "bg-white border-black/8"} shadow-lg hover:shadow-2xl hover:shadow-rose-500/10 transition-all`}
               >
                 <div className="grid md:grid-cols-5 gap-0">
                   {featuredBlog.image && (
@@ -2967,18 +2967,18 @@ const BlogListPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; them
                         alt={featuredBlog.title}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:via-transparent md:to-black/10" />
-                      <span className="absolute top-5 left-5 text-[10px] font-black uppercase tracking-[0.2em] bg-amber-500 text-stone-950 px-3 py-1.5 rounded-full shadow-lg">
+                      <span className="absolute top-5 left-5 text-[10px] font-black uppercase tracking-[0.2em] bg-rose-500 text-stone-950 px-3 py-1.5 rounded-full shadow-lg">
                         ★ Featured
                       </span>
                     </div>
                   )}
                   <div className="md:col-span-2 p-6 md:p-10 flex flex-col justify-center">
                     {featuredBlog.category && (
-                      <span className={`self-start text-[10px] font-black uppercase tracking-[0.25em] mb-4 px-2.5 py-1 rounded-full ${dark ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" : "bg-amber-50 text-amber-700 border border-amber-200"}`}>
+                      <span className={`self-start text-[10px] font-black uppercase tracking-[0.25em] mb-4 px-2.5 py-1 rounded-full ${dark ? "bg-rose-500/10 text-rose-400 border border-rose-500/20" : "bg-rose-50 text-rose-700 border border-rose-200"}`}>
                         {featuredBlog.category}
                       </span>
                     )}
-                    <h2 className="text-2xl md:text-4xl font-black font-serif leading-[1.05] mb-4 group-hover:text-amber-500 transition-colors">
+                    <h2 className="text-2xl md:text-4xl font-black font-serif leading-[1.05] mb-4 group-hover:text-rose-500 transition-colors">
                       {featuredBlog.title}
                     </h2>
                     <p className={`text-sm md:text-base ${dark ? "text-white/60" : "text-black/60"} leading-relaxed mb-6 line-clamp-3`}>
@@ -2989,7 +2989,7 @@ const BlogListPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; them
                       <span>•</span>
                       <span>{readTime(featuredBlog)} min read</span>
                     </div>
-                    <div className="inline-flex items-center gap-2 group-hover:gap-3 transition-all font-black text-xs uppercase tracking-widest text-amber-500">
+                    <div className="inline-flex items-center gap-2 group-hover:gap-3 transition-all font-black text-xs uppercase tracking-widest text-rose-500">
                       <span>Read Story</span>
                       <span className="text-base">→</span>
                     </div>
@@ -3001,7 +3001,7 @@ const BlogListPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; them
             {/* Section label */}
             {gridBlogs.length > 0 && (
               <div className="flex items-end justify-between border-b pb-3 border-dashed border-current/15">
-                <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-amber-500">
+                <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-rose-500">
                   {searchQuery ? "Search Results" : activeCategory !== "All" ? activeCategory : "Latest Journal"}
                 </h3>
                 <span className={`text-[10px] font-black uppercase tracking-widest ${dark ? "text-white/40" : "text-black/40"}`}>
@@ -3020,7 +3020,7 @@ const BlogListPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; them
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: Math.min(idx * 0.06, 0.4) }}
                     onClick={() => navigate(`/blog/${blog.id}`)}
-                    className={`group cursor-pointer overflow-hidden rounded-2xl border transition-all hover:-translate-y-1 hover:shadow-xl ${dark ? "bg-white/[0.03] border-white/10 hover:border-amber-500/40 hover:shadow-amber-500/10" : "bg-white border-black/8 hover:border-amber-500/40 hover:shadow-amber-500/10"}`}
+                    className={`group cursor-pointer overflow-hidden rounded-2xl border transition-all hover:-translate-y-1 hover:shadow-xl ${dark ? "bg-white/[0.03] border-white/10 hover:border-rose-500/40 hover:shadow-rose-500/10" : "bg-white border-black/8 hover:border-rose-500/40 hover:shadow-rose-500/10"}`}
                   >
                     {blog.image ? (
                       <div className="relative w-full h-52 overflow-hidden">
@@ -3046,13 +3046,13 @@ const BlogListPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; them
                         <span>•</span>
                         <span>{readTime(blog)} min</span>
                       </div>
-                      <h4 className="text-lg font-black font-serif mb-2 group-hover:text-amber-500 transition-colors line-clamp-2 leading-snug">
+                      <h4 className="text-lg font-black font-serif mb-2 group-hover:text-rose-500 transition-colors line-clamp-2 leading-snug">
                         {blog.title}
                       </h4>
                       <p className={`text-[13px] leading-relaxed line-clamp-3 mb-4 ${dark ? "text-white/55" : "text-black/55"}`}>
                         {blog.excerpt || "Read more from this edition..."}
                       </p>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-amber-500 inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all mt-auto">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-rose-500 inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all mt-auto">
                         Read Story <span>→</span>
                       </span>
                     </div>
@@ -3077,10 +3077,10 @@ const BlogDetailPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; th
       return <PageLoader theme={theme} />;
     }
     return (
-      <div className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-amber-50" : "bg-[#FDFBF7] text-[#1C1B18]"} flex items-center justify-center p-6`}>
+      <div className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-rose-50" : "bg-[#FFF7F9] text-[#1C1B18]"} flex items-center justify-center p-6`}>
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4 font-serif">Article Not Found</h1>
-          <button onClick={() => navigate("/blog")} className="px-6 py-2 bg-gradient-to-r from-amber-600 to-amber-500 rounded-xl text-stone-950 font-bold hover:opacity-90">Back to Blogs</button>
+          <button onClick={() => navigate("/blog")} className="px-6 py-2 bg-gradient-to-r from-rose-600 to-rose-500 rounded-xl text-stone-950 font-bold hover:opacity-90">Back to Blogs</button>
         </div>
       </div>
     );
@@ -3091,12 +3091,12 @@ const BlogDetailPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; th
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-amber-50" : "bg-[#FDFBF7] text-[#1C1B18]"} p-6 pb-24`}
+      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-rose-50" : "bg-[#FFF7F9] text-[#1C1B18]"} p-6 pb-24`}
     >
       <div className="max-w-2xl mx-auto">
         <button 
           onClick={() => navigate("/blog")} 
-          className={`mb-8 p-3 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border flex items-center gap-2 group transition-all hover:bg-amber-500/10 hover:border-amber-500/50 w-fit`}
+          className={`mb-8 p-3 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border flex items-center gap-2 group transition-all hover:bg-rose-500/10 hover:border-rose-500/50 w-fit`}
         >
           <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
           <span className="text-xs font-bold uppercase tracking-wider">Back to All Blogs</span>
@@ -3106,7 +3106,7 @@ const BlogDetailPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; th
           <div className="w-full h-64 sm:h-96 rounded-3xl overflow-hidden relative border border-white/5 mb-8 shadow-2xl">
             <MediaImage url={blog.image} className="w-full h-full object-cover" alt={blog.title} />
             {blog.category && (
-              <span className="absolute top-4 left-4 text-[10px] font-black uppercase tracking-widest bg-amber-500 text-stone-950 px-3 py-1 rounded-full shadow-lg">
+              <span className="absolute top-4 left-4 text-[10px] font-black uppercase tracking-widest bg-rose-500 text-stone-950 px-3 py-1 rounded-full shadow-lg">
                 {blog.category}
               </span>
             )}
@@ -3114,13 +3114,13 @@ const BlogDetailPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; th
         )}
 
         <div className="space-y-4 mb-8">
-          <p className={`text-[11px] ${theme === "dark" ? "text-amber-400/80" : "text-amber-700/80"} font-black uppercase tracking-widest`}>
+          <p className={`text-[11px] ${theme === "dark" ? "text-rose-400/80" : "text-rose-700/80"} font-black uppercase tracking-widest`}>
             Published on {new Date(blog.timestamp || Date.now()).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
           </p>
           <h1 className="text-3xl sm:text-4xl font-extrabold font-serif leading-tight">
             {blog.title}
           </h1>
-          <div className="w-20 h-1 bg-amber-500 rounded-full" />
+          <div className="w-20 h-1 bg-rose-500 rounded-full" />
         </div>
 
         {/* Content with elegant formatting styles */}
@@ -3152,10 +3152,10 @@ const PostDetailPage = ({ posts, products, profile, theme, navigate, isMuted, se
       return <PageLoader theme={theme} />;
     }
     return (
-      <div className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-amber-50" : "bg-[#FDFBF7] text-[#1C1B18]"} flex items-center justify-center p-6`}>
+      <div className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-rose-50" : "bg-[#FFF7F9] text-[#1C1B18]"} flex items-center justify-center p-6`}>
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Post Not Found</h1>
-          <button onClick={() => navigate("/")} className="px-6 py-2 bg-gradient-to-r from-amber-600 to-amber-500 rounded-xl text-stone-950 font-bold hover:opacity-90">Back to Home</button>
+          <button onClick={() => navigate("/")} className="px-6 py-2 bg-gradient-to-r from-rose-600 to-rose-500 rounded-xl text-stone-950 font-bold hover:opacity-90">Back to Home</button>
         </div>
       </div>
     );
@@ -3328,8 +3328,8 @@ const AnnouncementBanner = React.memo(({ theme }: { theme: "light" | "dark" }) =
   return (
     <div className={`w-full py-2.5 overflow-hidden text-center relative z-50 border-b ${
       theme === "dark" 
-        ? "bg-amber-950/20 text-amber-200 border-amber-500/20" 
-        : "bg-amber-50 text-amber-800 border-amber-100"
+        ? "bg-rose-950/20 text-rose-200 border-rose-500/20" 
+        : "bg-rose-50 text-rose-800 border-rose-100"
     } text-[11px] font-medium tracking-wide`}>
       <style>{`
         @keyframes marquee {
@@ -3347,7 +3347,7 @@ const AnnouncementBanner = React.memo(({ theme }: { theme: "light" | "dark" }) =
         }
       `}</style>
       <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10 flex items-center bg-transparent pointer-events-none">
-        <Sparkles className="w-3.5 h-3.5 text-amber-500 animate-pulse mr-1" />
+        <Sparkles className="w-3.5 h-3.5 text-rose-500 animate-pulse mr-1" />
       </div>
       <div className="animate-marquee-css">
         <span className="mx-6">✨ Premium Handpicked Boutique Styling Recommendations curated by Renu Agarwal ✨</span>
@@ -3577,7 +3577,7 @@ const BoutiqueHighlights = React.memo(({ theme }: { theme: "light" | "dark" }) =
       icon: Sparkles, 
       title: "Handcrafted Premium Style", 
       desc: "Curated with finest zari, organza & silk works by Renu Agarwal.",
-      color: "text-amber-500 bg-amber-500/10"
+      color: "text-rose-500 bg-rose-500/10"
     },
     { 
       icon: Check, 
@@ -3602,7 +3602,7 @@ const BoutiqueHighlights = React.memo(({ theme }: { theme: "light" | "dark" }) =
   return (
     <div className="mb-8 p-1 select-none">
       <div className="flex items-center gap-1.5 mb-3.5">
-        <Sparkles className="w-4 h-4 text-amber-500" />
+        <Sparkles className="w-4 h-4 text-rose-500" />
         <h3 className="text-[11px] font-bold uppercase tracking-wider opacity-80">Boutique Specialties</h3>
       </div>
       <div className="grid grid-cols-2 gap-3.5">
@@ -3613,8 +3613,8 @@ const BoutiqueHighlights = React.memo(({ theme }: { theme: "light" | "dark" }) =
               key={idx}
               className={`p-3.5 rounded-2xl border ${
                 theme === "dark" 
-                  ? "bg-white/[0.03] border-white/10 hover:border-amber-500/30" 
-                  : "bg-black/[0.02] border-black/10 hover:border-amber-500/20"
+                  ? "bg-white/[0.03] border-white/10 hover:border-rose-500/30" 
+                  : "bg-black/[0.02] border-black/10 hover:border-rose-500/20"
               } transition-all duration-300 flex flex-col gap-2.5 group transform hover:-translate-y-0.5`}
             >
               <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${item.color} transition-transform group-hover:scale-105 duration-300`}>
@@ -3677,7 +3677,7 @@ const LatestArrivalsCarousel = React.memo(({
     <div className="mb-8">
       <div className="flex justify-between items-center mb-3 px-1 select-none">
         <div className="flex items-center gap-1.5">
-          <Sparkles className="w-4 h-4 text-amber-500" />
+          <Sparkles className="w-4 h-4 text-rose-500" />
           <h3 className="text-[11px] font-bold uppercase tracking-wider opacity-80">Latest Arrivals ✨</h3>
         </div>
         <span className="text-[9px] opacity-45 font-semibold uppercase tracking-wider">Scroll Wheel or Swipe →</span>
@@ -3700,7 +3700,7 @@ const LatestArrivalsCarousel = React.memo(({
               }
             }}
             className={`flex-none w-52 rounded-2xl overflow-hidden cursor-pointer snap-start border ${
-              theme === "dark" ? "bg-white/[0.03] border-white/10 hover:border-amber-500/35" : "bg-black/[0.02] border-black/10 hover:border-amber-500/25"
+              theme === "dark" ? "bg-white/[0.03] border-white/10 hover:border-rose-500/35" : "bg-black/[0.02] border-black/10 hover:border-rose-500/25"
             } relative group transition-all duration-350 transform hover:-translate-y-0.5`}
           >
             <div className="aspect-[3/4] overflow-hidden relative">
@@ -3718,17 +3718,17 @@ const LatestArrivalsCarousel = React.memo(({
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
               )}
-              <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-black/85 text-[8px] font-extrabold text-amber-400 capitalize border border-amber-500/20 shadow-md">
+              <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-black/85 text-[8px] font-extrabold text-rose-400 capitalize border border-rose-500/20 shadow-md">
                 {item.originTag}
               </div>
             </div>
             <div className="p-3">
               <h4 className="text-[11px] font-bold truncate mb-1">{item.name}</h4>
               <div className="flex justify-between items-center">
-                <span className="text-xs font-black text-amber-500 dark:text-amber-400">
+                <span className="text-xs font-black text-rose-500 dark:text-rose-400">
                   {item.price ? `₹${item.price}` : "Fashion Video"}
                 </span>
-                <span className="text-[9px] opacity-40 uppercase tracking-widest font-bold group-hover:text-amber-400 group-hover:translate-x-1 transition-all flex items-center">
+                <span className="text-[9px] opacity-40 uppercase tracking-widest font-bold group-hover:text-rose-400 group-hover:translate-x-1 transition-all flex items-center">
                   View →
                 </span>
               </div>
@@ -3756,7 +3756,7 @@ const CustomerTestimonials = React.memo(({ theme }: { theme: "light" | "dark" })
   return (
     <div className="mb-8 mt-4 select-none">
       <div className="flex items-center gap-1.5 mb-3 px-1">
-        <MessageSquare className="w-4 h-4 text-amber-500" />
+        <MessageSquare className="w-4 h-4 text-rose-500" />
         <h3 className="text-[11px] font-bold uppercase tracking-wider opacity-80">💬 Happy Customers Say</h3>
       </div>
       <div 
@@ -3767,7 +3767,7 @@ const CustomerTestimonials = React.memo(({ theme }: { theme: "light" | "dark" })
           <div 
             key={index}
             className={`flex-none w-64 p-4 rounded-2xl border ${
-              theme === "dark" ? "bg-white/[0.03] border-white/10 hover:border-amber-500/20" : "bg-black/[0.02] border-black/10 hover:border-amber-500/15"
+              theme === "dark" ? "bg-white/[0.03] border-white/10 hover:border-rose-500/20" : "bg-black/[0.02] border-black/10 hover:border-rose-500/15"
             } snap-start transition-all duration-300`}
           >
             <div className="flex gap-0.5 mb-2.5">
@@ -4106,7 +4106,7 @@ const ShareModal = ({
         exit={{ scale: 0.95, opacity: 0, y: 15 }}
         className={`relative w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl border ${
           theme === "dark" 
-            ? "bg-[#09100E] border-white/10 text-amber-50" 
+            ? "bg-[#09100E] border-white/10 text-rose-50" 
             : "bg-white border-black/10 text-stone-900"
         }`}
       >
@@ -4188,7 +4188,7 @@ const PageLoader = ({ theme }: { theme: string }) => (
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
     exit={{ opacity: 0 }}
-    className={`fixed inset-0 left-0 top-0 w-screen h-screen z-[9999] flex flex-col items-center justify-center ${theme === "dark" ? "bg-[#0B1512] gold-grain-dark text-amber-50" : "bg-[#FDFBF7] gold-grain-light text-stone-900"}`}
+    className={`fixed inset-0 left-0 top-0 w-screen h-screen z-[9999] flex flex-col items-center justify-center ${theme === "dark" ? "bg-[#0B1512] gold-grain-dark text-rose-50" : "bg-[#FFF7F9] gold-grain-light text-stone-900"}`}
   >
     <motion.div
       initial={{ opacity: 0, scale: 0.8 }}
@@ -4196,18 +4196,18 @@ const PageLoader = ({ theme }: { theme: string }) => (
       transition={{ duration: 0.3 }}
       className="relative"
     >
-      <div className="w-20 h-20 rounded-full border-4 border-amber-500/20 border-t-amber-500 animate-spin" />
+      <div className="w-20 h-20 rounded-full border-4 border-rose-500/20 border-t-rose-500 animate-spin" />
       <div className="absolute inset-0 flex items-center justify-center">
-        <ShoppingBag className="w-7 h-7 text-amber-500" />
+        <ShoppingBag className="w-7 h-7 text-rose-500" />
       </div>
     </motion.div>
     <div className="mt-6 text-center px-4">
-      <p className="text-sm font-bold tracking-[0.1em] text-amber-600 dark:text-amber-400 uppercase mb-1.5 font-serif">We Are Preparing For You</p>
+      <p className="text-sm font-bold tracking-[0.1em] text-rose-600 dark:text-rose-400 uppercase mb-1.5 font-serif">We Are Preparing For You</p>
       <p className="text-[10px] tracking-[0.15em] text-stone-500 dark:text-stone-400 uppercase font-bold mb-3">Please Wait</p>
       <div className="flex items-center justify-center gap-1.5">
-        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-bounce [animation-delay:-0.3s]" />
-        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-bounce [animation-delay:-0.15s]" />
-        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-bounce" />
+        <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-bounce [animation-delay:-0.3s]" />
+        <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-bounce [animation-delay:-0.15s]" />
+        <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-bounce" />
       </div>
     </div>
   </motion.div>
@@ -4264,13 +4264,13 @@ const CountUp = ({ end, isLoaded, hasError, theme }: { end: number; isLoaded: bo
     return (
       <div className="flex flex-col items-center justify-center min-h-[44px]">
         <span className="block text-3xl font-extrabold font-serif text-stone-400 dark:text-stone-600 mb-1 leading-none">--</span>
-        <span className="text-[9px] font-bold text-amber-500/80 animate-pulse">Loading...</span>
+        <span className="text-[9px] font-bold text-rose-500/80 animate-pulse">Loading...</span>
       </div>
     );
   }
 
   return (
-    <span ref={elementRef} className="block text-3xl font-extrabold font-serif text-amber-500 mb-1 leading-none min-h-[36px] flex items-center justify-center">
+    <span ref={elementRef} className="block text-3xl font-extrabold font-serif text-rose-500 mb-1 leading-none min-h-[36px] flex items-center justify-center">
       {count}+
     </span>
   );
@@ -4347,7 +4347,7 @@ const CompanyStatisticsSection = ({
           theme === "dark" ? "bg-white/[0.01] border-white/5 shadow-[0_4px_16px_rgba(0,0,0,0.2)]" : "bg-white border-stone-150 shadow-sm"
         }`}
       >
-        <span className="block text-sm font-extrabold font-serif text-amber-500 mb-1 leading-tight">
+        <span className="block text-sm font-extrabold font-serif text-rose-500 mb-1 leading-tight">
           Growing Fashion Platform
         </span>
         <span className={`text-[10px] uppercase font-black tracking-widest leading-normal mt-1 ${theme === "dark" ? "text-stone-400" : "text-stone-600"}`}>
@@ -4396,7 +4396,7 @@ export default function App() {
       setIsNavigating(false);
     }, 550);
   }, [navigate]);
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [theme, setTheme] = useState<"dark" | "light">("light");
   const [activeTab, setActiveTab] = useState("shop");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -5658,7 +5658,7 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className={`fixed inset-0 left-0 top-0 w-screen h-screen z-[9999] flex flex-col items-center justify-center ${theme === "dark" ? "bg-[#0B1512] gold-grain-dark text-amber-50" : "bg-[#FDFBF7] gold-grain-light text-stone-900"}`}
+            className={`fixed inset-0 left-0 top-0 w-screen h-screen z-[9999] flex flex-col items-center justify-center ${theme === "dark" ? "bg-[#0B1512] gold-grain-dark text-rose-50" : "bg-[#FFF7F9] gold-grain-light text-stone-900"}`}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
@@ -5666,13 +5666,13 @@ export default function App() {
               transition={{ duration: 0.5 }}
               className="relative"
             >
-              <div className="w-24 h-24 rounded-full border-4 border-amber-500/20 border-t-amber-500 animate-spin" />
+              <div className="w-24 h-24 rounded-full border-4 border-rose-500/20 border-t-rose-500 animate-spin" />
               <div className="absolute inset-0 flex items-center justify-center">
                 <motion.div
                   animate={{ opacity: [0.4, 1, 0.4] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
-                  <ShoppingBag className="w-8 h-8 text-amber-500" />
+                  <ShoppingBag className="w-8 h-8 text-rose-500" />
                 </motion.div>
               </div>
             </motion.div>
@@ -5682,12 +5682,12 @@ export default function App() {
               transition={{ delay: 0.3 }}
               className="mt-8 text-center px-4"
             >
-              <p className="text-xl font-bold tracking-[0.1em] text-amber-600 dark:text-amber-400 uppercase mb-1.5 font-serif">We Are Preparing For You</p>
+              <p className="text-xl font-bold tracking-[0.1em] text-rose-600 dark:text-rose-400 uppercase mb-1.5 font-serif">We Are Preparing For You</p>
               <p className="text-xs tracking-[0.15em] text-stone-500 dark:text-stone-400 uppercase font-bold mb-4">Please Wait</p>
               <div className="flex items-center justify-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400 animate-bounce [animation-delay:-0.3s]" />
-                <div className="w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400 animate-bounce [animation-delay:-0.15s]" />
-                <div className="w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400 animate-bounce" />
+                <div className="w-1.5 h-1.5 rounded-full bg-rose-500 dark:bg-rose-400 animate-bounce [animation-delay:-0.3s]" />
+                <div className="w-1.5 h-1.5 rounded-full bg-rose-500 dark:bg-rose-400 animate-bounce [animation-delay:-0.15s]" />
+                <div className="w-1.5 h-1.5 rounded-full bg-rose-500 dark:bg-rose-400 animate-bounce" />
               </div>
             </motion.div>
           </motion.div>
@@ -5703,18 +5703,18 @@ export default function App() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3 }}
-          className={`min-h-screen ${theme === "dark" ? "gold-grain-dark text-amber-50" : "gold-grain-light text-stone-900"} font-sans transition-colors duration-300`}
+          className={`min-h-screen ${theme === "dark" ? "gold-grain-dark text-rose-50" : "gold-grain-light text-stone-900"} font-sans transition-colors duration-300`}
         >
           {!isAdminUser ? (
             <Navigate to="/login" replace />
           ) : (
           <div className="pb-32">
         {/* Admin Header */}
-        <div className={`sticky top-0 z-50 ${theme === "dark" ? "bg-[#0B1512]/90 border-white/10" : "bg-[#FDFBF7]/90 border-black/10"} md:backdrop-blur-xl border-b px-6 py-4`}>
+        <div className={`sticky top-0 z-50 ${theme === "dark" ? "bg-[#0B1512]/90 border-white/10" : "bg-[#FFF7F9]/90 border-black/10"} md:backdrop-blur-xl border-b px-6 py-4`}>
           <div className="max-w-2xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20">
-                <Settings className="w-5 h-5 text-amber-500 animate-spin-slow" />
+              <div className="p-2 rounded-xl bg-rose-500/10 border border-rose-500/20">
+                <Settings className="w-5 h-5 text-rose-500 animate-spin-slow" />
               </div>
               <div>
                 <h2 className="text-lg font-bold">Admin Panel</h2>
@@ -5826,15 +5826,15 @@ export default function App() {
                 className={`relative w-full max-w-md p-6 rounded-3xl ${theme === "dark" ? "bg-[#161f1c] border-white/10" : "bg-white border-black/10"} border shadow-2xl`}
               >
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className={`text-sm font-black uppercase tracking-wider flex items-center gap-2 ${theme === "dark" ? "text-amber-400" : "text-amber-600"}`}>
+                  <h3 className={`text-sm font-black uppercase tracking-wider flex items-center gap-2 ${theme === "dark" ? "text-rose-400" : "text-rose-600"}`}>
                     {linkEditorModal.type === "link" ? (
                       <>
-                        <Link2 className="w-5 h-5 text-amber-500" />
+                        <Link2 className="w-5 h-5 text-rose-500" />
                         Attach Hyperlink
                       </>
                     ) : (
                       <>
-                        <Mail className="w-5 h-5 text-amber-500" />
+                        <Mail className="w-5 h-5 text-rose-500" />
                         Attach Email
                       </>
                     )}
@@ -5850,7 +5850,7 @@ export default function App() {
 
                 <form onSubmit={handleLinkModalSubmit} className="space-y-4">
                   {linkEditorModal.savedRange === null ? (
-                    <div className="p-4 text-xs border border-amber-500/20 bg-amber-500/10 rounded-2xl text-amber-500 leading-relaxed font-semibold">
+                    <div className="p-4 text-xs border border-rose-500/20 bg-rose-500/10 rounded-2xl text-rose-500 leading-relaxed font-semibold">
                       Please select/highlight text in the editor first to turn it into a link or email.
                     </div>
                   ) : (
@@ -5864,7 +5864,7 @@ export default function App() {
                         value={linkEditorModal.value}
                         onChange={(e) => setLinkEditorModal(prev => ({ ...prev, value: e.target.value, error: "" }))}
                         placeholder={linkEditorModal.type === "link" ? "https://example.com" : "hello@example.com"}
-                        className={`w-full ${theme === "dark" ? "bg-[#0b1512] border-white/10 text-white placeholder-white/30" : "bg-stone-50 border-black/10 text-black placeholder-black/40"} border rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500/50 transition-colors text-sm font-semibold`}
+                        className={`w-full ${theme === "dark" ? "bg-[#0b1512] border-white/10 text-white placeholder-white/30" : "bg-stone-50 border-black/10 text-black placeholder-black/40"} border rounded-xl px-4 py-3 focus:outline-none focus:border-rose-500/50 transition-colors text-sm font-semibold`}
                       />
                       {linkEditorModal.error && (
                         <p className="text-red-500 text-xs font-bold mt-1.5 animate-pulse">
@@ -5885,7 +5885,7 @@ export default function App() {
                     {linkEditorModal.savedRange !== null && (
                       <button 
                         type="submit"
-                        className="flex-1 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs uppercase tracking-wider transition-colors"
+                        className="flex-1 py-3 rounded-xl bg-rose-500 hover:bg-rose-400 text-stone-950 font-black text-xs uppercase tracking-wider transition-colors"
                       >
                         {linkEditorModal.type === "link" ? "Apply Link" : "Apply Email"}
                       </button>
@@ -6037,8 +6037,8 @@ export default function App() {
                 exit={{ opacity: 0, y: 20, scale: 0.95 }}
                 className={`relative w-full max-w-lg p-6 rounded-3xl ${theme === "dark" ? "bg-[#111] border-white/10" : "bg-white border-black/10"} border shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto z-10`}
               >
-                <div className="flex justify-between items-center pb-2 border-b border-amber-500/10">
-                  <h3 className={`text-lg font-serif font-black uppercase tracking-wide ${theme === "dark" ? "text-amber-100" : "text-amber-950"}`}>Edit Blog Post</h3>
+                <div className="flex justify-between items-center pb-2 border-b border-rose-500/10">
+                  <h3 className={`text-lg font-serif font-black uppercase tracking-wide ${theme === "dark" ? "text-rose-100" : "text-rose-950"}`}>Edit Blog Post</h3>
                   <button 
                     onClick={() => setEditingBlog(null)}
                     className={`p-1.5 rounded-full hover:bg-stone-500/10 ${theme === "dark" ? "text-stone-400 hover:text-stone-200" : "text-stone-600 hover:text-stone-850"}`}
@@ -6054,7 +6054,7 @@ export default function App() {
                       type="text" 
                       value={editingBlog.title}
                       onChange={(e) => setEditingBlog({...editingBlog, title: e.target.value})}
-                      className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-sm font-semibold`}
+                      className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-rose-500/50 transition-colors text-sm font-semibold`}
                     />
                   </div>
 
@@ -6065,7 +6065,7 @@ export default function App() {
                         type="text" 
                         value={editingBlog.category || ""}
                         onChange={(e) => setEditingBlog({...editingBlog, category: e.target.value})}
-                        className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-sm`}
+                        className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-rose-500/50 transition-colors text-sm`}
                         placeholder="e.g. Sarees, Tips..."
                       />
                     </div>
@@ -6086,14 +6086,14 @@ export default function App() {
                       value={editingBlog.excerpt || ""}
                       onChange={(e) => setEditingBlog({...editingBlog, excerpt: e.target.value})}
                       rows={2}
-                      className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-sm resize-none`}
+                      className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-rose-500/50 transition-colors text-sm resize-none`}
                     />
                   </div>
 
                   {/* SEO Configuration Block */}
                   <div className={`p-4 rounded-xl border ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-stone-50 border-stone-200"} space-y-4`}>
-                    <h4 className="text-xs font-black uppercase tracking-wider text-amber-500/90 flex items-center gap-1.5">
-                      <ShieldCheck className="w-4 h-4 text-amber-500" />
+                    <h4 className="text-xs font-black uppercase tracking-wider text-rose-500/90 flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4 text-rose-500" />
                       SEO Optimization Settings
                     </h4>
                     
@@ -6103,7 +6103,7 @@ export default function App() {
                         type="text" 
                         value={editingBlog.seoTitle || ""}
                         onChange={(e) => setEditingBlog({...editingBlog, seoTitle: e.target.value})}
-                        className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2 focus:outline-none focus:border-amber-500/50 transition-colors text-xs font-semibold`}
+                        className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2 focus:outline-none focus:border-rose-500/50 transition-colors text-xs font-semibold`}
                         placeholder="Latest Fashion Trends 2026..."
                       />
                     </div>
@@ -6115,7 +6115,7 @@ export default function App() {
                           value={editingBlog.metaDescription || ""}
                           onChange={(e) => setEditingBlog({...editingBlog, metaDescription: e.target.value})}
                           rows={2}
-                          className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2 focus:outline-none focus:border-amber-500/50 transition-colors text-xs font-semibold resize-none`}
+                          className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2 focus:outline-none focus:border-rose-500/50 transition-colors text-xs font-semibold resize-none`}
                           placeholder="Meta description content..."
                         />
                       </div>
@@ -6125,7 +6125,7 @@ export default function App() {
                           value={editingBlog.focusKeyword || ""}
                           onChange={(e) => setEditingBlog({...editingBlog, focusKeyword: e.target.value})}
                           rows={2}
-                          className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2 focus:outline-none focus:border-amber-500/50 transition-colors text-xs font-semibold resize-none`}
+                          className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2 focus:outline-none focus:border-rose-500/50 transition-colors text-xs font-semibold resize-none`}
                           placeholder="Focus keyword content..."
                         />
                       </div>
@@ -6136,7 +6136,7 @@ export default function App() {
                     <label className={`block text-[10px] font-bold uppercase tracking-widest ${theme === "dark" ? "text-stone-400" : "text-stone-500"} mb-1`}>Article Content *</label>
                     <div className={`rounded-xl border ${theme === "dark" ? "bg-[#0b1512] border-white/10" : "bg-stone-50 border-black/10"} overflow-hidden`}>
                       {/* Edit Editor Toolbar */}
-                      <div className={`p-1.5 border-b flex flex-wrap items-center gap-1.5 ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-[#fcfaf6] border-black/10"}`}>
+                      <div className={`p-1.5 border-b flex flex-wrap items-center gap-1.5 ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-[#FFF7F9] border-black/10"}`}>
                         <button
                           type="button"
                           onMouseDown={(e) => {
@@ -6146,8 +6146,8 @@ export default function App() {
                           }}
                           className={`p-2 rounded-lg transition-colors ${
                             editorSelectionState.isBold 
-                              ? "bg-amber-500/20 text-amber-500 border border-amber-500/40" 
-                              : `hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`
+                              ? "bg-rose-500/20 text-rose-500 border border-rose-500/40" 
+                              : `hover:bg-rose-500/15 hover:text-rose-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`
                           }`}
                           title="Bold"
                         >
@@ -6162,8 +6162,8 @@ export default function App() {
                           }}
                           className={`p-2 rounded-lg transition-colors ${
                             editorSelectionState.isItalic 
-                              ? "bg-amber-500/20 text-amber-500 border border-amber-500/40" 
-                              : `hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`
+                              ? "bg-rose-500/20 text-rose-500 border border-rose-500/40" 
+                              : `hover:bg-rose-500/15 hover:text-rose-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`
                           }`}
                           title="Italic"
                         >
@@ -6178,8 +6178,8 @@ export default function App() {
                           }}
                           className={`p-2 rounded-lg transition-colors ${
                             editorSelectionState.isUnderline 
-                              ? "bg-amber-500/20 text-amber-500 border border-amber-500/40" 
-                              : `hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`
+                              ? "bg-rose-500/20 text-rose-500 border border-rose-500/40" 
+                              : `hover:bg-rose-500/15 hover:text-rose-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`
                           }`}
                           title="Underline"
                         >
@@ -6192,13 +6192,13 @@ export default function App() {
                         <button
                           type="button"
                           onMouseDown={(e) => { e.preventDefault(); document.execCommand('formatBlock', false, '<h1>'); }}
-                          className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-rose-500/15 hover:text-rose-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
                           title="Heading 1"
                         >H1</button>
                         <button
                           type="button"
                           onMouseDown={(e) => { e.preventDefault(); document.execCommand('formatBlock', false, '<h2>'); }}
-                          className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-rose-500/15 hover:text-rose-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
                           title="Heading 2"
                         >H2</button>
                         <button
@@ -6207,7 +6207,7 @@ export default function App() {
                             e.preventDefault();
                             document.execCommand('formatBlock', false, '<h3>');
                           }}
-                          className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-rose-500/15 hover:text-rose-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
                           title="Format Title Block (Heading 3)"
                         >
                           H3
@@ -6219,7 +6219,7 @@ export default function App() {
                             e.preventDefault();
                             document.execCommand('formatBlock', false, '<p>');
                           }}
-                          className={`px-2 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          className={`px-2 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-rose-500/15 hover:text-rose-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
                           title="Format Standard Text Block"
                         >
                           Text
@@ -6230,7 +6230,7 @@ export default function App() {
                             e.preventDefault();
                             document.execCommand('insertUnorderedList', false);
                           }}
-                          className={`px-2 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          className={`px-2 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-rose-500/15 hover:text-rose-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
                           title="Bulleted List"
                         >
                           • Bullet List
@@ -6241,7 +6241,7 @@ export default function App() {
                             e.preventDefault();
                             document.execCommand('insertOrderedList', false);
                           }}
-                          className={`px-2 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          className={`px-2 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-rose-500/15 hover:text-rose-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
                           title="Numbered List"
                         >
                           1. Numbered List
@@ -6249,10 +6249,10 @@ export default function App() {
                         <button
                           type="button"
                           onClick={() => handleInsertInlineImage("editBlogRichEditor")}
-                          className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 flex items-center gap-1.5 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-rose-500/15 hover:text-rose-500 flex items-center gap-1.5 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
                           title="Insert Image Inline"
                         >
-                          <ImageIcon className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
+                          <ImageIcon className="w-3.5 h-3.5 text-rose-500 animate-pulse" />
                           <span>Add Image</span>
                         </button>
 
@@ -6266,12 +6266,12 @@ export default function App() {
                           }}
                           className={`p-2 rounded-lg transition-colors flex items-center gap-1 text-[10px] font-black uppercase tracking-wider ${
                             editorSelectionState.linkUrl && !editorSelectionState.linkUrl.startsWith("mailto:")
-                              ? "bg-amber-500/20 text-amber-400 border border-amber-500/40" 
-                              : `hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`
+                              ? "bg-rose-500/20 text-rose-400 border border-rose-500/40" 
+                              : `hover:bg-rose-500/15 hover:text-rose-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`
                           }`}
                           title="Attach Link to Selection"
                         >
-                          <Link2 className="w-4 h-4 text-amber-500" />
+                          <Link2 className="w-4 h-4 text-rose-500" />
                           <span>Attach Link</span>
                         </button>
 
@@ -6283,20 +6283,20 @@ export default function App() {
                           }}
                           className={`p-2 rounded-lg transition-colors flex items-center gap-1 text-[10px] font-black uppercase tracking-wider ${
                             editorSelectionState.linkUrl && editorSelectionState.linkUrl.startsWith("mailto:")
-                              ? "bg-amber-500/20 text-amber-400 border border-amber-500/40" 
-                              : `hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`
+                              ? "bg-rose-500/20 text-rose-400 border border-rose-500/40" 
+                              : `hover:bg-rose-500/15 hover:text-rose-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`
                           }`}
                           title="Attach Email to Selection"
                         >
-                          <Mail className="w-4 h-4 text-amber-500" />
+                          <Mail className="w-4 h-4 text-rose-500" />
                           <span>Attach Email</span>
                         </button>
 
                         {editorSelectionState.linkUrl && (
                           <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold border ${
                             theme === "dark" 
-                              ? "bg-amber-500/10 text-amber-400 border-amber-500/25" 
-                              : "bg-amber-50 text-amber-800 border-amber-200"
+                              ? "bg-rose-500/10 text-rose-400 border-rose-500/25" 
+                              : "bg-rose-50 text-rose-800 border-rose-200"
                           }`}>
                             <span className="truncate max-w-[160px]" title={editorSelectionState.linkUrl}>
                               {editorSelectionState.linkUrl.startsWith("mailto:") 
@@ -6314,7 +6314,7 @@ export default function App() {
                                   setEditingBlog((prev: any) => ({ ...prev, content: editor.innerHTML }));
                                 }
                               }}
-                              className="text-amber-500 hover:text-red-500 transition-colors font-black text-xs ml-1"
+                              className="text-rose-500 hover:text-red-500 transition-colors font-black text-xs ml-1"
                               title="Remove Link"
                             >
                               ×
@@ -6363,7 +6363,7 @@ export default function App() {
                           };
                           input.click();
                         }}
-                        className={`flex-1 py-2.5 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/20 hover:border-amber-500/50 text-white/60" : "bg-black/5 border-black/20 hover:border-amber-500/50 text-black/60"} border border-dashed transition-all flex items-center justify-center gap-2 text-xs`}
+                        className={`flex-1 py-2.5 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/20 hover:border-rose-500/50 text-white/60" : "bg-black/5 border-black/20 hover:border-rose-500/50 text-black/60"} border border-dashed transition-all flex items-center justify-center gap-2 text-xs`}
                       >
                         <ImageIcon className="w-4 h-4" />
                         Change Header Image
@@ -6388,7 +6388,7 @@ export default function App() {
                       setTempBlogs(tempBlogs.map(b => b.id === updatedBlog.id ? updatedBlog : b));
                       setEditingBlog(null);
                     }}
-                    className="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 text-stone-950 font-black uppercase text-xs tracking-wider transition-colors shadow-lg"
+                    className="flex-1 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 text-stone-950 font-black uppercase text-xs tracking-wider transition-colors shadow-lg"
                   >
                     Save Changes
                   </button>
@@ -6413,8 +6413,8 @@ export default function App() {
                 onClick={() => setAdminTab(tab.id)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all whitespace-nowrap border ${
                   adminTab === tab.id 
-                    ? `${theme === "dark" ? "bg-amber-500 text-stone-950 border-amber-500 shadow-md shadow-amber-500/10" : "bg-amber-950 text-white border-[#1c1b18] shadow-md shadow-amber-950/10"}` 
-                    : `${theme === "dark" ? "bg-stone-900/40 text-stone-400 border-amber-500/10 hover:bg-stone-900/60" : "bg-white/60 text-stone-600 border-amber-500/10 hover:bg-white"}`
+                    ? `${theme === "dark" ? "bg-rose-500 text-stone-950 border-rose-500 shadow-md shadow-rose-500/10" : "bg-rose-950 text-white border-[#1c1b18] shadow-md shadow-rose-950/10"}` 
+                    : `${theme === "dark" ? "bg-stone-900/40 text-stone-400 border-rose-500/10 hover:bg-stone-900/60" : "bg-white/60 text-stone-600 border-rose-500/10 hover:bg-white"}`
                 }`}
               >
                 <tab.icon className="w-4 h-4" />
@@ -6431,8 +6431,8 @@ export default function App() {
           <div className="space-y-8">
             {adminTab === "profile" && (
               <section className={`p-6 rounded-3xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border`}>
-                <h2 className="text-lg font-black font-serif text-amber-950 dark:text-amber-100 mb-6 flex items-center gap-2">
-                  <User className="w-5 h-5 text-amber-500" />
+                <h2 className="text-lg font-black font-serif text-rose-950 dark:text-rose-100 mb-6 flex items-center gap-2">
+                  <User className="w-5 h-5 text-rose-500" />
                   Edit Profile
                 </h2>
                 <div className="space-y-4">
@@ -6473,8 +6473,8 @@ export default function App() {
                           }}
                           className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border cursor-pointer transition-all hover:scale-[1.02] active:scale-95 ${
                             theme === "dark" 
-                              ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20" 
-                              : "bg-amber-500/10 border-amber-500/20 text-amber-700 hover:bg-amber-500/20"
+                              ? "bg-rose-500/10 border-rose-500/30 text-rose-400 hover:bg-rose-500/20" 
+                              : "bg-rose-500/10 border-rose-500/20 text-rose-700 hover:bg-rose-500/20"
                           }`}
                         >
                           <Download className="w-3.5 h-3.5" />
@@ -6489,7 +6489,7 @@ export default function App() {
                       type="text" 
                       value={tempProfile.name}
                       onChange={(e) => setTempProfile({...tempProfile, name: e.target.value})}
-                      className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500/50 transition-colors text-sm`}
+                      className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border rounded-xl px-4 py-3 focus:outline-none focus:border-rose-500/50 transition-colors text-sm`}
                     />
                   </div>
                   <div>
@@ -6498,11 +6498,11 @@ export default function App() {
                       rows={3}
                       value={tempProfile.bio}
                       onChange={(e) => setTempProfile({...tempProfile, bio: e.target.value})}
-                      className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500/50 transition-colors text-sm resize-none`}
+                      className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border rounded-xl px-4 py-3 focus:outline-none focus:border-rose-500/50 transition-colors text-sm resize-none`}
                     />
                   </div>
                   <div className={`mt-6 pt-6 border-t ${theme === "dark" ? "border-white/5" : "border-black/5"}`}>
-                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-amber-500 mb-4 flex items-center gap-2">
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-rose-500 mb-4 flex items-center gap-2">
                       <ShieldCheck className="w-4 h-4" />
                       Legal Policies Management
                     </h3>
@@ -6511,13 +6511,13 @@ export default function App() {
                       <div>
                         <div className="flex justify-between items-center mb-1.5">
                           <label className={`block text-[10px] font-bold uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"}`}>Privacy Policy</label>
-                          <span className="text-[9px] text-amber-600 dark:text-amber-400 font-bold tracking-wider uppercase">Crawlable & Legal</span>
+                          <span className="text-[9px] text-rose-600 dark:text-rose-400 font-bold tracking-wider uppercase">Crawlable & Legal</span>
                         </div>
                         <textarea 
                           rows={10}
                           value={tempProfile.privacyPolicy || ""}
                           onChange={(e) => setTempProfile({...tempProfile, privacyPolicy: e.target.value})}
-                          className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500/50 transition-colors text-xs font-mono`}
+                          className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-3 focus:outline-none focus:border-rose-500/50 transition-colors text-xs font-mono`}
                           placeholder="Enter the updated privacy policy text..."
                         />
                       </div>
@@ -6525,13 +6525,13 @@ export default function App() {
                       <div>
                         <div className="flex justify-between items-center mb-1.5">
                           <label className={`block text-[10px] font-bold uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"}`}>Terms of Service</label>
-                          <span className="text-[9px] text-amber-600 dark:text-amber-400 font-bold tracking-wider uppercase">Crawlable & Legal</span>
+                          <span className="text-[9px] text-rose-600 dark:text-rose-400 font-bold tracking-wider uppercase">Crawlable & Legal</span>
                         </div>
                         <textarea 
                           rows={10}
                           value={tempProfile.termsOfService || ""}
                           onChange={(e) => setTempProfile({...tempProfile, termsOfService: e.target.value})}
-                          className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500/50 transition-colors text-xs font-mono`}
+                          className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-3 focus:outline-none focus:border-rose-500/50 transition-colors text-xs font-mono`}
                           placeholder="Enter the updated terms of service text..."
                         />
                       </div>
@@ -6540,7 +6540,7 @@ export default function App() {
                         <button
                           type="button"
                           onClick={() => setShowSaveConfirm(true)}
-                          className="px-5 py-3 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-stone-950 font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 shadow-lg shadow-amber-500/10 cursor-pointer active:scale-95"
+                          className="px-5 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-700 hover:to-rose-600 text-stone-950 font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 shadow-lg shadow-rose-500/10 cursor-pointer active:scale-95"
                         >
                           <ShieldCheck className="w-4 h-4" />
                           Update Privacy & Terms
@@ -6554,8 +6554,8 @@ export default function App() {
 
             {adminTab === "posts" && (
               <section className={`p-6 rounded-3xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border`}>
-                <h2 className="text-lg font-black font-serif text-amber-950 dark:text-amber-100 mb-6 flex items-center gap-2">
-                  <ImageIcon className="w-5 h-5 text-amber-500" />
+                <h2 className="text-lg font-black font-serif text-rose-950 dark:text-rose-100 mb-6 flex items-center gap-2">
+                  <ImageIcon className="w-5 h-5 text-rose-500" />
                   Manage Posts (Gallery)
                 </h2>
                 
@@ -6580,7 +6580,7 @@ export default function App() {
                   <div className="flex gap-2">
                     <button 
                       onClick={() => postFileInputRef.current?.click()}
-                      className={`flex-1 py-3 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/20 hover:border-amber-500/50" : "bg-black/5 border-black/20 hover:border-amber-500/50"} border border-dashed transition-all flex items-center justify-center gap-2 text-xs ${theme === "dark" ? "text-white/60" : "text-black/60"}`}
+                      className={`flex-1 py-3 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/20 hover:border-rose-500/50" : "bg-black/5 border-black/20 hover:border-rose-500/50"} border border-dashed transition-all flex items-center justify-center gap-2 text-xs ${theme === "dark" ? "text-white/60" : "text-black/60"}`}
                     >
                       {isUploading ? (
                         <div className={`w-4 h-4 border-2 ${theme === "dark" ? "border-white/30 border-t-white" : "border-black/30 border-t-black"} rounded-full animate-spin`} />
@@ -6596,7 +6596,7 @@ export default function App() {
                     />
                     <button 
                       onClick={() => setNewPost({...newPost, type: "video", url: ""})}
-                      className={`p-3 rounded-xl border transition-all ${newPost.type === "video" ? "bg-amber-500/20 border-amber-500 text-amber-500" : `${theme === "dark" ? "bg-white/5 border-white/10 text-white/40" : "bg-black/5 border-black/10 text-black/40"}`}`}
+                      className={`p-3 rounded-xl border transition-all ${newPost.type === "video" ? "bg-rose-500/20 border-rose-500 text-rose-500" : `${theme === "dark" ? "bg-white/5 border-white/10 text-white/40" : "bg-black/5 border-black/10 text-black/40"}`}`}
                     >
                       <Play className="w-4 h-4" />
                     </button>
@@ -6615,7 +6615,7 @@ export default function App() {
                         category: newPost.category && newPost.category !== autoDetectCategory(newPost.name || "", "") ? newPost.category : detected
                       });
                     }}
-                    className={`w-full ${theme === "dark" ? "bg-[#222] border-white/10 text-white placeholder-white/30" : "bg-black/5 border-black/10 text-black placeholder-black/40"} border rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500/50 transition-colors text-sm`}
+                    className={`w-full ${theme === "dark" ? "bg-[#222] border-white/10 text-white placeholder-white/30" : "bg-black/5 border-black/10 text-black placeholder-black/40"} border rounded-xl px-4 py-3 focus:outline-none focus:border-rose-500/50 transition-colors text-sm`}
                   />
 
                   <div className="flex gap-2">
@@ -6624,7 +6624,7 @@ export default function App() {
                       placeholder="Category (e.g. Sarees, Kurtas, Lehengas...)"
                       value={newPost.category || ""}
                       onChange={(e) => setNewPost({...newPost, category: e.target.value})}
-                      className={`flex-1 ${theme === "dark" ? "bg-[#222] border-white/10 text-white placeholder-white/30" : "bg-black/5 border-black/10 text-black placeholder-black/40"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-sm`}
+                      className={`flex-1 ${theme === "dark" ? "bg-[#222] border-white/10 text-white placeholder-white/30" : "bg-black/5 border-black/10 text-black placeholder-black/40"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-rose-500/50 transition-colors text-sm`}
                     />
                     <button 
                       type="button"
@@ -6645,7 +6645,7 @@ export default function App() {
                       placeholder="Paste YT, IG, or FB video link..."
                       value={newPost.url}
                       onChange={(e) => setNewPost({...newPost, url: e.target.value, type: "video"})}
-                      className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500/50 transition-colors text-sm`}
+                      className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-3 focus:outline-none focus:border-rose-500/50 transition-colors text-sm`}
                     />
                   )}
 
@@ -6685,7 +6685,7 @@ export default function App() {
                           }}
                           className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all border ${
                             newPost.taggedProducts.includes(product.id) 
-                              ? "bg-amber-500/20 border-amber-500 text-amber-500" 
+                              ? "bg-rose-500/20 border-rose-500 text-rose-500" 
                               : "bg-white/5 border-white/10 text-white/40 hover:text-white"
                           }`}
                         >
@@ -6700,8 +6700,8 @@ export default function App() {
                     disabled={isAddingPost || !newPost.url}
                     className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
                       isAddingPost || !newPost.url 
-                        ? "bg-amber-650/40 text-stone-500 cursor-not-allowed" 
-                        : "bg-amber-500 hover:bg-amber-400 text-stone-950 font-black uppercase text-xs tracking-wider"
+                        ? "bg-rose-650/40 text-stone-500 cursor-not-allowed" 
+                        : "bg-rose-500 hover:bg-rose-400 text-stone-950 font-black uppercase text-xs tracking-wider"
                     }`}
                   >
                     {isAddingPost ? (
@@ -6758,7 +6758,7 @@ export default function App() {
                         category: newProduct.category && newProduct.category !== autoDetectCategory(newProduct.name, newProduct.description) ? newProduct.category : detected
                       });
                     }}
-                    className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-sm`}
+                    className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-rose-500/50 transition-colors text-sm`}
                   />
                   <textarea 
                     placeholder="Product Description"
@@ -6773,7 +6773,7 @@ export default function App() {
                       });
                     }}
                     rows={2}
-                    className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-sm resize-none`}
+                    className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-rose-500/50 transition-colors text-sm resize-none`}
                   />
 
                   <div className="flex gap-2">
@@ -6782,7 +6782,7 @@ export default function App() {
                       placeholder="Category (e.g. Sarees, Kurtas, Lehengas...)"
                       value={newProduct.category || ""}
                       onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
-                      className={`flex-1 ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-sm`}
+                      className={`flex-1 ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-rose-500/50 transition-colors text-sm`}
                     />
                     <button 
                       type="button"
@@ -6804,7 +6804,7 @@ export default function App() {
                         placeholder="Price"
                         value={newProduct.price}
                         onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
-                        className={`w-full sm:w-24 ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-sm`}
+                        className={`w-full sm:w-24 ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-rose-500/50 transition-colors text-sm`}
                       />
                       <div className="flex gap-2 flex-1">
                         <input 
@@ -6817,12 +6817,12 @@ export default function App() {
                               fetchProductDetails();
                             }
                           }}
-                          className={`flex-1 min-w-0 ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-sm`}
+                          className={`flex-1 min-w-0 ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-rose-500/50 transition-colors text-sm`}
                         />
                         <button 
                           onClick={fetchProductDetails}
                           disabled={isFetchingProduct || !newProduct.buyUrl}
-                          className={`px-4 py-2.5 rounded-xl ${theme === "dark" ? "bg-amber-500/10 border-amber-500/20" : "bg-amber-500/5 border-amber-500/10"} border text-amber-500 hover:bg-amber-500/20 transition-all disabled:opacity-50 flex items-center justify-center flex-shrink-0`}
+                          className={`px-4 py-2.5 rounded-xl ${theme === "dark" ? "bg-rose-500/10 border-rose-500/20" : "bg-rose-500/5 border-rose-500/10"} border text-rose-500 hover:bg-rose-500/20 transition-all disabled:opacity-50 flex items-center justify-center flex-shrink-0`}
                           title="Fetch Product Details"
                         >
                           {isFetchingProduct ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
@@ -6948,11 +6948,11 @@ export default function App() {
               <section className={`p-6 md:p-8 rounded-3xl ${theme === "dark" ? "bg-gradient-to-br from-white/[0.04] to-white/[0.01] border-white/10" : "bg-gradient-to-br from-white to-stone-50 border-black/8"} border shadow-sm space-y-8`}>
                 <div className={`flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-6 border-b ${theme === "dark" ? "border-white/10" : "border-black/8"}`}>
                   <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${theme === "dark" ? "bg-amber-500/10 border border-amber-500/20" : "bg-amber-50 border border-amber-200"}`}>
-                      <BookOpen className="w-6 h-6 text-amber-500" />
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${theme === "dark" ? "bg-rose-500/10 border border-rose-500/20" : "bg-rose-50 border border-rose-200"}`}>
+                      <BookOpen className="w-6 h-6 text-rose-500" />
                     </div>
                     <div>
-                      <p className={`text-[10px] font-black uppercase tracking-[0.25em] ${theme === "dark" ? "text-amber-400/70" : "text-amber-700/70"}`}>Editorial Studio</p>
+                      <p className={`text-[10px] font-black uppercase tracking-[0.25em] ${theme === "dark" ? "text-rose-400/70" : "text-rose-700/70"}`}>Editorial Studio</p>
                       <h2 className="text-2xl font-black font-serif tracking-tight">Blog Management</h2>
                     </div>
                   </div>
@@ -6965,8 +6965,8 @@ export default function App() {
                 {/* Form to add blogs */}
                 <div className={`p-6 rounded-2xl ${theme === "dark" ? "bg-stone-900/40 border-white/5" : "bg-white border-black/0"} border space-y-4`}>
                   <div className="flex items-center gap-2.5 pb-2 border-b border-dashed border-current/10">
-                    <div className="w-1 h-6 bg-amber-500 rounded-full" />
-                    <h3 className="text-sm font-black uppercase tracking-wider text-amber-500">Create New Fashion Post</h3>
+                    <div className="w-1 h-6 bg-rose-500 rounded-full" />
+                    <h3 className="text-sm font-black uppercase tracking-wider text-rose-500">Create New Fashion Post</h3>
                   </div>
 
                   
@@ -6978,7 +6978,7 @@ export default function App() {
                         placeholder="e.g. 5 Stunning Ways to Style Your Saree"
                         value={newBlog.title}
                         onChange={(e) => setNewBlog({ ...newBlog, title: e.target.value })}
-                        className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white placeholder-white/30" : "bg-black/5 border-black/10 text-black placeholder-black/40"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-sm font-semibold`}
+                        className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white placeholder-white/30" : "bg-black/5 border-black/10 text-black placeholder-black/40"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-rose-500/50 transition-colors text-sm font-semibold`}
                       />
                     </div>
                     <div>
@@ -6988,7 +6988,7 @@ export default function App() {
                         placeholder="e.g. Sarees, Styling Tips, Vlogs"
                         value={newBlog.category}
                         onChange={(e) => setNewBlog({ ...newBlog, category: e.target.value })}
-                        className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white placeholder-white/30" : "bg-black/5 border-black/10 text-black placeholder-black/40"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-sm font-semibold`}
+                        className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white placeholder-white/30" : "bg-black/5 border-black/10 text-black placeholder-black/40"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-rose-500/50 transition-colors text-sm font-semibold`}
                       />
                     </div>
                   </div>
@@ -7000,14 +7000,14 @@ export default function App() {
                       value={newBlog.excerpt}
                       onChange={(e) => setNewBlog({ ...newBlog, excerpt: e.target.value })}
                       rows={2}
-                      className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white placeholder-white/30" : "bg-black/5 border-black/10 text-black placeholder-black/40"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-sm font-semibold resize-none`}
+                      className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white placeholder-white/30" : "bg-black/5 border-black/10 text-black placeholder-black/40"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-rose-500/50 transition-colors text-sm font-semibold resize-none`}
                     />
                   </div>
 
                   {/* SEO Configuration Section */}
                   <div className={`p-4 rounded-xl border ${theme === "dark" ? "bg-white/[0.02] border-white/10" : "bg-stone-50 border-stone-200"} space-y-4`}>
-                    <h4 className="text-xs font-black uppercase tracking-wider text-amber-500/90 flex items-center gap-1.5">
-                      <ShieldCheck className="w-4 h-4 text-amber-500" />
+                    <h4 className="text-xs font-black uppercase tracking-wider text-rose-500/90 flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4 text-rose-500" />
                       SEO Optimization Settings
                     </h4>
                     
@@ -7018,7 +7018,7 @@ export default function App() {
                         placeholder="e.g. Latest Fashion Trends 2026: Top Styles Every Fashion Lover Must Know"
                         value={newBlog.seoTitle}
                         onChange={(e) => setNewBlog({ ...newBlog, seoTitle: e.target.value })}
-                        className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white placeholder-white/30" : "bg-black/5 border-black/10 text-black placeholder-black/40"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-xs font-semibold`}
+                        className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white placeholder-white/30" : "bg-black/5 border-black/10 text-black placeholder-black/40"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-rose-500/50 transition-colors text-xs font-semibold`}
                       />
                     </div>
 
@@ -7030,7 +7030,7 @@ export default function App() {
                           value={newBlog.metaDescription}
                           onChange={(e) => setNewBlog({ ...newBlog, metaDescription: e.target.value })}
                           rows={2}
-                          className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white placeholder-white/30" : "bg-black/5 border-black/10 text-black placeholder-black/40"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-xs font-semibold resize-none`}
+                          className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white placeholder-white/30" : "bg-black/5 border-black/10 text-black placeholder-black/40"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-rose-500/50 transition-colors text-xs font-semibold resize-none`}
                         />
                       </div>
                       <div>
@@ -7040,7 +7040,7 @@ export default function App() {
                           value={newBlog.focusKeyword}
                           onChange={(e) => setNewBlog({ ...newBlog, focusKeyword: e.target.value })}
                           rows={2}
-                          className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white placeholder-white/30" : "bg-black/5 border-black/10 text-black placeholder-black/40"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500/50 transition-colors text-xs font-semibold resize-none`}
+                          className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white placeholder-white/30" : "bg-black/5 border-black/10 text-black placeholder-black/40"} border rounded-xl px-4 py-2.5 focus:outline-none focus:border-rose-500/50 transition-colors text-xs font-semibold resize-none`}
                         />
                       </div>
                     </div>
@@ -7051,7 +7051,7 @@ export default function App() {
                     <label className={`block text-[10px] font-bold uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"} mb-1`}>Article Content *</label>
                     <div className={`rounded-xl border ${theme === "dark" ? "bg-[#0b1512] border-white/10" : "bg-stone-50 border-black/10"} overflow-hidden`}>
                       {/* Editor Toolbar */}
-                      <div className={`p-1.5 border-b flex flex-wrap items-center gap-1.5 ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-[#fcfaf6] border-black/10"}`}>
+                      <div className={`p-1.5 border-b flex flex-wrap items-center gap-1.5 ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-[#FFF7F9] border-black/10"}`}>
                         <button
                           type="button"
                           onMouseDown={(e) => {
@@ -7061,8 +7061,8 @@ export default function App() {
                           }}
                           className={`p-2 rounded-lg transition-colors ${
                             editorSelectionState.isBold 
-                              ? "bg-amber-500/20 text-amber-500 border border-amber-500/40" 
-                              : `hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`
+                              ? "bg-rose-500/20 text-rose-500 border border-rose-500/40" 
+                              : `hover:bg-rose-500/15 hover:text-rose-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`
                           }`}
                           title="Bold"
                         >
@@ -7077,8 +7077,8 @@ export default function App() {
                           }}
                           className={`p-2 rounded-lg transition-colors ${
                             editorSelectionState.isItalic 
-                              ? "bg-amber-500/20 text-amber-500 border border-amber-500/40" 
-                              : `hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`
+                              ? "bg-rose-500/20 text-rose-500 border border-rose-500/40" 
+                              : `hover:bg-rose-500/15 hover:text-rose-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`
                           }`}
                           title="Italic"
                         >
@@ -7093,8 +7093,8 @@ export default function App() {
                           }}
                           className={`p-2 rounded-lg transition-colors ${
                             editorSelectionState.isUnderline 
-                              ? "bg-amber-500/20 text-amber-500 border border-amber-500/40" 
-                              : `hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`
+                              ? "bg-rose-500/20 text-rose-500 border border-rose-500/40" 
+                              : `hover:bg-rose-500/15 hover:text-rose-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`
                           }`}
                           title="Underline"
                         >
@@ -7107,13 +7107,13 @@ export default function App() {
                         <button
                           type="button"
                           onMouseDown={(e) => { e.preventDefault(); document.execCommand('formatBlock', false, '<h1>'); }}
-                          className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-rose-500/15 hover:text-rose-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
                           title="Heading 1"
                         >H1</button>
                         <button
                           type="button"
                           onMouseDown={(e) => { e.preventDefault(); document.execCommand('formatBlock', false, '<h2>'); }}
-                          className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-rose-500/15 hover:text-rose-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
                           title="Heading 2"
                         >H2</button>
                         <button
@@ -7122,7 +7122,7 @@ export default function App() {
                             e.preventDefault();
                             document.execCommand('formatBlock', false, '<h3>');
                           }}
-                          className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-rose-500/15 hover:text-rose-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
                           title="Format Title Block (Heading 3)"
                         >
                           H3
@@ -7134,7 +7134,7 @@ export default function App() {
                             e.preventDefault();
                             document.execCommand('formatBlock', false, '<p>');
                           }}
-                          className={`px-2 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          className={`px-2 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-rose-500/15 hover:text-rose-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
                           title="Format Standard Text Block"
                         >
                           Text
@@ -7145,7 +7145,7 @@ export default function App() {
                             e.preventDefault();
                             document.execCommand('insertUnorderedList', false);
                           }}
-                          className={`px-2 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          className={`px-2 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-rose-500/15 hover:text-rose-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
                           title="Bulleted List"
                         >
                           • Bullet List
@@ -7156,7 +7156,7 @@ export default function App() {
                             e.preventDefault();
                             document.execCommand('insertOrderedList', false);
                           }}
-                          className={`px-2 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          className={`px-2 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-rose-500/15 hover:text-rose-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
                           title="Numbered List"
                         >
                           1. Numbered List
@@ -7164,10 +7164,10 @@ export default function App() {
                         <button
                           type="button"
                           onClick={() => handleInsertInlineImage("blogRichEditor")}
-                          className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-amber-500/15 hover:text-amber-500 flex items-center gap-1.5 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
+                          className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors hover:bg-rose-500/15 hover:text-rose-500 flex items-center gap-1.5 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`}
                           title="Insert Image Inline"
                         >
-                          <ImageIcon className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
+                          <ImageIcon className="w-3.5 h-3.5 text-rose-500 animate-pulse" />
                           <span>Add Image</span>
                         </button>
 
@@ -7180,12 +7180,12 @@ export default function App() {
                           }}
                           className={`p-2 rounded-lg transition-colors flex items-center gap-1 text-[10px] font-black uppercase tracking-wider ${
                             editorSelectionState.linkUrl && !editorSelectionState.linkUrl.startsWith("mailto:")
-                              ? "bg-amber-500/20 text-amber-400 border border-amber-500/40" 
-                              : `hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`
+                              ? "bg-rose-500/20 text-rose-400 border border-rose-500/40" 
+                              : `hover:bg-rose-500/15 hover:text-rose-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`
                           }`}
                           title="Attach Link to Selection"
                         >
-                          <Link2 className="w-4 h-4 text-amber-500" />
+                          <Link2 className="w-4 h-4 text-rose-500" />
                           <span>Attach Link</span>
                         </button>
 
@@ -7197,12 +7197,12 @@ export default function App() {
                           }}
                           className={`p-2 rounded-lg transition-colors flex items-center gap-1 text-[10px] font-black uppercase tracking-wider ${
                             editorSelectionState.linkUrl && editorSelectionState.linkUrl.startsWith("mailto:")
-                              ? "bg-amber-500/20 text-amber-400 border border-amber-500/40" 
-                              : `hover:bg-amber-500/15 hover:text-amber-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`
+                              ? "bg-rose-500/20 text-rose-400 border border-rose-500/40" 
+                              : `hover:bg-rose-500/15 hover:text-rose-500 ${theme === "dark" ? "text-stone-300" : "text-stone-700"}`
                           }`}
                           title="Attach Email to Selection"
                         >
-                          <Mail className="w-4 h-4 text-amber-500" />
+                          <Mail className="w-4 h-4 text-rose-500" />
                           <span>Attach Email</span>
                         </button>
 
@@ -7210,8 +7210,8 @@ export default function App() {
                         {editorSelectionState.linkUrl && (
                           <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold border ${
                             theme === "dark" 
-                              ? "bg-amber-500/10 text-amber-400 border-amber-500/25" 
-                              : "bg-amber-50 text-amber-800 border-amber-200"
+                              ? "bg-rose-500/10 text-rose-400 border-rose-500/25" 
+                              : "bg-rose-50 text-rose-800 border-rose-200"
                           }`}>
                             <span className="truncate max-w-[160px]" title={editorSelectionState.linkUrl}>
                               {editorSelectionState.linkUrl.startsWith("mailto:") 
@@ -7229,7 +7229,7 @@ export default function App() {
                                   setNewBlog(prev => ({ ...prev, content: editor.innerHTML }));
                                 }
                               }}
-                              className="text-amber-500 hover:text-red-500 transition-colors font-black text-xs ml-1"
+                              className="text-rose-500 hover:text-red-500 transition-colors font-black text-xs ml-1"
                               title="Remove Link"
                             >
                               ×
@@ -7315,7 +7315,7 @@ export default function App() {
                             setNewBlog({ title: "", category: "", excerpt: "", content: "", image: "", seoTitle: "", metaDescription: "", focusKeyword: "" });
                             if (editor) editor.innerHTML = "";
                           }}
-                          className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 text-stone-950 font-black uppercase text-xs tracking-wider transition-all flex items-center justify-center gap-2 hover:opacity-95"
+                          className="w-full py-3 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 text-stone-950 font-black uppercase text-xs tracking-wider transition-all flex items-center justify-center gap-2 hover:opacity-95"
                         >
                           <Plus className="w-4 h-4" />
                           Publish blog post
@@ -7328,7 +7328,7 @@ export default function App() {
 
                 {/* List of current blogs */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-black uppercase tracking-wider text-amber-500">Scheduled / Published Stories ({tempBlogs.length})</h3>
+                  <h3 className="text-sm font-black uppercase tracking-wider text-rose-500">Scheduled / Published Stories ({tempBlogs.length})</h3>
                   {tempBlogs.length === 0 ? (
                     <div className="text-center py-12">
                       <p className={`text-xs ${theme === "dark" ? "text-white/40" : "text-black/40"} font-bold tracking-wider uppercase`}>No blogs created yet</p>
@@ -7344,7 +7344,7 @@ export default function App() {
                           )}
                           <div className="flex-1 min-w-0 pr-2">
                             <h4 className="font-bold text-sm truncate">{b.title}</h4>
-                            <p className="text-[10px] text-amber-500 uppercase font-black tracking-widest">{b.category || "Fashion"}</p>
+                            <p className="text-[10px] text-rose-500 uppercase font-black tracking-widest">{b.category || "Fashion"}</p>
                             <p className={`text-[9px] ${theme === "dark" ? "text-white/40" : "text-black/40"}`}>{new Date(b.timestamp).toLocaleDateString()}</p>
                           </div>
                           
@@ -7352,7 +7352,7 @@ export default function App() {
                             <button 
                               type="button"
                               onClick={() => setEditingBlog(b)}
-                              className={`p-2 rounded-xl ${theme === "dark" ? "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20" : "bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200"} transition-all cursor-pointer`}
+                              className={`p-2 rounded-xl ${theme === "dark" ? "bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20" : "bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200"} transition-all cursor-pointer`}
                               title="Edit Blog"
                             >
                               <Edit className="w-3.5 h-3.5" />
@@ -7378,7 +7378,7 @@ export default function App() {
               <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-full max-w-xl px-6 z-40">
                 <button 
                   onClick={() => setShowSaveConfirm(true)}
-                  className="w-full py-4 rounded-2xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black uppercase text-xs tracking-wider transition-all flex items-center justify-center gap-2 shadow-2xl shadow-amber-500/20 border border-amber-400/20 active:scale-[0.98]"
+                  className="w-full py-4 rounded-2xl bg-rose-500 hover:bg-rose-400 text-stone-950 font-black uppercase text-xs tracking-wider transition-all flex items-center justify-center gap-2 shadow-2xl shadow-rose-500/20 border border-rose-400/20 active:scale-[0.98]"
                 >
                   <Save className="w-4 h-4" />
                   Save All Changes
@@ -7401,8 +7401,8 @@ export default function App() {
                     exit={{ scale: 0.9, opacity: 0, y: 20 }}
                     className="w-full max-w-sm bg-[#1a1a1a] border border-white/10 rounded-[2.5rem] p-8 text-center"
                   >
-                    <div className="w-20 h-20 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto mb-6 border border-amber-500/20">
-                      <Save className="w-9 h-9 text-amber-500" />
+                    <div className="w-20 h-20 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto mb-6 border border-rose-500/20">
+                      <Save className="w-9 h-9 text-rose-500" />
                     </div>
                     <h3 className="text-2xl font-serif font-black mb-2 text-stone-100">Save Changes?</h3>
                     <p className="text-stone-400 text-xs mb-8">This will update your profile, posts, and products across the entire app.</p>
@@ -7411,7 +7411,7 @@ export default function App() {
                       <button 
                         onClick={handleSaveAll}
                         disabled={isSaving}
-                        className="w-full py-4 rounded-2xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black uppercase text-xs tracking-wider transition-all flex items-center justify-center gap-2"
+                        className="w-full py-4 rounded-2xl bg-rose-500 hover:bg-rose-400 text-stone-950 font-black uppercase text-xs tracking-wider transition-all flex items-center justify-center gap-2"
                       >
                         {isSaving ? (
                           <>
@@ -7459,36 +7459,36 @@ export default function App() {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 1.05 }}
           transition={{ duration: 0.3 }}
-          className={`min-h-screen ${theme === "dark" ? "gold-grain-dark text-amber-50" : "gold-grain-light text-[#1C1B18]"} font-sans flex items-center justify-center p-6 transition-colors duration-300`}
+          className={`min-h-screen ${theme === "dark" ? "gold-grain-dark text-rose-50" : "gold-grain-light text-[#1C1B18]"} font-sans flex items-center justify-center p-6 transition-colors duration-300`}
         >
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className={`w-full max-w-sm p-8 rounded-3xl ${theme === "dark" ? "bg-stone-900/40 border-amber-500/20" : "bg-white/80 border-amber-500/15 shadow-xl"} border md:backdrop-blur-xl`}
+          className={`w-full max-w-sm p-8 rounded-3xl ${theme === "dark" ? "bg-stone-900/40 border-rose-500/20" : "bg-white/80 border-rose-500/15 shadow-xl"} border md:backdrop-blur-xl`}
         >
           <div className="flex flex-col items-center mb-8">
-            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 mb-4">
-              <Settings className="w-8 h-8 text-amber-500 animate-spin-slow" />
+            <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 mb-4">
+              <Settings className="w-8 h-8 text-rose-500 animate-spin-slow" />
             </div>
-            <h2 className="text-2xl font-serif font-black tracking-tight text-amber-950 dark:text-amber-100">Admin Login</h2>
+            <h2 className="text-2xl font-serif font-black tracking-tight text-rose-950 dark:text-rose-100">Admin Login</h2>
             <p className={`${theme === "dark" ? "text-stone-400" : "text-stone-500"} text-xs mt-1 tracking-wide`}>Enter your credentials to continue</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className={`block text-[11px] font-black uppercase tracking-widest ${theme === "dark" ? "text-amber-500" : "text-[#1c1b18]"} mb-2`}>Username</label>
+              <label className={`block text-[11px] font-black uppercase tracking-widest ${theme === "dark" ? "text-rose-500" : "text-[#1c1b18]"} mb-2`}>Username</label>
               <input 
                 type="text" 
                 required
                 autoComplete="username"
                 value={loginData.username}
                 onChange={(e) => setLoginData({...loginData, username: e.target.value})}
-                className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-stone-50 border-stone-200 text-stone-900"} border rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500/50 transition-colors text-sm`}
+                className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-stone-50 border-stone-200 text-stone-900"} border rounded-xl px-4 py-3 focus:outline-none focus:border-rose-500/50 transition-colors text-sm`}
                 placeholder="Username"
               />
             </div>
             <div>
-              <label className={`block text-[11px] font-black uppercase tracking-widest ${theme === "dark" ? "text-amber-500" : "text-[#1c1b18]"} mb-2`}>Password</label>
+              <label className={`block text-[11px] font-black uppercase tracking-widest ${theme === "dark" ? "text-rose-500" : "text-[#1c1b18]"} mb-2`}>Password</label>
               <div className="relative">
                 <input 
                   type={showPassword ? "text" : "password"} 
@@ -7496,7 +7496,7 @@ export default function App() {
                   autoComplete="current-password"
                   value={loginData.password}
                   onChange={(e) => setLoginData({...loginData, password: e.target.value})}
-                  className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-stone-50 border-stone-200 text-stone-900"} border rounded-xl px-4 py-3 pr-12 focus:outline-none focus:border-amber-500/50 transition-colors text-sm`}
+                  className={`w-full ${theme === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-stone-50 border-stone-200 text-stone-900"} border rounded-xl px-4 py-3 pr-12 focus:outline-none focus:border-rose-500/50 transition-colors text-sm`}
                   placeholder="••••••••"
                 />
                 <button
@@ -7511,7 +7511,7 @@ export default function App() {
             {loginError && <p className="text-red-500 text-xs font-semibold text-center">{loginError}</p>}
             <button 
               type="submit"
-              className="w-full py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black tracking-widest uppercase text-xs transition-all mt-4 shadow-lg shadow-amber-500/10 active:scale-98"
+              className="w-full py-4 rounded-xl bg-rose-500 hover:bg-rose-400 text-stone-950 font-black tracking-widest uppercase text-xs transition-all mt-4 shadow-lg shadow-rose-500/10 active:scale-98"
             >
               Sign In
             </button>
@@ -7533,14 +7533,14 @@ export default function App() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.4 }}
-          className={`min-h-screen ${theme === "dark" ? "gold-grain-dark text-amber-50" : "gold-grain-light text-[#1C1B18]"} font-sans p-6 md:p-12 transition-colors duration-300`}
+          className={`min-h-screen ${theme === "dark" ? "gold-grain-dark text-rose-50" : "gold-grain-light text-[#1C1B18]"} font-sans p-6 md:p-12 transition-colors duration-300`}
         >
           {/* Subtle glow filter on top */}
-          <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-amber-500/5 to-transparent pointer-events-none" />
+          <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-rose-500/5 to-transparent pointer-events-none" />
 
           <div className="max-w-5xl lg:max-w-6xl mx-auto relative z-10">
             {/* Elegant Header with Back Action */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10 pb-6 border-b border-dashed border-amber-500/25">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10 pb-6 border-b border-dashed border-rose-500/25">
               <div 
                 onClick={() => {
                   handleNavigate("/");
@@ -7548,11 +7548,11 @@ export default function App() {
                 }}
                 className="cursor-pointer group select-none transition-all duration-300"
               >
-                <span className="text-[10px] uppercase tracking-[0.25em] font-semibold text-amber-600 dark:text-amber-400 block mb-1 group-hover:text-amber-500 transition-colors">
+                <span className="text-[10px] uppercase tracking-[0.25em] font-semibold text-rose-600 dark:text-rose-400 block mb-1 group-hover:text-rose-500 transition-colors">
                   Styling Consultant Lounge
                 </span>
-                <h2 className="text-3xl font-serif font-semibold tracking-tight text-amber-950 dark:text-amber-100 flex items-center gap-2 group-hover:opacity-85 transition-opacity">
-                  Contact Renu Fashion Hub <Sparkles className="w-5 h-5 text-amber-500 animate-pulse group-hover:scale-110 transition-transform" />
+                <h2 className="text-3xl font-serif font-semibold tracking-tight text-rose-950 dark:text-rose-100 flex items-center gap-2 group-hover:opacity-85 transition-opacity">
+                  Contact Renu Fashion Hub <Sparkles className="w-5 h-5 text-rose-500 animate-pulse group-hover:scale-110 transition-transform" />
                 </h2>
               </div>
               <button 
@@ -7562,8 +7562,8 @@ export default function App() {
                 }}
                 className={`flex items-center gap-2 self-start py-2.5 px-5 rounded-full text-xs font-semibold ${
                   theme === "dark" 
-                    ? "bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border-amber-500/30" 
-                    : "bg-amber-100 hover:bg-amber-200 text-amber-950 border-amber-200"
+                    ? "bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border-rose-500/30" 
+                    : "bg-rose-100 hover:bg-rose-200 text-rose-950 border-rose-200"
                 } border transition-all active:scale-95`}
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -7579,7 +7579,7 @@ export default function App() {
                   className={`p-6 sm:p-8 rounded-3xl transition-all duration-300 hover:shadow-lg hover:scale-[1.01] ${
                     theme === "dark" 
                       ? "bg-white/[0.04] border-white/10 hover:bg-white/[0.07]" 
-                      : "bg-white border-amber-500/15 shadow-sm text-stone-900 hover:border-amber-500/30"
+                      : "bg-white border-rose-500/15 shadow-sm text-stone-900 hover:border-rose-500/30"
                   } border`}
                   itemScope
                   itemType="https://schema.org/LocalBusiness"
@@ -7588,9 +7588,9 @@ export default function App() {
                   <meta itemProp="email" content="support@renufashionhub.in" />
                   <meta itemProp="telephone" content="+917248763036" />
                   
-                  <div className="flex items-center gap-2.5 mb-4 border-b border-amber-500/10 pb-3">
-                    <MapPin className="w-5 h-5 text-amber-500 flex-shrink-0 animate-bounce" />
-                    <h2 className="text-lg font-black uppercase tracking-wider text-amber-500 font-serif">
+                  <div className="flex items-center gap-2.5 mb-4 border-b border-rose-500/10 pb-3">
+                    <MapPin className="w-5 h-5 text-rose-500 flex-shrink-0 animate-bounce" />
+                    <h2 className="text-lg font-black uppercase tracking-wider text-rose-500 font-serif">
                       OFFICE ADDRESS
                     </h2>
                   </div>
@@ -7606,21 +7606,21 @@ export default function App() {
                     </p>
                   </div>
                   
-                  <div className="mt-6 space-y-3 pt-6 border-t border-amber-500/10">
+                  <div className="mt-6 space-y-3 pt-6 border-t border-rose-500/10">
                     <div className="flex items-center gap-3">
-                      <Phone className="w-4 h-4 text-amber-500 flex-shrink-0 animate-bounce" />
+                      <Phone className="w-4 h-4 text-rose-500 flex-shrink-0 animate-bounce" />
                       <a href="tel:+917248763036" className="text-xs font-bold hover:underline" itemProp="telephone">
                         +91 72487 63036
                       </a>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Mail className="w-4 h-4 text-amber-500 flex-shrink-0 animate-bounce" />
+                      <Mail className="w-4 h-4 text-rose-500 flex-shrink-0 animate-bounce" />
                       <a href="mailto:support@renufashionhub.in" className="text-xs font-bold hover:underline" itemProp="email">
                         support@renufashionhub.in
                       </a>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Clock className="w-4 h-4 text-amber-500 flex-shrink-0 animate-pulse" />
+                      <Clock className="w-4 h-4 text-rose-500 flex-shrink-0 animate-pulse" />
                       <span className="text-xs font-bold">
                         Mon - Sat: 11:00 AM - 8:00 PM
                       </span>
@@ -7629,7 +7629,7 @@ export default function App() {
                 </div>
 
                 <div className={`p-6 rounded-2xl ${
-                  theme === "dark" ? "bg-amber-500/5 text-amber-300 border-amber-500/10" : "bg-amber-500/5 text-amber-950 border-amber-500/10"
+                  theme === "dark" ? "bg-rose-500/5 text-rose-300 border-rose-500/10" : "bg-rose-500/5 text-rose-950 border-rose-500/10"
                 } border text-xs`}>
                   <p className="font-semibold leading-relaxed">
                     🌟 <strong>Note:</strong> We encourage scheduling appointments before visiting our Agra headquarters to ensure customized curation sessions with Mrs. Renu Agarwal.
@@ -7646,7 +7646,7 @@ export default function App() {
                   className={`p-6 sm:p-8 rounded-3xl ${
                     theme === "dark" 
                       ? "bg-white/[0.04] border-white/10 text-white" 
-                      : "bg-white border-amber-500/15 shadow-sm text-stone-900"
+                      : "bg-white border-rose-500/15 shadow-sm text-stone-900"
                   } border md:backdrop-blur-xl`}
                 >
                   <AnimatePresence mode="wait">
@@ -7661,7 +7661,7 @@ export default function App() {
                         <div className="w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto mb-6">
                           <Check className="w-9 h-9 text-emerald-500" />
                         </div>
-                        <h2 className="text-2xl font-serif font-black text-amber-950 dark:text-amber-100 mb-2">
+                        <h2 className="text-2xl font-serif font-black text-rose-950 dark:text-rose-100 mb-2">
                           Message Sent!
                         </h2>
                         <p className={`text-stone-500 dark:text-stone-400 text-xs mb-8 max-w-sm mx-auto leading-relaxed`}>
@@ -7669,7 +7669,7 @@ export default function App() {
                         </p>
                         <button 
                           onClick={() => setMessageSent(false)}
-                          className="px-6 py-2.5 rounded-full border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-black hover:bg-amber-500/10 transition-colors"
+                          className="px-6 py-2.5 rounded-full border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-black hover:bg-rose-500/10 transition-colors"
                         >
                           Send another message
                         </button>
@@ -7681,7 +7681,7 @@ export default function App() {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                       >
-                        <h2 className="text-xl font-serif font-black text-amber-950 dark:text-amber-100 mb-1">
+                        <h2 className="text-xl font-serif font-black text-rose-950 dark:text-rose-100 mb-1">
                           Send Direct Message to Admin
                         </h2>
                         <p className="text-xs text-stone-400 mb-6">
@@ -7691,7 +7691,7 @@ export default function App() {
                         <form className="space-y-5" onSubmit={handleContactSubmit}>
                           <div>
                             <label className={`block text-[11px] font-black uppercase tracking-widest ${
-                              theme === "dark" ? "text-amber-500" : "text-[#1c1b18]"
+                              theme === "dark" ? "text-rose-500" : "text-[#1c1b18]"
                             } mb-2`}>
                               Your Full Name
                             </label>
@@ -7702,9 +7702,9 @@ export default function App() {
                               onChange={(e) => setContactData({...contactData, name: e.target.value})}
                               className={`w-full text-xs xs:text-sm ${
                                 theme === "dark" 
-                                  ? "bg-white/5 border-white/10 text-white focus:border-amber-500/60" 
-                                  : "bg-stone-50 border-stone-200 text-stone-900 focus:border-amber-500/60"
-                              } border rounded-xl px-4 py-3 placeholder-stone-400 transition-all outline-none focus:ring-1 focus:ring-amber-500/25`}
+                                  ? "bg-white/5 border-white/10 text-white focus:border-rose-500/60" 
+                                  : "bg-stone-50 border-stone-200 text-stone-900 focus:border-rose-500/60"
+                              } border rounded-xl px-4 py-3 placeholder-stone-400 transition-all outline-none focus:ring-1 focus:ring-rose-500/25`}
                               placeholder="e.g. Priyanjali Sen"
                             />
                           </div>
@@ -7712,7 +7712,7 @@ export default function App() {
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                               <label className={`block text-[11px] font-black uppercase tracking-widest ${
-                                theme === "dark" ? "text-amber-500" : "text-[#1c1b18]"
+                                theme === "dark" ? "text-rose-500" : "text-[#1c1b18]"
                               } mb-2`}>
                                 Email Address
                               </label>
@@ -7723,15 +7723,15 @@ export default function App() {
                                 onChange={(e) => setContactData({...contactData, email: e.target.value})}
                                 className={`w-full text-xs xs:text-sm ${
                                   theme === "dark" 
-                                    ? "bg-white/5 border-white/10 text-white focus:border-amber-500/60" 
-                                    : "bg-stone-50 border-stone-200 text-stone-900 focus:border-amber-500/60"
-                                } border rounded-xl px-4 py-3 placeholder-stone-400 transition-all outline-none focus:ring-1 focus:ring-amber-500/25`}
+                                    ? "bg-white/5 border-white/10 text-white focus:border-rose-500/60" 
+                                    : "bg-stone-50 border-stone-200 text-stone-900 focus:border-rose-500/60"
+                                } border rounded-xl px-4 py-3 placeholder-stone-400 transition-all outline-none focus:ring-1 focus:ring-rose-500/25`}
                                 placeholder="name@domain.com"
                               />
                             </div>
                             <div>
                               <label className={`block text-[11px] font-black uppercase tracking-widest ${
-                                theme === "dark" ? "text-amber-500" : "text-[#1c1b18]"
+                                theme === "dark" ? "text-rose-500" : "text-[#1c1b18]"
                               } mb-2`}>
                                 Mobile Number
                               </label>
@@ -7742,9 +7742,9 @@ export default function App() {
                                 onChange={(e) => setContactData({...contactData, mobile: e.target.value})}
                                 className={`w-full text-xs xs:text-sm ${
                                   theme === "dark" 
-                                    ? "bg-white/5 border-white/10 text-white focus:border-amber-500/60" 
-                                    : "bg-stone-50 border-stone-200 text-stone-900 focus:border-amber-500/60"
-                                } border rounded-xl px-4 py-3 placeholder-stone-400 transition-all outline-none focus:ring-1 focus:ring-amber-500/25`}
+                                    ? "bg-white/5 border-white/10 text-white focus:border-rose-500/60" 
+                                    : "bg-stone-50 border-stone-200 text-stone-900 focus:border-rose-500/60"
+                                } border rounded-xl px-4 py-3 placeholder-stone-400 transition-all outline-none focus:ring-1 focus:ring-rose-500/25`}
                                 placeholder="+91 XXXXX XXXXX"
                               />
                             </div>
@@ -7752,7 +7752,7 @@ export default function App() {
 
                           <div>
                             <label className={`block text-[11px] font-black uppercase tracking-widest ${
-                              theme === "dark" ? "text-amber-500" : "text-[#1c1b18]"
+                              theme === "dark" ? "text-rose-500" : "text-[#1c1b18]"
                             } mb-2`}>
                               Message Details
                             </label>
@@ -7763,9 +7763,9 @@ export default function App() {
                               onChange={(e) => setContactData({...contactData, message: e.target.value})}
                               className={`w-full text-xs xs:text-sm ${
                                 theme === "dark" 
-                                  ? "bg-white/5 border-white/10 text-white focus:border-amber-500/60" 
-                                  : "bg-stone-50 border-stone-200 text-stone-900 focus:border-amber-500/60"
-                              } border rounded-xl px-4 py-3 placeholder-stone-400 transition-all outline-none focus:ring-1 focus:ring-amber-500/25 resize-none`}
+                                  ? "bg-white/5 border-white/10 text-white focus:border-rose-500/60" 
+                                  : "bg-stone-50 border-stone-200 text-stone-900 focus:border-rose-500/60"
+                              } border rounded-xl px-4 py-3 placeholder-stone-400 transition-all outline-none focus:ring-1 focus:ring-rose-500/25 resize-none`}
                               placeholder="Tell us what you are looking for, including specific colors or collections..."
                             />
                           </div>
@@ -7781,8 +7781,8 @@ export default function App() {
                             disabled={isSendingMessage}
                             className={`w-full py-4 rounded-xl ${
                               theme === "dark" 
-                                ? "bg-amber-500 text-stone-950 font-bold" 
-                                : "bg-amber-950 text-white font-semibold"
+                                ? "bg-rose-500 text-stone-950 font-bold" 
+                                : "bg-rose-950 text-white font-semibold"
                             } transition-all duration-300 shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer`}
                           >
                             {isSendingMessage ? (
@@ -7819,13 +7819,13 @@ export default function App() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
-          className={`min-h-screen ${theme === "dark" ? "gold-grain-dark text-amber-50" : "gold-grain-light text-[#1C1B18]"} font-sans selection:bg-amber-500/30 transition-colors duration-300`}
+          className={`min-h-screen ${theme === "dark" ? "gold-grain-dark text-rose-50" : "gold-grain-light text-[#1C1B18]"} font-sans selection:bg-rose-500/30 transition-colors duration-300`}
         >
 
       {/* Background Gradient */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className={`absolute top-[-10%] left-[-10%] w-[40%] h-[40%] ${theme === "dark" ? "bg-emerald-900/15" : "bg-amber-100/30"} blur-[120px] rounded-full`} />
-        <div className={`absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] ${theme === "dark" ? "bg-amber-900/10" : "bg-amber-100/10"} blur-[120px] rounded-full`} />
+        <div className={`absolute top-[-10%] left-[-10%] w-[40%] h-[40%] ${theme === "dark" ? "bg-emerald-900/15" : "bg-rose-100/30"} blur-[120px] rounded-full`} />
+        <div className={`absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] ${theme === "dark" ? "bg-rose-900/10" : "bg-rose-100/10"} blur-[120px] rounded-full`} />
       </div>
 
       <div className="relative w-full max-w-md md:max-w-3xl lg:max-w-6xl mx-auto px-6 md:px-8 lg:px-12 pt-16 pb-24">
@@ -7874,13 +7874,13 @@ export default function App() {
               className="flex flex-col items-center lg:items-start text-center lg:text-left"
             >
               <div className="relative mb-4">
-                <div className="w-28 h-28 rounded-full p-1 bg-gradient-to-tr from-amber-600 via-amber-400 to-yellow-300">
+                <div className="w-28 h-28 rounded-full p-1 bg-gradient-to-tr from-rose-600 via-rose-400 to-yellow-300">
                   <MediaImage 
                     url={profile.avatar} 
                     alt={profile.name} 
                     className={`w-full h-full rounded-full object-cover border-4 ${theme === "dark" ? "border-[#0B1512]" : "border-white"}`}
                     fallback={
-                      <div className={`w-full h-full rounded-full ${theme === "dark" ? "bg-[#0B1512]" : "bg-[#FDFBF7]"} flex items-center justify-center`}>
+                      <div className={`w-full h-full rounded-full ${theme === "dark" ? "bg-[#0B1512]" : "bg-[#FFF7F9]"} flex items-center justify-center`}>
                         <User className={`w-12 h-12 ${theme === "dark" ? "text-white/20" : "text-black/20"}`} />
                       </div>
                     }
@@ -7931,7 +7931,7 @@ export default function App() {
                       hover: { y: 0 }
                     }}
                     transition={{ type: "tween", ease: [0.22, 1, 0.36, 1], duration: 0.4 }}
-                    className="absolute inset-0 bg-amber-500/10 -z-10"
+                    className="absolute inset-0 bg-rose-500/10 -z-10"
                   />
                   <div className="relative z-10 flex items-center gap-4">
                     <div className={`p-2 rounded-xl ${theme === "dark" ? "bg-white/5 group-hover:bg-white/10" : "bg-black/5 group-hover:bg-black/10"} transition-colors`}>
@@ -7965,7 +7965,7 @@ export default function App() {
                   variant={theme === "dark" ? "primary" : "secondary"}
                 >
                   <span className="flex items-center justify-center gap-2">
-                    <BookOpen className="w-4 h-4 text-amber-500 animate-pulse" />
+                    <BookOpen className="w-4 h-4 text-rose-500 animate-pulse" />
                     Fashion Blog
                   </span>
                 </PremiumButton>
@@ -7976,7 +7976,7 @@ export default function App() {
                 variant={theme === "dark" ? "secondary" : "primary"}
               >
                 <span className="flex items-center justify-center gap-2">
-                  <Sparkles className="w-4 h-4 text-amber-500" />
+                  <Sparkles className="w-4 h-4 text-rose-500" />
                   About Renu Fashion Hub
                 </span>
               </PremiumButton>
@@ -7988,7 +7988,7 @@ export default function App() {
                     scale: 1.04, 
                     boxShadow: theme === "dark" ? "0 0 14px rgba(245, 158, 11, 0.35)" : "0 0 10px rgba(245, 158, 11, 0.22)",
                     borderColor: "rgba(245, 158, 11, 0.45)",
-                    color: theme === "dark" ? "#FBBF24" : "#B45309"
+                    color: theme === "dark" ? "#FB7185" : "#BE123C"
                   }}
                   whileTap={{ scale: 0.96 }}
                   transition={{ type: "spring", stiffness: 420, damping: 17 }}
@@ -8006,7 +8006,7 @@ export default function App() {
                     scale: 1.04, 
                     boxShadow: theme === "dark" ? "0 0 14px rgba(245, 158, 11, 0.35)" : "0 0 10px rgba(245, 158, 11, 0.22)",
                     borderColor: "rgba(245, 158, 11, 0.45)",
-                    color: theme === "dark" ? "#FBBF24" : "#B45309"
+                    color: theme === "dark" ? "#FB7185" : "#BE123C"
                   }}
                   whileTap={{ scale: 0.96 }}
                   transition={{ type: "spring", stiffness: 420, damping: 17 }}
@@ -8024,7 +8024,7 @@ export default function App() {
                     scale: 1.04, 
                     boxShadow: theme === "dark" ? "0 0 14px rgba(245, 158, 11, 0.35)" : "0 0 10px rgba(245, 158, 11, 0.22)",
                     borderColor: "rgba(245, 158, 11, 0.45)",
-                    color: theme === "dark" ? "#FBBF24" : "#B45309"
+                    color: theme === "dark" ? "#FB7185" : "#BE123C"
                   }}
                   whileTap={{ scale: 0.96 }}
                   transition={{ type: "spring", stiffness: 420, damping: 17 }}
@@ -8045,7 +8045,7 @@ export default function App() {
           {/* Right Column: Carousel, Tabs & Dynamic Content List */}
           <div className="lg:col-span-7 space-y-8 mt-10 lg:mt-0">
             {/* Dynamic visible H1 tag for SEO compliance */}
-            <h1 className="text-xl sm:text-2xl font-black font-serif tracking-tight text-amber-950 dark:text-amber-100 leading-tight">
+            <h1 className="text-xl sm:text-2xl font-black font-serif tracking-tight text-rose-950 dark:text-rose-100 leading-tight">
               {searchQuery 
                 ? `Search Results for "${searchQuery}"` 
                 : (selectedCategory && selectedCategory !== "All") 
@@ -8080,13 +8080,13 @@ export default function App() {
                   opacity: activeTab === tab.id ? 1 : 0
                 }}
                 transition={{ type: "tween", ease: [0.22, 1, 0.36, 1], duration: 0.4 }}
-                className={`absolute inset-0 -z-10 ${theme === "dark" ? "bg-amber-500/20" : "bg-amber-500/10"}`}
+                className={`absolute inset-0 -z-10 ${theme === "dark" ? "bg-rose-500/20" : "bg-rose-500/10"}`}
               />
               <span className="relative z-10">{tab.label}</span>
               {activeTab === tab.id && (
                 <motion.div 
                   layoutId="activeTabIndicator"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-500"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-500"
                 />
               )}
             </button>
@@ -8170,15 +8170,15 @@ export default function App() {
                     ? "bg-[#141B19]/40 border-white/10" 
                     : "bg-[#1C1B18]/5 border-[#1C1B18]/10"
                 }`}>
-                  <span className={`text-[8.5px] font-black uppercase tracking-wider ${theme === "dark" ? "text-amber-100/90" : "text-[#1C1B18]"} flex items-center gap-1 flex-shrink-0`}>
-                    <ArrowUpDown className="w-3 h-3 text-amber-500" /> Price:
+                  <span className={`text-[8.5px] font-black uppercase tracking-wider ${theme === "dark" ? "text-rose-100/90" : "text-[#1C1B18]"} flex items-center gap-1 flex-shrink-0`}>
+                    <ArrowUpDown className="w-3 h-3 text-rose-500" /> Price:
                   </span>
                   <div className="flex items-center gap-1.5 flex-1 justify-end min-w-0">
                     <button
                       onClick={() => setSortBy("default")}
                       className={`px-2 py-1.5 rounded-xl text-[8.5px] font-black uppercase tracking-tight transition-all duration-300 flex-shrink-0 ${
                         sortBy === "default"
-                          ? (theme === "dark" ? "bg-amber-500 text-stone-950 shadow-md shadow-amber-500/20" : "bg-stone-900 text-stone-50 shadow-md shadow-black/10")
+                          ? (theme === "dark" ? "bg-rose-500 text-stone-950 shadow-md shadow-rose-500/20" : "bg-stone-900 text-stone-50 shadow-md shadow-black/10")
                           : (theme === "dark" ? "bg-white/5 border border-white/5 hover:bg-white/15 text-stone-300 shadow-sm" : "bg-black/5 border border-transparent hover:bg-black/10 text-stone-700")
                       }`}
                     >
@@ -8188,7 +8188,7 @@ export default function App() {
                       onClick={() => setSortBy("price-asc")}
                       className={`px-2 py-1.5 rounded-xl text-[8.5px] font-black uppercase tracking-tight transition-all duration-300 flex-shrink-0 ${
                         sortBy === "price-asc"
-                          ? (theme === "dark" ? "bg-amber-500 text-stone-950 shadow-md shadow-amber-500/20" : "bg-stone-900 text-stone-50 shadow-md shadow-black/10")
+                          ? (theme === "dark" ? "bg-rose-500 text-stone-950 shadow-md shadow-rose-500/20" : "bg-stone-900 text-stone-50 shadow-md shadow-black/10")
                           : (theme === "dark" ? "bg-white/5 border border-white/5 hover:bg-white/15 text-stone-300 shadow-sm" : "bg-black/5 border border-transparent hover:bg-black/10 text-stone-700")
                       }`}
                     >
@@ -8198,7 +8198,7 @@ export default function App() {
                       onClick={() => setSortBy("price-desc")}
                       className={`px-2 py-1.5 rounded-xl text-[8.5px] font-black uppercase tracking-tight transition-all duration-300 flex-shrink-0 ${
                         sortBy === "price-desc"
-                          ? (theme === "dark" ? "bg-amber-500 text-stone-950 shadow-md shadow-amber-500/20" : "bg-stone-900 text-stone-50 shadow-md shadow-black/10")
+                          ? (theme === "dark" ? "bg-rose-500 text-stone-950 shadow-md shadow-rose-500/20" : "bg-stone-900 text-stone-50 shadow-md shadow-black/10")
                           : (theme === "dark" ? "bg-white/5 border border-white/5 hover:bg-white/15 text-stone-300 shadow-sm" : "bg-black/5 border border-transparent hover:bg-black/10 text-stone-700")
                       }`}
                     >
@@ -8360,11 +8360,11 @@ export default function App() {
             <div 
               className={`relative z-10 px-4 py-1.5 rounded-full border text-[9px] font-black uppercase tracking-widest flex items-center gap-2 shadow-sm ${
                 theme === "dark" 
-                  ? "bg-[#09100E] border-white/10 text-amber-500/80" 
-                  : "bg-white border-black/10 text-amber-600/80"
+                  ? "bg-[#09100E] border-white/10 text-rose-500/80" 
+                  : "bg-white border-black/10 text-rose-600/80"
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5 animate-pulse text-amber-500" />
+              <Sparkles className="w-3.5 h-3.5 animate-pulse text-rose-500" />
               <span>Premium Experience</span>
             </div>
           </div>
@@ -8376,16 +8376,16 @@ export default function App() {
               transition={{ duration: 0.2 }}
               className={`flex items-center gap-3.5 p-3.5 rounded-2xl border transition-all ${
                 theme === "dark" 
-                  ? "bg-white/[0.02] hover:bg-white/[0.04] border-white/10 text-amber-50 shadow-[0_4px_24px_rgba(0,0,0,0.4)]" 
+                  ? "bg-white/[0.02] hover:bg-white/[0.04] border-white/10 text-rose-50 shadow-[0_4px_24px_rgba(0,0,0,0.4)]" 
                   : "bg-[#1C1B18]/[0.01] hover:bg-[#1C1B18]/[0.03] border-black/10 text-[#1C1B18] shadow-[0_4px_24px_rgba(0,0,0,0.02)]"
               }`}
             >
               <div className={`p-2 rounded-xl ${
                 theme === "dark" 
-                  ? "bg-gradient-to-br from-amber-500/10 to-amber-500/15 border border-white/5" 
-                  : "bg-gradient-to-br from-amber-500/5 to-amber-500/10 border border-black/5"
+                  ? "bg-gradient-to-br from-rose-500/10 to-rose-500/15 border border-white/5" 
+                  : "bg-gradient-to-br from-rose-500/5 to-rose-500/10 border border-black/5"
               }`}>
-                <Phone className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
+                <Phone className="w-3.5 h-3.5 text-rose-500 animate-pulse" />
               </div>
               <div className="text-left leading-tight">
                 <span className={`block text-[8px] font-extrabold uppercase tracking-widest ${
@@ -8403,7 +8403,7 @@ export default function App() {
                 rel="noopener noreferrer" 
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[9px] font-black uppercase tracking-wider ml-1.5 hover:scale-105 active:scale-95 transition-all shadow-md ${
                   theme === "dark" 
-                    ? "bg-amber-500 hover:bg-amber-400 text-stone-950 border-amber-400 shadow-amber-500/10" 
+                    ? "bg-rose-500 hover:bg-rose-400 text-stone-950 border-rose-400 shadow-rose-500/10" 
                     : "bg-stone-900 hover:bg-stone-800 text-stone-50 border-stone-800 shadow-black/10"
                 }`}
               >
@@ -8417,7 +8417,7 @@ export default function App() {
               <div 
                 className={`w-full flex items-center justify-center p-3 rounded-xl border text-[8.5px] font-black uppercase tracking-[0.18em] transition-all whitespace-nowrap overflow-x-hidden ${
                   theme === "dark" 
-                    ? "bg-[#09100E] border-white/5 text-amber-500/60 shadow-[0_2px_12px_rgba(0,0,0,0.2)]" 
+                    ? "bg-[#09100E] border-white/5 text-rose-500/60 shadow-[0_2px_12px_rgba(0,0,0,0.2)]" 
                     : "bg-stone-50 border-black/5 text-[#1C1B18]/60 shadow-[0_2px_12px_rgba(0,0,0,0.01)]"
                 }`}
               >
@@ -8426,7 +8426,7 @@ export default function App() {
               <div className="flex flex-wrap gap-x-3 gap-y-1.5 items-center justify-center max-w-sm">
                 <motion.a
                   href="/about"
-                  whileHover={{ scale: 1.1, color: theme === "dark" ? "#FBBF24" : "#D97706" }}
+                  whileHover={{ scale: 1.1, color: theme === "dark" ? "#FB7185" : "#E11D48" }}
                   whileTap={{ scale: 0.93 }}
                   transition={{ type: "spring", stiffness: 450, damping: 15 }}
                   onClick={(e) => {
@@ -8434,7 +8434,7 @@ export default function App() {
                     handleNavigate("/about");
                   }}
                   className={`text-[9px] font-black uppercase tracking-[0.18em] transition-colors cursor-pointer outline-none ${
-                    theme === "dark" ? "text-amber-500" : "text-[#1C1B18]/80"
+                    theme === "dark" ? "text-rose-500" : "text-[#1C1B18]/80"
                   }`}
                 >
                   About Us
@@ -8442,7 +8442,7 @@ export default function App() {
                 <span className={`text-[8px] ${theme === "dark" ? "text-stone-700" : "text-stone-300"}`}>|</span>
                 <motion.a
                   href="/privacy-policy"
-                  whileHover={{ scale: 1.1, color: theme === "dark" ? "#FBBF24" : "#D97706" }}
+                  whileHover={{ scale: 1.1, color: theme === "dark" ? "#FB7185" : "#E11D48" }}
                   whileTap={{ scale: 0.93 }}
                   transition={{ type: "spring", stiffness: 450, damping: 15 }}
                   onClick={(e) => {
@@ -8450,7 +8450,7 @@ export default function App() {
                     handleNavigate("/privacy-policy");
                   }}
                   className={`text-[9px] font-black uppercase tracking-[0.18em] transition-colors cursor-pointer outline-none ${
-                    theme === "dark" ? "text-amber-500" : "text-[#1C1B18]/80"
+                    theme === "dark" ? "text-rose-500" : "text-[#1C1B18]/80"
                   }`}
                 >
                   Privacy
@@ -8458,7 +8458,7 @@ export default function App() {
                 <span className={`text-[8px] ${theme === "dark" ? "text-stone-700" : "text-stone-300"}`}>|</span>
                 <motion.a
                   href="/terms-of-service"
-                  whileHover={{ scale: 1.1, color: theme === "dark" ? "#FBBF24" : "#D97706" }}
+                  whileHover={{ scale: 1.1, color: theme === "dark" ? "#FB7185" : "#E11D48" }}
                   whileTap={{ scale: 0.93 }}
                   transition={{ type: "spring", stiffness: 450, damping: 15 }}
                   onClick={(e) => {
@@ -8466,7 +8466,7 @@ export default function App() {
                     handleNavigate("/terms-of-service");
                   }}
                   className={`text-[9px] font-black uppercase tracking-[0.18em] transition-colors cursor-pointer outline-none ${
-                    theme === "dark" ? "text-amber-500" : "text-[#1C1B18]/80"
+                    theme === "dark" ? "text-rose-500" : "text-[#1C1B18]/80"
                   }`}
                 >
                   Terms
@@ -8474,7 +8474,7 @@ export default function App() {
                 <span className={`text-[8px] ${theme === "dark" ? "text-stone-700" : "text-stone-300"}`}>|</span>
                 <motion.a
                   href="/disclaimer"
-                  whileHover={{ scale: 1.1, color: theme === "dark" ? "#FBBF24" : "#D97706" }}
+                  whileHover={{ scale: 1.1, color: theme === "dark" ? "#FB7185" : "#E11D48" }}
                   whileTap={{ scale: 0.93 }}
                   transition={{ type: "spring", stiffness: 450, damping: 15 }}
                   onClick={(e) => {
@@ -8482,7 +8482,7 @@ export default function App() {
                     handleNavigate("/disclaimer");
                   }}
                   className={`text-[9px] font-black uppercase tracking-[0.18em] transition-colors cursor-pointer outline-none ${
-                    theme === "dark" ? "text-amber-500" : "text-[#1C1B18]/80"
+                    theme === "dark" ? "text-rose-500" : "text-[#1C1B18]/80"
                   }`}
                 >
                   Disclaimer
@@ -8490,7 +8490,7 @@ export default function App() {
                 <span className={`text-[8px] ${theme === "dark" ? "text-stone-700" : "text-stone-300"}`}>|</span>
                 <motion.a
                   href="/contact"
-                  whileHover={{ scale: 1.1, color: theme === "dark" ? "#FBBF24" : "#D97706" }}
+                  whileHover={{ scale: 1.1, color: theme === "dark" ? "#FB7185" : "#E11D48" }}
                   whileTap={{ scale: 0.93 }}
                   transition={{ type: "spring", stiffness: 450, damping: 15 }}
                   onClick={(e) => {
@@ -8498,7 +8498,7 @@ export default function App() {
                     handleNavigate("/contact");
                   }}
                   className={`text-[9px] font-black uppercase tracking-[0.18em] transition-colors cursor-pointer outline-none ${
-                    theme === "dark" ? "text-amber-500" : "text-[#1C1B18]/80"
+                    theme === "dark" ? "text-rose-500" : "text-[#1C1B18]/80"
                   }`}
                 >
                   Contact
