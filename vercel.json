@@ -3,81 +3,48 @@
     {
       "source": "/(.*)",
       "headers": [
-        {
-          "key": "Strict-Transport-Security",
-          "value": "max-age=63072000; includeSubDomains; preload"
-        },
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        },
-        {
-          "key": "Permissions-Policy",
-          "value": "camera=(), microphone=(), geolocation=(), payment=()"
-        },
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), payment=()" },
         {
           "key": "Content-Security-Policy",
           "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; media-src 'self' data: blob: https:; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://www.instagram.com https://www.facebook.com https://googleads.g.doubleclick.net; connect-src 'self' https:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
         }
       ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/ads.txt",
-      "destination": "/ads.txt"
-    },
-    {
-      "source": "/robots.txt",
-      "destination": "/robots.txt"
-    },
-    {
-      "source": "/llms.txt",
-      "destination": "/llms.txt"
-    },
-    {
-      "source": "/favicon.svg",
-      "destination": "/favicon.svg"
     },
     {
       "source": "/sitemap.xml",
-      "destination": "/api/sitemap"
-    },
-    {
-      "source": "/api/settings/profile",
-      "destination": "/api/settings-profile"
-    },
-    {
-      "source": "/api/products/:id/reviews",
-      "destination": "/api/products?id=:id&action=reviews"
-    },
-    {
-      "source": "/api/messages/:id",
-      "destination": "/api/messages?id=:id"
-    },
-    {
-      "source": "/blog/:id",
-      "destination": "/api/seo-handler?type=blog&id=:id"
-    },
-    {
-      "source": "/product/:id",
-      "destination": "/api/seo-handler?type=product&id=:id"
-    },
-    {
-      "source": "/post/:id",
-      "destination": "/api/seo-handler?type=post&id=:id"
-    },
-    {
-      "source": "/((?!api/).*)",
-      "destination": "/index.html"
+      "headers": [{ "key": "Content-Type", "value": "application/xml; charset=utf-8" }]
     }
+  ],
+  "rewrites": [
+    { "source": "/ads.txt", "destination": "/ads.txt" },
+    { "source": "/robots.txt", "destination": "/robots.txt" },
+    { "source": "/llms.txt", "destination": "/llms.txt" },
+    { "source": "/favicon.svg", "destination": "/favicon.svg" },
+    { "source": "/og-image.jpg", "destination": "/og-image.jpg" },
+    { "source": "/apple-touch-icon.png", "destination": "/apple-touch-icon.png" },
+
+    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+
+    { "source": "/api/settings/profile", "destination": "/api/settings-profile" },
+    { "source": "/api/products/:id/reviews", "destination": "/api/products?id=:id&action=reviews" },
+    { "source": "/api/messages/:id", "destination": "/api/messages?id=:id" },
+
+    { "source": "/blog/:id", "destination": "/api/seo-handler?type=blog&id=:id" },
+    { "source": "/product/:id", "destination": "/api/seo-handler?type=product&id=:id" },
+    { "source": "/post/:id", "destination": "/api/seo-handler?type=post&id=:id" },
+
+    { "source": "/", "destination": "/api/seo-handler?type=page&name=home" },
+    { "source": "/about", "destination": "/api/seo-handler?type=page&name=about" },
+    { "source": "/blog", "destination": "/api/seo-handler?type=page&name=blog" },
+    { "source": "/contact", "destination": "/api/seo-handler?type=page&name=contact" },
+    { "source": "/privacy-policy", "destination": "/api/seo-handler?type=page&name=privacy" },
+    { "source": "/terms-of-service", "destination": "/api/seo-handler?type=page&name=terms" },
+    { "source": "/disclaimer", "destination": "/api/seo-handler?type=page&name=disclaimer" },
+
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }

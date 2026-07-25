@@ -1,6 +1,39 @@
+# Renu Fashion Hub - robots.txt
 User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /login
+Disallow: /api/
+
+# Explicitly allow major AI crawlers (for Google AI Overviews, ChatGPT, Perplexity, Claude, etc.)
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Bingbot
+Allow: /
 
 Sitemap: https://www.renufashionhub.in/sitemap.xml

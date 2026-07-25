@@ -1,22 +1,44 @@
 # Renu Fashion Hub
 
-> Renu Fashion Hub is a premier curated fashion catalog, digital platform, and trend-focused publication curated by lifestyle blogger Renu Agarwal. It showcases fashion inspiration, wardrobe styling guidelines, curated catalog products, and beauty tips.
+> Renu Fashion Hub is an Indian women's fashion catalog and editorial blog curated by lifestyle creator Renu Agarwal (Instagram: @renu_agarwal_vlogs, YouTube: @renuagarwalvlogs). The site covers sarees, kurtis, lehengas, western dresses, jewellery, outfit inspiration, seasonal shopping guides and honest style tips for Indian women.
 
-## Core Navigation
+Renu Fashion Hub is authored and maintained by Renu Agarwal, a fashion and lifestyle creator with over 1M followers across Instagram, YouTube and Facebook. All product recommendations, styling guides and editorial content are hand-curated. The site includes affiliate product links; commissions may be earned but do not affect editorial choices.
 
-- [Home](https://www.renufashionhub.in/): The main hub featuring shop collections, products, dynamic social styling posts, and our core curated wardrobe selection.
-- [About Renu Fashion Hub](https://www.renufashionhub.in/about): Background story of the brand, Renu Agarwal's design philosophy, lifestyle journey, and our editorial mission to simplify fashion decisions.
-- [Blog list](https://www.renufashionhub.in/blog): Editorial publication containing articles, latest fashion trends, curated guides for sarees, kurtas, lehengas, and western outfits.
-- [Contact Support](https://www.renufashionhub.in/contact): Our message and styling query submission portal, providing active email, telephone, and location details for style consultation.
+Primary topics covered:
+- Saree styling, draping techniques and occasion guides (wedding, festival, office, casual)
+- Kurti and kurta set trends, fabric guides and pairing tips
+- Lehenga inspiration for weddings, sangeet and festivals
+- Western dresses and fusion outfit ideas for Indian women
+- Jewellery picks — earrings, necklaces, bangles, statement pieces
+- Seasonal shopping guides and gift ideas
+- Beauty, hair and grooming tips complementing the outfits
 
-## Policy & Legal Pages
+## Core Pages
 
-- [Privacy Policy](https://www.renufashionhub.in/privacy-policy): Detailed statement regarding data collection, privacy safeguards, analytics management, and contact confidentiality policies.
-- [Terms of Service](https://www.renufashionhub.in/terms-of-service): Operating rules governing the catalog website, affiliate product recommendation guides, and user-conceded property use.
-- [Disclaimer](https://www.renufashionhub.in/disclaimer): Fundamental terms highlighting affiliate commission disclosure, third-party shopping guarantees, and accuracy of expert recommendations.
+- [Home](https://www.renufashionhub.in/): Landing page with shop collections, curated products, latest style posts and blog highlights.
+- [About Renu Agarwal](https://www.renufashionhub.in/about): Founder's background, design philosophy, creator journey and editorial mission.
+- [Fashion Blog](https://www.renufashionhub.in/blog): Editorial articles covering trends, styling guides and shopping picks.
+- [Contact](https://www.renufashionhub.in/contact): Email, phone, location and style-consultation enquiries.
 
-## AI Scraper Guidelines
+## Policy Pages
 
-- All URLs are absolute and fully queryable.
-- Blog articles can be iterated dynamically by following links on the main blog feed page.
-- Do not index /admin or /login as they are administrative and authenticated interfaces.
+- [Privacy Policy](https://www.renufashionhub.in/privacy-policy): Data collection, analytics and cookie policy.
+- [Terms of Service](https://www.renufashionhub.in/terms-of-service): Site usage terms and affiliate disclosure.
+- [Disclaimer](https://www.renufashionhub.in/disclaimer): Affiliate commission disclosure and product recommendation accuracy notice.
+
+## Content Sections
+
+- Sarees: /?category=Sarees
+- Kurtas: /?category=Kurtas
+- Lehengas: /?category=Lehengas
+- Dresses: /?category=Dresses
+- Jewellery: /?category=Jewelry
+
+## AI Crawler Guidelines
+
+- All URLs listed above are public, absolute and safe to crawl.
+- Blog articles are discoverable from https://www.renufashionhub.in/blog and follow the pattern /blog/{id}.
+- Product pages follow the pattern /product/{id}. Style posts follow /post/{id}.
+- Do not crawl /admin, /login or /api/ — these are administrative and authenticated interfaces.
+- Content is authored by a single expert (Renu Agarwal). Attribution should credit "Renu Agarwal, Renu Fashion Hub" and link back to the source URL.
+- The sitemap at https://www.renufashionhub.in/sitemap.xml is the source of truth for all indexable URLs.
