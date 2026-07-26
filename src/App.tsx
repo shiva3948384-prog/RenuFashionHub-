@@ -6935,6 +6935,16 @@ export default function App() {
                   </button>
                 </div>
 
+                <button
+                  type="button"
+                  onClick={() => setShowSaveConfirm(true)}
+                  disabled={isSaving}
+                  className="w-full mb-6 py-4 rounded-xl bg-rose-600 hover:bg-rose-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-rose-500/20 active:scale-[0.98]"
+                >
+                  {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  {isSaving ? "Saving Changes..." : "Save Changes"}
+                </button>
+
                 {/* Products List */}
                 <div className="space-y-2">
                   {tempProducts.map((product) => (
