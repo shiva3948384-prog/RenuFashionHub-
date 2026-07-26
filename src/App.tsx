@@ -7458,6 +7458,7 @@ export default function App() {
               </section>
             )}
 
+          </div>
             {/* Single global save button — writes profile, privacy policy, terms,
                 posts/videos, products and blogs to the database in one go. */}
             <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-full max-w-xl px-6 z-40">
@@ -7465,7 +7466,7 @@ export default function App() {
                 type="button"
                 onClick={() => setShowSaveConfirm(true)}
                 disabled={isSaving || pendingChangesCount === 0}
-                className="w-full py-4 rounded-2xl bg-rose-500 hover:bg-rose-400 disabled:opacity-50 disabled:cursor-not-allowed text-stone-950 font-black uppercase text-xs tracking-wider transition-all flex items-center justify-center gap-2 shadow-2xl shadow-rose-500/25 border border-rose-400/20 active:scale-[0.98]"
+                className="w-full py-4 rounded-2xl bg-rose-500 hover:bg-rose-400 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black uppercase text-xs tracking-wider transition-all flex items-center justify-center gap-2 shadow-2xl shadow-rose-500/30 border border-rose-400/20 active:scale-[0.98]"
               >
                 {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 {isSaving
@@ -7474,7 +7475,7 @@ export default function App() {
                     ? "All Changes Saved"
                     : "Save All Changes"}
                 {!isSaving && pendingChangesCount > 0 && (
-                  <span className="ml-1 px-2 py-0.5 rounded-full bg-stone-950/20 text-[10px]">
+                  <span className="ml-1 px-2 py-0.5 rounded-full bg-white/25 text-[10px]">
                     {pendingChangesCount}
                   </span>
                 )}
@@ -7489,25 +7490,25 @@ export default function App() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="fixed inset-0 bg-black/90 md:backdrop-blur-md z-[100] flex items-center justify-center p-6"
+                  className="fixed inset-0 bg-rose-950/30 backdrop-blur-sm z-[100] flex items-center justify-center p-6"
                 >
                   <motion.div 
                     initial={{ scale: 0.9, opacity: 0, y: 20 }}
                     animate={{ scale: 1, opacity: 1, y: 0 }}
                     exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                    className="w-full max-w-sm bg-[#1a1a1a] border border-white/10 rounded-[2.5rem] p-8 text-center"
+                    className="w-full max-w-sm bg-white border border-rose-100 rounded-[2.5rem] p-8 text-center shadow-2xl shadow-rose-500/20"
                   >
                     <div className="w-20 h-20 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto mb-6 border border-rose-500/20">
                       <Save className="w-9 h-9 text-rose-500" />
                     </div>
-                    <h3 className="text-2xl font-serif font-black mb-2 text-stone-100">Save Changes?</h3>
-                    <p className="text-stone-400 text-xs mb-8">This will update your profile, posts, and products across the entire app.</p>
+                    <h3 className="text-2xl font-serif font-black mb-2 text-rose-950">Save All Changes?</h3>
+                    <p className="text-stone-500 text-xs mb-8">This updates your profile, photos, privacy policy, terms, posts, videos, products and blogs across the entire site.</p>
                     
                     <div className="flex flex-col gap-3">
                       <button 
                         onClick={handleSaveAll}
                         disabled={isSaving}
-                        className="w-full py-4 rounded-2xl bg-rose-500 hover:bg-rose-400 text-stone-950 font-black uppercase text-xs tracking-wider transition-all flex items-center justify-center gap-2"
+                        className="w-full py-4 rounded-2xl bg-rose-500 hover:bg-rose-400 text-white font-black uppercase text-xs tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg shadow-rose-500/25"
                       >
                         {isSaving ? (
                           <>
@@ -7518,7 +7519,7 @@ export default function App() {
                       </button>
                       <button 
                         onClick={() => setShowSaveConfirm(false)}
-                        className="w-full py-4 rounded-2xl bg-white/5 hover:bg-white/10 text-stone-200 hover:text-white border border-white/5 font-black uppercase text-xs tracking-wider transition-all"
+                        className="w-full py-4 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-900 border border-rose-100 font-black uppercase text-xs tracking-wider transition-all"
                       >
                         Cancel
                       </button>
@@ -7542,7 +7543,6 @@ export default function App() {
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
         </div>
       </div>
     )}
