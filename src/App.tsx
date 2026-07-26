@@ -5627,6 +5627,20 @@ export default function App() {
     }
   };
 
+  // Total number of unsaved edits across the whole admin panel (profile,
+  // privacy policy, terms, posts/videos, products and blogs). Drives the
+  // single global "Save All Changes" button.
+  const pendingChangesCount =
+    (JSON.stringify(tempProfile) !== JSON.stringify(profile) ? 1 : 0) +
+    pickChanged(tempBlogs, blogs).length +
+    pickChanged(tempProducts, products).length +
+    pickChanged(tempPosts, posts).length +
+    deletedBlogIds.length +
+    deletedProductIds.length +
+    deletedPostIds.length;
+
+
+
   const handleContactSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (isSendingMessage) return;
@@ -6082,7 +6096,7 @@ export default function App() {
                     }}
                     className="flex-1 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm transition-colors"
                   >
-                    Save Changes
+                    Apply Changes
                   </button>
                 </div>
               </motion.div>
@@ -6460,7 +6474,7 @@ export default function App() {
                     }}
                     className="flex-1 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 text-stone-950 font-black uppercase text-xs tracking-wider transition-colors shadow-lg"
                   >
-                    Save Changes
+                    Apply Changes
                   </button>
                 </div>
               </motion.div>
@@ -6606,16 +6620,10 @@ export default function App() {
                         />
                       </div>
 
-                      <div className="flex justify-end pt-2">
-                        <button
-                          type="button"
-                          onClick={() => setShowSaveConfirm(true)}
-                          className="px-5 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-700 hover:to-rose-600 text-stone-950 font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 shadow-lg shadow-rose-500/10 cursor-pointer active:scale-95"
-                        >
-                          <ShieldCheck className="w-4 h-4" />
-                          Update Privacy & Terms
-                        </button>
-                      </div>
+                      <p className={`flex items-center gap-2 pt-2 text-[10px] font-bold ${theme === "dark" ? "text-white/40" : "text-black/40"}`}>
+                        <ShieldCheck className="w-3.5 h-3.5 text-rose-500" />
+                        Privacy &amp; Terms are saved with the "Save All Changes" button below.
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -6935,15 +6943,11 @@ export default function App() {
                   </button>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => setShowSaveConfirm(true)}
-                  disabled={isSaving}
-                  className="w-full mb-6 py-4 rounded-xl bg-rose-600 hover:bg-rose-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-rose-500/20 active:scale-[0.98]"
-                >
-                  {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                  {isSaving ? "Saving Changes..." : "Save Changes"}
-                </button>
+                <p className={`mb-6 text-[10px] font-bold text-center ${theme === "dark" ? "text-white/40" : "text-black/40"}`}>
+                  Added products go live once you tap "Save All Changes" below.
+                </p>
+
+
 
                 {/* Products List */}
                 <div className="space-y-2">
@@ -7454,17 +7458,29 @@ export default function App() {
               </section>
             )}
 
-            {adminTab !== "messages" && (
-              <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-full max-w-xl px-6 z-40">
-                <button 
-                  onClick={() => setShowSaveConfirm(true)}
-                  className="w-full py-4 rounded-2xl bg-rose-500 hover:bg-rose-400 text-stone-950 font-black uppercase text-xs tracking-wider transition-all flex items-center justify-center gap-2 shadow-2xl shadow-rose-500/20 border border-rose-400/20 active:scale-[0.98]"
-                >
-                  <Save className="w-4 h-4" />
-                  Save All Changes
-                </button>
-              </div>
-            )}
+            {/* Single global save button — writes profile, privacy policy, terms,
+                posts/videos, products and blogs to the database in one go. */}
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-full max-w-xl px-6 z-40">
+              <button
+                type="button"
+                onClick={() => setShowSaveConfirm(true)}
+                disabled={isSaving || pendingChangesCount === 0}
+                className="w-full py-4 rounded-2xl bg-rose-500 hover:bg-rose-400 disabled:opacity-50 disabled:cursor-not-allowed text-stone-950 font-black uppercase text-xs tracking-wider transition-all flex items-center justify-center gap-2 shadow-2xl shadow-rose-500/25 border border-rose-400/20 active:scale-[0.98]"
+              >
+                {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                {isSaving
+                  ? "Saving All Changes..."
+                  : pendingChangesCount === 0
+                    ? "All Changes Saved"
+                    : "Save All Changes"}
+                {!isSaving && pendingChangesCount > 0 && (
+                  <span className="ml-1 px-2 py-0.5 rounded-full bg-stone-950/20 text-[10px]">
+                    {pendingChangesCount}
+                  </span>
+                )}
+              </button>
+            </div>
+            <div className="h-24" />
 
             {/* Save Confirmation Modal */}
             <AnimatePresence>
