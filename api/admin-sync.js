@@ -56,6 +56,38 @@ async function uploadImageToStorage(bucket, id, base64Str) {
   }
 }
 
+
+// Upsert in small chunks so one oversized payload can't fail the whole batch,
+// and retry row-by-row when a chunk fails so a single bad record cannot block
+// every other new item (this is what previously made new products vanish).
+async function upsertRecords(table, records) {
+  const CHUNK_SIZE = 20;
+  let saved = 0;
+  const errors = [];
+
+  for (let i = 0; i < records.length; i += CHUNK_SIZE) {
+    const chunk = records.slice(i, i + CHUNK_SIZE);
+    const { error } = await supabase.from(table).upsert(chunk);
+    if (!error) {
+      saved += chunk.length;
+      continue;
+    }
+
+    console.error(`Chunk upsert failed for ${table}:`, error.message);
+    for (const record of chunk) {
+      const { error: rowError } = await supabase.from(table).upsert(record);
+      if (rowError) {
+        console.error(`Row upsert failed for ${table} id ${record.id}:`, rowError.message);
+        errors.push(`${table} id ${record.id}: ${rowError.message}`);
+      } else {
+        saved += 1;
+      }
+    }
+  }
+
+  return { saved, errors };
+}
+
 export default async function handler(req, res) {
   applySameOriginHeaders(req, res, 'POST,OPTIONS');
 
@@ -118,13 +150,9 @@ export default async function handler(req, res) {
       }))).filter((r) => r !== null);
 
       if (dbRecords.length > 0) {
-        const { error } = await supabase.from('blogs').upsert(dbRecords);
-        if (error) {
-          console.error(`Error bulk upserting blogs to Supabase:`, error.message);
-          results.errors.push(`Blogs bulk upsert: ${error.message}`);
-        } else {
-          results.blogsUpserted = dbRecords.length;
-        }
+        const { saved, errors } = await upsertRecords('blogs', dbRecords);
+        results.blogsUpserted = saved;
+        if (errors.length > 0) results.errors.push(...errors);
       }
     }
 
@@ -155,13 +183,9 @@ export default async function handler(req, res) {
       }))).filter((r) => r !== null);
 
       if (dbRecords.length > 0) {
-        const { error } = await supabase.from('products').upsert(dbRecords);
-        if (error) {
-          console.error(`Error bulk upserting products to Supabase:`, error.message);
-          results.errors.push(`Products bulk upsert: ${error.message}`);
-        } else {
-          results.productsUpserted = dbRecords.length;
-        }
+        const { saved, errors } = await upsertRecords('products', dbRecords);
+        results.productsUpserted = saved;
+        if (errors.length > 0) results.errors.push(...errors);
       }
     }
 
@@ -188,13 +212,9 @@ export default async function handler(req, res) {
       }))).filter((r) => r !== null);
 
       if (dbRecords.length > 0) {
-        const { error } = await supabase.from('posts').upsert(dbRecords);
-        if (error) {
-          console.error(`Error bulk upserting posts to Supabase:`, error.message);
-          results.errors.push(`Posts bulk upsert: ${error.message}`);
-        } else {
-          results.postsUpserted = dbRecords.length;
-        }
+        const { saved, errors } = await upsertRecords('posts', dbRecords);
+        results.postsUpserted = saved;
+        if (errors.length > 0) results.errors.push(...errors);
       }
     }
 

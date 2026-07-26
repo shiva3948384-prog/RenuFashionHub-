@@ -5495,11 +5495,46 @@ export default function App() {
     setIsAddingPost(false);
   };
 
+  // Only send records that are new or actually modified. Sending the entire
+  // catalogue on every save made the payload huge, which made the serverless
+  // sync fail (payload/timeout) and silently drop newly added products.
+  const pickChanged = (items: any[], originals: any[]) => {
+    const originalMap = new Map(originals.map((o: any) => [String(o.id), JSON.stringify(o)]));
+    return items.filter((it: any) => originalMap.get(String(it.id)) !== JSON.stringify(it));
+  };
+
+  const refreshContentFromServer = async () => {
+    try {
+      const [productsRes, postsRes, blogsRes] = await Promise.all([
+        fetch("/api/products", { cache: "no-store" }),
+        fetch("/api/posts", { cache: "no-store" }),
+        fetch("/api/blogs", { cache: "no-store" }),
+      ]);
+      if (productsRes.ok) {
+        const data = await productsRes.json();
+        setProducts(data);
+        setTempProducts(data);
+      }
+      if (postsRes.ok) {
+        const data = await postsRes.json();
+        setPosts(data);
+        setTempPosts(data);
+      }
+      if (blogsRes.ok) {
+        const data = await blogsRes.json();
+        setBlogs(data);
+        setTempBlogs(data);
+      }
+    } catch (err) {
+      console.error("Failed to refresh content after save:", err);
+    }
+  };
+
   const handleSaveAll = async () => {
     if (isSaving || !isAdminUser) return;
     setIsSaving(true);
     setIsNavigating(true);
-    
+
     try {
       // 1. Save Profile Settings if changed
       if (JSON.stringify(tempProfile) !== JSON.stringify(profile)) {
@@ -5511,39 +5546,74 @@ export default function App() {
           body: JSON.stringify(tempProfile)
         });
         if (!profileRes.ok) {
-          console.error("Failed to save profile settings:", profileRes.statusText);
+          throw new Error("Failed to save profile settings (" + profileRes.status + ")");
         }
       }
 
-      // 2. Save and Sync Blogs, Products, Posts to Supabase via admin-sync proxy
-      const syncResponse = await fetch("/api/admin-sync", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          blogs: tempBlogs,
-          products: tempProducts,
-          posts: tempPosts,
-          deletedBlogIds,
-          deletedProductIds,
-          deletedPostIds
-        })
-      });
-      if (!syncResponse.ok) {
-        throw new Error("Failed to sync changes: " + syncResponse.statusText);
+      // 2. Sync only new/edited Blogs, Products and Posts to the database
+      const changedBlogs = pickChanged(tempBlogs, blogs);
+      const changedProducts = pickChanged(tempProducts, products);
+      const changedPosts = pickChanged(tempPosts, posts);
+
+      const hasContentChanges =
+        changedBlogs.length > 0 ||
+        changedProducts.length > 0 ||
+        changedPosts.length > 0 ||
+        deletedBlogIds.length > 0 ||
+        deletedProductIds.length > 0 ||
+        deletedPostIds.length > 0;
+
+      if (hasContentChanges) {
+        const syncResponse = await fetch("/api/admin-sync", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            blogs: changedBlogs,
+            products: changedProducts,
+            posts: changedPosts,
+            deletedBlogIds,
+            deletedProductIds,
+            deletedPostIds
+          })
+        });
+
+        let payload: any = null;
+        try {
+          payload = await syncResponse.json();
+        } catch {
+          payload = null;
+        }
+
+        if (!syncResponse.ok) {
+          throw new Error(
+            (payload && (payload.error || payload.message)) ||
+              "Sync failed with status " + syncResponse.status
+          );
+        }
+
+        // A 207 response means some records were rejected by the database.
+        // Surface it instead of showing a false "saved" message.
+        const syncErrors: string[] = payload?.results?.errors || [];
+        if (syncErrors.length > 0) {
+          throw new Error(syncErrors.join(" | "));
+        }
       }
 
-      // Reset deletion trackers immediately
+      // Reset deletion trackers
       setDeletedPostIds([]);
       setDeletedProductIds([]);
       setDeletedBlogIds([]);
 
-      // Update main state immediately for better UX
       setProfile(tempProfile);
       setPosts(tempPosts);
       setProducts(tempProducts);
       setBlogs(tempBlogs);
+
+      // Re-read from the database so the public site and the admin panel show
+      // exactly what was actually stored.
+      await refreshContentFromServer();
 
       setShowSaveConfirm(false);
       setShowSuccess(true);
