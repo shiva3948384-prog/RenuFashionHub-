@@ -126,3 +126,17 @@ button:active { transform: scale(.97); }
 
 div[contentEditable]:empty:before { content: attr(placeholder); color: #78716c; font-style: italic; cursor: text; }
 [theme="dark"] div[contentEditable]:empty:before { color: #a8a29e; }
+
+/* Performance: skip layout/paint for off-screen cards in long product & post grids.
+   Keeps scrolling smooth with 100+ items without changing any visual styling. */
+.perf-card { content-visibility: auto; contain-intrinsic-size: 340px; }
+
+/* Respect users who disable animations (also cuts jank on low-end phones) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

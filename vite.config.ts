@@ -26,6 +26,17 @@ export default defineConfig(({ mode }) => {
       minify: 'esbuild',
       cssMinify: true,
       sourcemap: false,
+      // Split heavy vendor libs out of the app chunk so they stay cached across
+      // deploys and the first paint parses less JavaScript.
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+            'vendor-motion': ['motion'],
+            'vendor-icons': ['lucide-react'],
+          },
+        },
+      },
     },
   };
 });

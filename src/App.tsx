@@ -80,12 +80,28 @@ const INITIAL_TABS = [
   { id: "products", label: "Products", icon: Tag },
 ];
 
-const MediaImage = React.memo(({ url, className, alt, fallback, onReady, ...props }: { url: string | File | Blob; className?: string; alt?: string; fallback?: React.ReactNode; onReady?: () => void; [key: string]: any }) => {
+// Supabase storage images are served at full size (50-90KB each). With 100+ product
+// cards on one page that is several MB of downloads and the main cause of scroll lag.
+// Rewrite public object URLs to the image-render endpoint so the browser gets a
+// right-sized, compressed variant. Falls back to the original URL if render fails.
+const SUPABASE_OBJECT_PATH = "/storage/v1/object/public/";
+const SUPABASE_RENDER_PATH = "/storage/v1/render/image/public/";
+
+const buildOptimizedUrl = (url: string, width: number) => {
+  if (typeof url !== "string" || !url.includes(SUPABASE_OBJECT_PATH)) return null;
+  const rendered = url.replace(SUPABASE_OBJECT_PATH, SUPABASE_RENDER_PATH);
+  const sep = rendered.includes("?") ? "&" : "?";
+  return `${rendered}${sep}width=${width}&resize=contain&quality=70`;
+};
+
+const MediaImage = React.memo(({ url, className, alt, fallback, onReady, imgWidth = 640, ...props }: { url: string | File | Blob; className?: string; alt?: string; fallback?: React.ReactNode; onReady?: () => void; imgWidth?: number; [key: string]: any }) => {
   const [mediaUrl, setMediaUrl] = React.useState<string | null>(null);
   const [error, setError] = React.useState(false);
+  const [useOriginal, setUseOriginal] = React.useState(false);
 
   React.useEffect(() => {
     setError(false);
+    setUseOriginal(false);
     if (!url) {
       setMediaUrl(null);
       onReady?.();
@@ -108,13 +124,31 @@ const MediaImage = React.memo(({ url, className, alt, fallback, onReady, ...prop
     if (error) onReady?.();
     return <>{fallback || null}</>;
   }
+
+  const optimized = useOriginal ? null : buildOptimizedUrl(mediaUrl, imgWidth);
+  const srcSet = optimized
+    ? `${buildOptimizedUrl(mediaUrl, Math.round(imgWidth / 2))} ${Math.round(imgWidth / 2)}w, ${optimized} ${imgWidth}w`
+    : undefined;
+
   return (
     <img 
-      src={mediaUrl} 
+      src={optimized || mediaUrl} 
+      srcSet={srcSet}
+      sizes={srcSet ? `${imgWidth}px` : undefined}
       className={className} 
       alt={alt} 
+      loading="lazy"
+      decoding="async"
       referrerPolicy="no-referrer" 
-      onError={() => { setError(true); onReady?.(); }}
+      onError={() => {
+        // Optimized variant failed -> retry the untouched original before giving up.
+        if (optimized && !useOriginal) {
+          setUseOriginal(true);
+          return;
+        }
+        setError(true);
+        onReady?.();
+      }}
       onLoad={() => onReady?.()}
       {...props} 
     />
@@ -3903,7 +3937,7 @@ const ProductCard = React.memo(({ product, navigate, isMobile }: { product: any;
     viewport={{ once: true, margin: "-50px" }}
     transition={{ duration: 0.4, ease: "easeOut" }}
     onClick={() => navigate(`/product/${product.id}`)}
-    className="group cursor-pointer flex flex-col will-change-transform"
+    className="group cursor-pointer flex flex-col perf-card"
   >
     <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-white/5 border border-white/10 mb-2 relative">
       <MediaImage 
@@ -3958,7 +3992,7 @@ const PostCard = React.memo(({ post, products, navigate, onTabChange, isMobile }
     viewport={{ once: true, margin: "-50px" }}
     transition={{ duration: 0.4, ease: "easeOut" }}
     onClick={() => navigate(`/post/${post.id}`)}
-    className="w-full rounded-2xl overflow-hidden bg-white/5 border border-white/10 relative group cursor-pointer will-change-transform"
+    className="w-full rounded-2xl overflow-hidden bg-white/5 border border-white/10 relative group cursor-pointer perf-card"
   >
     {post.type === "video" ? (
       <div className="aspect-[9/16] w-full">
