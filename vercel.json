@@ -1,4 +1,7 @@
 {
+  "crons": [
+    { "path": "/api/auto-blog?limit=2", "schedule": "0 4 * * *" }
+  ],
   "headers": [
     {
       "source": "/(.*)",
@@ -15,8 +18,16 @@
       ]
     },
     {
+      "source": "/assets/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    },
+    {
       "source": "/sitemap.xml",
       "headers": [{ "key": "Content-Type", "value": "application/xml; charset=utf-8" }]
+    },
+    {
+      "source": "/llms.txt",
+      "headers": [{ "key": "Content-Type", "value": "text/plain; charset=utf-8" }]
     }
   ],
   "rewrites": [
@@ -33,17 +44,17 @@
     { "source": "/api/products/:id/reviews", "destination": "/api/products?id=:id&action=reviews" },
     { "source": "/api/messages/:id", "destination": "/api/messages?id=:id" },
 
-    { "source": "/blog/:id", "destination": "/api/seo-handler?type=blog&id=:id" },
-    { "source": "/product/:id", "destination": "/api/seo-handler?type=product&id=:id" },
-    { "source": "/post/:id", "destination": "/api/seo-handler?type=post&id=:id" },
+    { "source": "/blog/:id", "destination": "/api/seo-render?type=blog&id=:id" },
+    { "source": "/product/:id", "destination": "/api/seo-render?type=product&id=:id" },
+    { "source": "/post/:id", "destination": "/api/seo-render?type=post&id=:id" },
 
-    { "source": "/", "destination": "/api/seo-handler?type=page&name=home" },
-    { "source": "/about", "destination": "/api/seo-handler?type=page&name=about" },
-    { "source": "/blog", "destination": "/api/seo-handler?type=page&name=blog" },
-    { "source": "/contact", "destination": "/api/seo-handler?type=page&name=contact" },
-    { "source": "/privacy-policy", "destination": "/api/seo-handler?type=page&name=privacy" },
-    { "source": "/terms-of-service", "destination": "/api/seo-handler?type=page&name=terms" },
-    { "source": "/disclaimer", "destination": "/api/seo-handler?type=page&name=disclaimer" },
+    { "source": "/", "destination": "/api/seo-render?type=page&name=home" },
+    { "source": "/about", "destination": "/api/seo-render?type=page&name=about" },
+    { "source": "/blog", "destination": "/api/seo-render?type=page&name=blog" },
+    { "source": "/contact", "destination": "/api/seo-render?type=page&name=contact" },
+    { "source": "/privacy-policy", "destination": "/api/seo-render?type=page&name=privacy" },
+    { "source": "/terms-of-service", "destination": "/api/seo-render?type=page&name=terms" },
+    { "source": "/disclaimer", "destination": "/api/seo-render?type=page&name=disclaimer" },
 
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]

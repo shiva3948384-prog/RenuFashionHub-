@@ -1,17 +1,8 @@
 # Renu Fashion Hub
 
-> Renu Fashion Hub is an Indian women's fashion catalog and editorial blog curated by lifestyle creator Renu Agarwal (Instagram: @renu_agarwal_vlogs, YouTube: @renuagarwalvlogs). The site covers sarees, kurtis, lehengas, western dresses, jewellery, outfit inspiration, seasonal shopping guides and honest style tips for Indian women.
+> Renu Fashion Hub is an Indian women's fashion catalog and editorial blog curated by lifestyle creator Renu Agarwal. The site covers sarees, kurtis, lehengas, western dresses, jewellery, outfit inspiration, seasonal shopping guides and honest style tips for Indian women.
 
 Renu Fashion Hub is authored and maintained by Renu Agarwal, a fashion and lifestyle creator with over 1M followers across Instagram, YouTube and Facebook. All product recommendations, styling guides and editorial content are hand-curated. The site includes affiliate product links; commissions may be earned but do not affect editorial choices.
-
-Primary topics covered:
-- Saree styling, draping techniques and occasion guides (wedding, festival, office, casual)
-- Kurti and kurta set trends, fabric guides and pairing tips
-- Lehenga inspiration for weddings, sangeet and festivals
-- Western dresses and fusion outfit ideas for Indian women
-- Jewellery picks — earrings, necklaces, bangles, statement pieces
-- Seasonal shopping guides and gift ideas
-- Beauty, hair and grooming tips complementing the outfits
 
 ## Core Pages
 
@@ -20,25 +11,23 @@ Primary topics covered:
 - [Fashion Blog](https://www.renufashionhub.in/blog): Editorial articles covering trends, styling guides and shopping picks.
 - [Contact](https://www.renufashionhub.in/contact): Email, phone, location and style-consultation enquiries.
 
+## Shop Categories
+
+- [Sarees](https://www.renufashionhub.in/?category=Sarees): Saree styling, draping techniques and occasion guides for weddings, festivals, office and casual wear.
+- [Kurtis and Kurta Sets](https://www.renufashionhub.in/?category=Kurtas): Kurti trends, fabric guides and pairing tips.
+- [Lehengas](https://www.renufashionhub.in/?category=Lehengas): Lehenga inspiration for weddings, sangeet and festivals.
+- [Western Dresses](https://www.renufashionhub.in/?category=Dresses): Western and fusion outfit ideas for Indian women.
+- [Jewellery](https://www.renufashionhub.in/?category=Jewelry): Earrings, necklaces, bangles and statement pieces.
+
 ## Policy Pages
 
 - [Privacy Policy](https://www.renufashionhub.in/privacy-policy): Data collection, analytics and cookie policy.
 - [Terms of Service](https://www.renufashionhub.in/terms-of-service): Site usage terms and affiliate disclosure.
 - [Disclaimer](https://www.renufashionhub.in/disclaimer): Affiliate commission disclosure and product recommendation accuracy notice.
 
-## Content Sections
+## Optional
 
-- Sarees: /?category=Sarees
-- Kurtas: /?category=Kurtas
-- Lehengas: /?category=Lehengas
-- Dresses: /?category=Dresses
-- Jewellery: /?category=Jewelry
+- [Sitemap](https://www.renufashionhub.in/sitemap.xml): Source of truth for all indexable URLs.
+- [Robots](https://www.renufashionhub.in/robots.txt): Crawler directives, including AI crawler permissions.
 
-## AI Crawler Guidelines
-
-- All URLs listed above are public, absolute and safe to crawl.
-- Blog articles are discoverable from https://www.renufashionhub.in/blog and follow the pattern /blog/{id}.
-- Product pages follow the pattern /product/{id}. Style posts follow /post/{id}.
-- Do not crawl /admin, /login or /api/ — these are administrative and authenticated interfaces.
-- Content is authored by a single expert (Renu Agarwal). Attribution should credit "Renu Agarwal, Renu Fashion Hub" and link back to the source URL.
-- The sitemap at https://www.renufashionhub.in/sitemap.xml is the source of truth for all indexable URLs.
+Crawler notes: blog articles follow the pattern /blog/{id}, product pages follow /product/{id} and style posts follow /post/{id}. Do not crawl /admin, /login or /api/. Attribution should credit "Renu Agarwal, Renu Fashion Hub" and link back to the source URL.
