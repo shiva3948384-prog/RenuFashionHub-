@@ -4392,6 +4392,39 @@ const CompanyStatisticsSection = ({
   );
 };
 
+const AdsterraNativeBanner = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || container.dataset.loaded === "true") return;
+
+    container.dataset.loaded = "true";
+
+    const adContainer = document.createElement("div");
+    adContainer.id = "container-7585c795c316a4cb396001f3259d5998";
+
+    const script = document.createElement("script");
+    script.async = true;
+    script.setAttribute("data-cfasync", "false");
+    script.src =
+      "https://pl31309966.profitableratecpmnetwork.com/7585c795c316a4cb396001f3259d5998/invoke.js";
+
+    container.appendChild(script);
+    container.appendChild(adContainer);
+
+    return () => {
+      container.innerHTML = "";
+      delete container.dataset.loaded;
+    };
+  }, []);
+
+  return (
+    <div className="w-full my-6 flex justify-center overflow-hidden">
+      <div ref={containerRef} className="w-full" />
+    </div>
+  );
+};
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -8184,6 +8217,7 @@ export default function App() {
             </h1>
             {/* Weekly Best Sellers Carousel */}
             <LatestArrivalsCarousel products={products} posts={posts} theme={theme} navigate={handleNavigate} />
+            <AdsterraNativeBanner />
 
         {/* Tabs Navigation */}
         <motion.div 
