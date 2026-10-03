@@ -22,17 +22,12 @@ try {
 
 async function startServer() {
   const app = express();
-  app.use(compression());
+  app.use(compression() as any);
   app.use(express.json({ limit: "50mb" }));
   app.use((req, res, next) => {
     res.setHeader("X-Content-Type-Options", "nosniff");
-    res.setHeader("X-Frame-Options", "DENY");
     res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
     res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
-    res.setHeader(
-      "Content-Security-Policy",
-      "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; media-src 'self' data: blob: https:; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://www.instagram.com https://www.facebook.com https://googleads.g.doubleclick.net; connect-src 'self' https:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
-    );
     if (req.secure || req.headers["x-forwarded-proto"] === "https") {
       res.setHeader("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
     }
@@ -42,8 +37,8 @@ async function startServer() {
 
   const baseUrl = "https://www.renufashionhub.in";
 
-  const SUPABASE_URL = process.env.SUPABASE_URL || "";
-  const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+  const SUPABASE_URL = process.env.SUPABASE_URL || "https://placeholder.supabase.co";
+  const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "placeholder-key";
   const ADMIN_COOKIE_NAME = "rfh_admin_session";
   const ADMIN_SESSION_TTL_SECONDS = 60 * 60 * 8;
 
@@ -219,18 +214,56 @@ async function startServer() {
     });
   }
 
-  // Helper to fetch collection docs via Supabase Client
-  async function fetchCollectionDocs(tableName: string) {
-    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) return [];
+  // Helper to safely read local backup files
+  function getLocalBackup(filename: string) {
     try {
-      const { data, error } = await supabase.from(tableName).select('*');
-      if (error) {
-        console.error(`Failed to fetch ${tableName} from Supabase:`, error.message);
-        return [];
+      const filePath = path.join(process.cwd(), "backups", filename);
+      if (fs.existsSync(filePath)) {
+        const data = fs.readFileSync(filePath, "utf8");
+        return JSON.parse(data);
       }
-      return (data || [])
-        .filter((row: any) => row.id !== 999999 && row.category !== "site_settings")
-        .map((row: any) => {
+    } catch (e: any) {
+      console.warn(`[LocalBackup] Error reading ${filename}:`, e.message);
+    }
+    return null;
+  }
+
+  // Helper to fetch collection docs via Supabase Client with local backup fallback
+  async function fetchCollectionDocs(tableName: string) {
+    if (SUPABASE_URL && !SUPABASE_URL.includes("placeholder") && SUPABASE_SERVICE_ROLE_KEY && !SUPABASE_SERVICE_ROLE_KEY.includes("placeholder")) {
+      try {
+        const { data, error } = await supabase.from(tableName).select('*');
+        if (!error && Array.isArray(data) && data.length > 0) {
+          return data
+            .filter((row: any) => row.id !== 999999 && row.category !== "site_settings")
+            .map((row: any) => {
+              let lastmod = new Date().toISOString().split('.')[0] + 'Z';
+              const timestampField = row.timestamp || row.created_at;
+              if (timestampField) {
+                try {
+                  const d = new Date(timestampField);
+                  if (!isNaN(d.getTime())) {
+                    lastmod = d.toISOString().split('.')[0] + 'Z';
+                  }
+                } catch (e) {}
+              }
+
+              return {
+                id: String(row.id),
+                lastmod,
+                category: row.category ? String(row.category) : ""
+              };
+            });
+        }
+      } catch (err: any) {
+        console.warn(`Failed to fetch collection ${tableName} from Supabase, using backup:`, err.message);
+      }
+    }
+
+    const localData = getLocalBackup(`${tableName}.json`) || [];
+    return localData
+      .filter((row: any) => row.id !== 999999 && row.category !== "site_settings")
+      .map((row: any) => {
         let lastmod = new Date().toISOString().split('.')[0] + 'Z';
         const timestampField = row.timestamp || row.created_at;
         if (timestampField) {
@@ -239,21 +272,14 @@ async function startServer() {
             if (!isNaN(d.getTime())) {
               lastmod = d.toISOString().split('.')[0] + 'Z';
             }
-          } catch (e) {
-            // Ignore format errors and keep default
-          }
+          } catch (e) {}
         }
-
         return {
           id: String(row.id),
           lastmod,
           category: row.category ? String(row.category) : ""
         };
       });
-    } catch (err) {
-      console.error(`Failed to fetch collection ${tableName} via Supabase Client:`, err);
-      return [];
-    }
   }
 
   // Combine both collections - now we just use Supabase!
@@ -266,66 +292,103 @@ async function startServer() {
     res.json({ status: "ok" });
   });
 
-  // Fetch blogs from Supabase
+  // Fetch blogs from Supabase with fallback to local backup
   app.get("/api/blogs", async (req, res) => {
-    try {
-      const { data, error } = await supabase
-        .from("blogs")
-        .select("*")
-        .order("id", { ascending: false });
-      if (error) throw error;
-      
-      const mappedBlogs = (data || [])
-        .filter((b: any) => b.id !== 999999 && b.category !== "site_settings")
-        .map((b: any) => ({
-          id: b.id,
-          title: b.title,
-          excerpt: b.excerpt || "",
-          content: b.content || "",
-          category: b.category || "",
-          image: b.image_url || "",
-          seoTitle: b.seo_title || "",
-          metaDescription: b.meta_description || "",
-          focusKeyword: b.focus_keyword || "",
-          timestamp: b.timestamp || new Date().toISOString()
-        }));
+    if (SUPABASE_URL && !SUPABASE_URL.includes("placeholder") && SUPABASE_SERVICE_ROLE_KEY && !SUPABASE_SERVICE_ROLE_KEY.includes("placeholder")) {
+      try {
+        const { data, error } = await supabase
+          .from("blogs")
+          .select("*")
+          .order("id", { ascending: false });
+        if (!error && Array.isArray(data) && data.length > 0) {
+          const mappedBlogs = data
+            .filter((b: any) => b.id !== 999999 && b.id !== 1782274718063 && b.category !== "site_settings" && b.title !== "ggdf" && b.status !== "draft" && b.status !== "pending_review")
+            .map((b: any) => ({
+              id: b.id,
+              title: b.title,
+              excerpt: b.excerpt || "",
+              content: b.content || "",
+              category: b.category || "",
+              image: b.image_url || b.image || "",
+              seoTitle: b.seo_title || b.seoTitle || "",
+              metaDescription: b.meta_description || b.metaDescription || "",
+              focusKeyword: b.focus_keyword || b.focusKeyword || "",
+              status: b.status || "published",
+              timestamp: b.timestamp || b.created_at || new Date().toISOString()
+            }));
 
-      res.json(mappedBlogs);
-    } catch (err: any) {
-      console.error("GET /api/blogs error:", err.message);
-      res.status(500).json({ error: err.message });
+          return res.json(mappedBlogs);
+        }
+      } catch (err: any) {
+        console.warn("GET /api/blogs Supabase error, falling back to local backup:", err.message);
+      }
     }
-  });
 
-  // Fetch products from Supabase
-  app.get("/api/products", async (req, res) => {
-    try {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .order("id", { ascending: false });
-      if (error) throw error;
-
-      const mappedProducts = (data || []).map((p: any) => ({
-        id: p.id,
-        name: p.name,
-        buyUrl: p.buy_url || "",
-        price: p.price || "",
-        url: p.image_url || "",
-        description: p.description || "",
-        category: p.category || "",
-        reviews: p.reviews || [],
-        created_at: p.created_at
+    const localBlogs = getLocalBackup("blogs.json") || [];
+    const mappedBlogs = localBlogs
+      .filter((b: any) => b.id !== 999999 && b.id !== 1782274718063 && b.category !== "site_settings" && b.title !== "ggdf" && b.status !== "draft" && b.status !== "pending_review")
+      .map((b: any) => ({
+        id: b.id,
+        title: b.title,
+        excerpt: b.excerpt || "",
+        content: b.content || "",
+        category: b.category || "",
+        image: b.image_url || b.image || "",
+        seoTitle: b.seo_title || b.seoTitle || "",
+        metaDescription: b.meta_description || b.metaDescription || "",
+        focusKeyword: b.focus_keyword || b.focusKeyword || "",
+        status: b.status || "published",
+        timestamp: b.timestamp || b.created_at || new Date().toISOString()
       }));
 
-      res.json(mappedProducts);
-    } catch (err: any) {
-      console.error("GET /api/products error:", err.message);
-      res.status(500).json({ error: err.message });
-    }
+    res.json(mappedBlogs);
   });
 
-  // Submit a public review for a product in Supabase
+  // Fetch products from Supabase with fallback to local backup
+  app.get("/api/products", async (req, res) => {
+    if (SUPABASE_URL && !SUPABASE_URL.includes("placeholder") && SUPABASE_SERVICE_ROLE_KEY && !SUPABASE_SERVICE_ROLE_KEY.includes("placeholder")) {
+      try {
+        const { data, error } = await supabase
+          .from("products")
+          .select("*")
+          .order("id", { ascending: false });
+        if (!error && Array.isArray(data) && data.length > 0) {
+          const mappedProducts = data.map((p: any) => ({
+            id: p.id,
+            name: p.name,
+            buyUrl: p.buy_url || p.buyUrl || "",
+            price: p.price || "",
+            url: p.image_url || p.url || "",
+            description: p.description || "",
+            category: p.category || "",
+            reviews: p.reviews || [],
+            created_at: p.created_at
+          }));
+
+          return res.json(mappedProducts);
+        }
+      } catch (err: any) {
+        console.warn("GET /api/products Supabase error, falling back to local backup:", err.message);
+      }
+    }
+
+    const localProducts = getLocalBackup("products.json") || [];
+    const mappedProducts = localProducts.map((p: any) => ({
+      id: p.id,
+      name: p.name,
+      buyUrl: p.buy_url || p.buyUrl || "",
+      price: p.price || "",
+      url: p.image_url || p.url || "",
+      description: p.description || "",
+      category: p.category || "",
+      reviews: p.reviews || [],
+      created_at: p.created_at || new Date().toISOString()
+    }));
+
+    res.json(mappedProducts);
+  });
+
+  // Submit a public review for a product in Supabase or local backup
   app.post("/api/products/:id/reviews", async (req, res) => {
     try {
       const productId = parseInt(req.params.id, 10);
@@ -340,18 +403,6 @@ async function startServer() {
         return res.status(400).json({ error: "Invalid review content" });
       }
 
-      // 1. Fetch current product reviews
-      const { data: product, error: fetchErr } = await supabase
-        .from("products")
-        .select("reviews")
-        .eq("id", productId)
-        .single();
-
-      if (fetchErr || !product) {
-        return res.status(404).json({ error: "Product not found" });
-      }
-
-      const reviews = Array.isArray(product.reviews) ? product.reviews : [];
       const newReview = {
         id: Date.now(),
         user: safeUser,
@@ -360,15 +411,37 @@ async function startServer() {
         date: new Date().toISOString()
       };
 
-      reviews.push(newReview);
+      if (SUPABASE_URL && !SUPABASE_URL.includes("placeholder") && SUPABASE_SERVICE_ROLE_KEY && !SUPABASE_SERVICE_ROLE_KEY.includes("placeholder")) {
+        try {
+          const { data: product, error: fetchErr } = await supabase
+            .from("products")
+            .select("reviews")
+            .eq("id", productId)
+            .single();
 
-      // 2. Update reviews array in Supabase
-      const { error: updateErr } = await supabase
-        .from("products")
-        .update({ reviews })
-        .eq("id", productId);
+          if (!fetchErr && product) {
+            const reviews = Array.isArray(product.reviews) ? product.reviews : [];
+            reviews.push(newReview);
+            await supabase.from("products").update({ reviews }).eq("id", productId);
+            return res.json({ success: true, review: newReview });
+          }
+        } catch (e: any) {
+          console.warn("Supabase review submit error:", e.message);
+        }
+      }
 
-      if (updateErr) throw updateErr;
+      // Update local backup
+      try {
+        const localProds = getLocalBackup("products.json");
+        if (Array.isArray(localProds)) {
+          const idx = localProds.findIndex((p: any) => p.id === productId);
+          if (idx !== -1) {
+            localProds[idx].reviews = localProds[idx].reviews || [];
+            localProds[idx].reviews.push(newReview);
+            fs.writeFileSync(path.join(process.cwd(), "backups", "products.json"), JSON.stringify(localProds, null, 2), "utf8");
+          }
+        }
+      } catch (e) {}
 
       res.json({ success: true, review: newReview });
     } catch (err: any) {
@@ -377,28 +450,40 @@ async function startServer() {
     }
   });
 
-  // Fetch posts/vlogs from Supabase
+  // Fetch posts/vlogs from Supabase with fallback to local backup
   app.get("/api/posts", async (req, res) => {
-    try {
-      const { data, error } = await supabase
-        .from("posts")
-        .select("*")
-        .order("id", { ascending: false });
-      if (error) throw error;
+    if (SUPABASE_URL && !SUPABASE_URL.includes("placeholder") && SUPABASE_SERVICE_ROLE_KEY && !SUPABASE_SERVICE_ROLE_KEY.includes("placeholder")) {
+      try {
+        const { data, error } = await supabase
+          .from("posts")
+          .select("*")
+          .order("id", { ascending: false });
+        if (!error && Array.isArray(data) && data.length > 0) {
+          const mappedPosts = data.map((po: any) => ({
+            id: po.id,
+            url: po.url,
+            type: po.type || "video",
+            taggedProducts: po.tagged_products || po.taggedProducts || [],
+            created_at: po.created_at
+          }));
 
-      const mappedPosts = (data || []).map((po: any) => ({
-        id: po.id,
-        url: po.url,
-        type: po.type || "video",
-        taggedProducts: po.tagged_products || [],
-        created_at: po.created_at
-      }));
-
-      res.json(mappedPosts);
-    } catch (err: any) {
-      console.error("GET /api/posts error:", err.message);
-      res.status(500).json({ error: err.message });
+          return res.json(mappedPosts);
+        }
+      } catch (err: any) {
+        console.warn("GET /api/posts Supabase error, falling back to local backup:", err.message);
+      }
     }
+
+    const localPosts = getLocalBackup("posts.json") || [];
+    const mappedPosts = localPosts.map((po: any) => ({
+      id: po.id,
+      url: po.url,
+      type: po.type || "video",
+      taggedProducts: po.tagged_products || po.taggedProducts || [],
+      created_at: po.created_at || new Date().toISOString()
+    }));
+
+    res.json(mappedPosts);
   });
 
   // Fetch and save site profile settings
@@ -865,13 +950,13 @@ async function startServer() {
       const staticCategories = ["Sarees", "Kurtas", "Lehengas", "Dresses", "Jewelry"];
       const dynamicCategories = new Set<string>(staticCategories);
 
-      products.forEach(p => {
+      (products as any[]).forEach((p: any) => {
         if (p.category && p.category.toLowerCase() !== "other") {
           dynamicCategories.add(p.category.charAt(0).toUpperCase() + p.category.slice(1).toLowerCase());
         }
       });
 
-      posts.forEach(p => {
+      (posts as any[]).forEach((p: any) => {
         if (p.category && p.category.toLowerCase() !== "other") {
           dynamicCategories.add(p.category.charAt(0).toUpperCase() + p.category.slice(1).toLowerCase());
         }
@@ -912,24 +997,24 @@ async function startServer() {
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>${baseUrl}/affiliate-disclosure</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/cookie-policy</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>${baseUrl}/blog</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
 `;
 
-      // Render Dynamic Category Filtering URLs
-      Array.from(dynamicCategories).forEach(cat => {
-        const escapedCat = escapeXml(encodeURIComponent(cat));
-        xml += `  <url>
-    <loc>${baseUrl}/?category=${escapedCat}</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>\n`;
-      });
-
       // Render Dynamic Products pages
-      products.forEach(p => {
+      (products as any[]).forEach((p: any) => {
         const escapedId = escapeXml(encodeURIComponent(p.id));
         xml += `  <url>
     <loc>${baseUrl}/product/${escapedId}</loc>
@@ -940,7 +1025,7 @@ async function startServer() {
       });
 
       // Render Dynamic Lifestyle Posts/Vlogs Pages
-      posts.forEach(p => {
+      (posts as any[]).forEach((p: any) => {
         const escapedId = escapeXml(encodeURIComponent(p.id));
         xml += `  <url>
     <loc>${baseUrl}/post/${escapedId}</loc>
@@ -950,8 +1035,8 @@ async function startServer() {
   </url>\n`;
       });
 
-      // Render Dynamic Editorial Blog Posts Pages
-      blogs.forEach(b => {
+      // Render Dynamic Editorial Blog Posts Pages (only published, non-test articles)
+      (blogs as any[]).filter((b: any) => b.id !== "1782274718063" && b.id !== 1782274718063).forEach((b: any) => {
         const escapedId = escapeXml(encodeURIComponent(b.id));
         xml += `  <url>
     <loc>${baseUrl}/blog/${escapedId}</loc>
@@ -1103,6 +1188,28 @@ async function startServer() {
   }
 
   // Bind SEO handlers to routes before serving general SPA fallback
+  app.get("/ads.txt", (req, res) => {
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
+    res.setHeader("Cache-Control", "public, max-age=86400");
+    const adsTxtPath = path.join(process.cwd(), "public", "ads.txt");
+    if (fs.existsSync(adsTxtPath)) {
+      res.sendFile(adsTxtPath);
+    } else {
+      res.send("google.com, pub-8650082341590465, DIRECT, f08c47fec0942fa0\n");
+    }
+  });
+
+  app.get("/robots.txt", (req, res) => {
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
+    res.setHeader("Cache-Control", "public, max-age=86400");
+    const robotsPath = path.join(process.cwd(), "public", "robots.txt");
+    if (fs.existsSync(robotsPath)) {
+      res.sendFile(robotsPath);
+    } else {
+      res.send("User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /login\nDisallow: /api/\nSitemap: https://www.renufashionhub.in/sitemap.xml\n");
+    }
+  });
+
   app.get("/blog/:id", (req, res) => serveSeoHtml(req, res, "blog"));
   app.get("/product/:id", (req, res) => serveSeoHtml(req, res, "product"));
   app.get("/post/:id", (req, res) => serveSeoHtml(req, res, "post"));

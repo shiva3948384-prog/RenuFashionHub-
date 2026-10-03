@@ -118,6 +118,22 @@ const staticPages = {
     h1: "Disclaimer",
     body: "Renu Fashion Hub may earn affiliate commissions on some product links. Product availability and pricing are governed by third-party retailers."
   },
+  affiliate: {
+    title: "Affiliate Disclosure | Renu Fashion Hub",
+    description: "Transparent affiliate disclosure for Renu Fashion Hub adhering to ASCI and FTC guidelines — how commissions support our free styling guides at zero extra cost to you.",
+    path: "/affiliate-disclosure",
+    ogType: "website",
+    h1: "Affiliate Disclosure",
+    body: "Renu Fashion Hub partners with trusted retail affiliate networks. When you purchase via our styling recommendations, we may earn a small referral commission at no additional cost to you."
+  },
+  cookie: {
+    title: "Cookie Policy | Renu Fashion Hub",
+    description: "Cookie policy of Renu Fashion Hub — details on essential, analytics, and advertising cookies used, and how to manage your privacy and consent preferences.",
+    path: "/cookie-policy",
+    ogType: "website",
+    h1: "Cookie Policy",
+    body: "Learn about the cookies and tracking technologies used on Renu Fashion Hub, why they are used, and how you can control your browser cookies."
+  },
 };
 
 /* ---------- JSON-LD builders ---------- */

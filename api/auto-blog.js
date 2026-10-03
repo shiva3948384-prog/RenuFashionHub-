@@ -286,13 +286,14 @@ async function publish(product) {
     seo_title: truncate(ai.seo_title, 65),
     meta_description: truncate(ai.meta_description, 155),
     focus_keyword: stripHtml(ai.focus_keyword).slice(0, 80),
+    status: 'pending_review',
     timestamp: new Date().toISOString(),
   };
 
   const { error } = await supabase.from('blogs').insert(row);
   if (error) throw new Error(`Failed to insert blog: ${error.message}`);
 
-  return { blogId: id, productId: product.id, title: row.title, url: `${BASE_URL}/blog/${id}` };
+  return { blogId: id, productId: product.id, title: row.title, status: 'pending_review', url: `${BASE_URL}/blog/${id}` };
 }
 
 /* ---------- handler ---------- */

@@ -900,6 +900,20 @@ const ProductDetailPage = ({ products, theme, navigate, isLoaded }: { products: 
   const [showShareModal, setShowShareModal] = useState(false);
   const reviewsContainerRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    if (product) {
+      document.title = `${product.name} | Renu Fashion Hub`;
+      let metaDesc = document.querySelector('meta[name="description"]');
+      if (!metaDesc) {
+        metaDesc = document.createElement('meta');
+        metaDesc.setAttribute('name', 'description');
+        document.head.appendChild(metaDesc);
+      }
+      metaDesc.setAttribute('content', `${product.name} curated by Renu Agarwal. Check price ₹${product.price}, styling tips, fabric specifications and reviews.`);
+      window.scrollTo(0, 0);
+    }
+  }, [product]);
+
   if (!product) {
     if (!isLoaded) {
       return <PageLoader theme={theme} />;
@@ -913,6 +927,46 @@ const ProductDetailPage = ({ products, theme, navigate, isLoaded }: { products: 
       </div>
     );
   }
+
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.name,
+    "image": product.url,
+    "description": product.description || `Handpicked ${product.category || 'ethnic fashion'} curated by Renu Agarwal.`,
+    "offers": {
+      "@type": "Offer",
+      "price": product.price || "0",
+      "priceCurrency": "INR",
+      "availability": "https://schema.org/InStock",
+      "url": `https://www.renufashionhub.in/product/${product.id}`
+    }
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://www.renufashionhub.in/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": product.category || "Fashion",
+        "item": "https://www.renufashionhub.in/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": product.name,
+        "item": `https://www.renufashionhub.in/product/${product.id}`
+      }
+    ]
+  };
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -977,7 +1031,35 @@ const ProductDetailPage = ({ products, theme, navigate, isLoaded }: { products: 
       exit={{ opacity: 0 }}
       className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-rose-50" : "bg-[#FFF7F9] text-[#1C1B18]"} p-4 sm:p-6 pb-24`}
     >
+      <script type="application/ld+json">
+        {JSON.stringify(productSchema)}
+      </script>
+      <script type="application/ld+json">
+        {JSON.stringify(breadcrumbSchema)}
+      </script>
+
       <div className="max-w-4xl lg:max-w-6xl mx-auto">
+        {/* Breadcrumbs Navigation */}
+        <nav aria-label="Breadcrumb" className={`mb-6 flex flex-wrap items-center gap-2 text-xs font-semibold ${
+          theme === "dark" ? "text-stone-400" : "text-stone-500"
+        }`}>
+          <a 
+            href="/" 
+            onClick={(e) => { e.preventDefault(); navigate("/"); }} 
+            className="hover:text-rose-500 transition-colors"
+          >
+            Home
+          </a>
+          <span>/</span>
+          <span className="hover:text-rose-500 cursor-pointer" onClick={() => navigate(`/?category=${encodeURIComponent(product.category || 'All')}`)}>
+            {product.category || "Apparel"}
+          </span>
+          <span>/</span>
+          <span className={`truncate max-w-[200px] sm:max-w-xs ${theme === "dark" ? "text-rose-400" : "text-rose-600"}`}>
+            {product.name}
+          </span>
+        </nav>
+
         <button 
           onClick={() => navigate("/")} 
           className={`mb-6 p-2.5 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border flex items-center gap-2 group transition-all hover:bg-rose-500/10 hover:border-rose-500/50 w-fit cursor-pointer`}
@@ -1008,21 +1090,31 @@ const ProductDetailPage = ({ products, theme, navigate, isLoaded }: { products: 
               <h1 className="text-2xl sm:text-3xl font-black font-serif tracking-tight leading-tight">{product.name}</h1>
               <div className="flex items-center gap-3 pt-2">
                 <p className="text-2xl font-black text-rose-600 dark:text-rose-400">₹{product.price}</p>
+                {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
+                  <span className="text-sm font-semibold text-stone-400 line-through">₹{product.originalPrice}</span>
+                )}
                 <span className="text-[10px] font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-500 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
                   In stock
                 </span>
               </div>
             </div>
 
-            {/* Description Card */}
-            {product.description && (
-              <div className={`p-6 rounded-2xl ${theme === "dark" ? "bg-white/[0.02] border-white/5" : "bg-white border-stone-150"} border shadow-sm`}>
-                <h3 className="text-[10px] font-bold uppercase tracking-widest opacity-40 mb-2">Editor's Note</h3>
+            {/* Description & Styling Guide Card */}
+            <div className={`p-6 rounded-2xl ${theme === "dark" ? "bg-white/[0.02] border-white/5" : "bg-white border-stone-150"} border shadow-sm space-y-4`}>
+              <div>
+                <h3 className="text-[10px] font-bold uppercase tracking-widest text-rose-600 dark:text-rose-400 mb-2">Editor's Styling & Fabric Guide</h3>
                 <p className={`text-xs sm:text-sm leading-relaxed ${theme === "dark" ? "text-stone-300" : "text-stone-700"} whitespace-pre-wrap`}>
-                  {product.description}
+                  {product.description && product.description !== "undefined" && product.description.trim().length > 5
+                    ? product.description
+                    : `Handpicked by Renu Agarwal for Renu Fashion Hub. This ${product.category || 'ethnic fashion'} selection highlights refined craftsmanship, breathable textile comfort, and versatile styling potential across Indian festive, wedding, and daily wear occasions. Pair with classic accessories and comfortable footwear for a complete statement look.`
+                  }
                 </p>
               </div>
-            )}
+
+              <div className={`p-3 rounded-xl ${theme === "dark" ? "bg-rose-500/5 text-rose-300 border-rose-500/10" : "bg-rose-50/60 text-rose-950 border-rose-200/50"} border text-[11px] leading-relaxed`}>
+                ℹ️ <strong>Affiliate Disclosure:</strong> When you purchase through our links, Renu Fashion Hub may earn a small referral commission at no additional cost to you. We curate verified fashion picks to help you make informed styling choices.
+              </div>
+            </div>
 
             {/* CTA action card */}
             <div className={`p-4 rounded-2xl ${theme === "dark" ? "bg-rose-500/[0.01] border-rose-500/10" : "bg-rose-500/[0.03] border-rose-500/15"} border shadow-sm flex flex-col sm:flex-row gap-3`}>
@@ -2854,6 +2946,323 @@ const TermsOfServicePage = ({ profile, theme, navigate }: { profile: any; theme:
   );
 };
 
+const AffiliateDisclosurePage = ({ theme, navigate }: { theme: string; navigate: any }) => {
+  useEffect(() => {
+    document.title = "Affiliate Disclosure | Renu Fashion Hub";
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (!metaDesc) {
+      metaDesc = document.createElement('meta');
+      metaDesc.setAttribute('name', 'description');
+      document.head.appendChild(metaDesc);
+    }
+    metaDesc.setAttribute('content', 'Affiliate disclosure for Renu Fashion Hub in compliance with ASCI and FTC guidelines. Learn how our recommendations support the platform at zero extra cost to you.');
+    window.scrollTo(0, 0);
+  }, []);
+
+  const schemaData = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Affiliate Disclosure - Renu Fashion Hub",
+    "description": "Full transparency statement regarding affiliate marketing relationships and commissions earned by Renu Fashion Hub.",
+    "url": "https://www.renufashionhub.in/affiliate-disclosure",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Renu Fashion Hub",
+      "url": "https://www.renufashionhub.in"
+    }
+  };
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-rose-50" : "bg-[#FFF7F9] text-[#1C1B18]"} p-4 sm:p-6 pb-24 font-sans`}
+    >
+      <script type="application/ld+json">
+        {JSON.stringify(schemaData)}
+      </script>
+
+      <div className="max-w-4xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <button 
+            onClick={() => navigate("/")} 
+            className={`p-3 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border flex items-center gap-2 group transition-all hover:bg-rose-500/10 hover:border-rose-500/50 w-fit cursor-pointer`}
+          >
+            <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+            <span className="text-xs font-bold uppercase tracking-wider">Back to Home</span>
+          </button>
+          
+          <div className="text-right">
+            <p className="text-xl font-black uppercase tracking-wider font-serif text-rose-500">
+              Renu Fashion Hub
+            </p>
+            <p className={`text-[10px] uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"} font-bold`}>
+              Affiliate Disclosure
+            </p>
+          </div>
+        </div>
+
+        <div className={`p-6 sm:p-10 rounded-3xl ${theme === "dark" ? "bg-white/[0.02] border-white/10 shadow-2xl" : "bg-white border-stone-200 shadow-md"} border space-y-6 text-sm leading-relaxed`}>
+          <div className="border-b border-rose-500/20 pb-4">
+            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-rose-600 block mb-1">
+              Transparency & Ethics
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-serif font-black tracking-tight text-stone-900 dark:text-stone-100">
+              Affiliate Relationship Disclosure
+            </h1>
+            <p className={`text-xs mt-2 ${theme === "dark" ? "text-stone-400" : "text-stone-500"}`}>
+              Last Updated: October 2026 • Compliant with ASCI & FTC Guidelines
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <h2 className="text-lg font-bold font-serif text-rose-600 dark:text-rose-400">1. Overview & General Policy</h2>
+            <p className={theme === "dark" ? "text-stone-300" : "text-stone-700"}>
+              At <strong>Renu Fashion Hub</strong> (https://www.renufashionhub.in), we believe in 100% honesty, transparency, and authenticity. This disclosure document outlines our participation in affiliate marketing programs and clarifies how recommendations, referral links, and monetization methods work across our website, articles, catalogs, and video lookbooks.
+            </p>
+
+            <h2 className="text-lg font-bold font-serif text-rose-600 dark:text-rose-400">2. How Affiliate Links Work</h2>
+            <p className={theme === "dark" ? "text-stone-300" : "text-stone-700"}>
+              Some links on Renu Fashion Hub are <strong>affiliate links</strong>. This means that if you click on a product link or button (such as "Buy Now" or "Check Price") and are redirected to a partner retailer (such as Meesho, Amazon, or other verified Indian e-commerce merchants) and proceed to make a purchase, Renu Fashion Hub may receive a small referral commission.
+            </p>
+            <div className={`p-4 rounded-2xl ${theme === "dark" ? "bg-rose-500/10 border-rose-500/20" : "bg-rose-50 border-rose-200"} border font-semibold`}>
+              👉 <strong>Zero Additional Cost to You:</strong> The commission we receive is paid directly by the partner merchant or affiliate network. You do NOT pay a single rupee extra. The price of the product remains identical whether you use our link or search for it independently.
+            </div>
+
+            <h2 className="text-lg font-bold font-serif text-rose-600 dark:text-rose-400">3. Independent Editorial Integrity</h2>
+            <p className={theme === "dark" ? "text-stone-300" : "text-stone-700"}>
+              Our founder and curator, <strong>Renu Agarwal</strong>, chooses apparel, jewellery, kurtis, sarees, and beauty accessories solely on their aesthetic design, styling versatility, user demand, and value-for-money appeal. We do not accept payment to write artificially positive reviews, nor do we promote products we do not believe provide genuine utility to Indian women.
+            </p>
+
+            <h2 className="text-lg font-bold font-serif text-rose-600 dark:text-rose-400">4. Third-Party Marketplace Notice</h2>
+            <p className={theme === "dark" ? "text-stone-300" : "text-stone-700"}>
+              Renu Fashion Hub is a <strong>curation and fashion inspiration portal</strong>; we do not store, package, ship, or process customer payments directly for third-party merchandise. When you order from an external platform:
+            </p>
+            <ul className="list-disc pl-5 space-y-1.5">
+              <li>Order fulfillment, transit, packaging, and delivery timelines are managed entirely by that seller.</li>
+              <li>Returns, refunds, and size exchanges must be initiated directly through the marketplace app where you completed the transaction.</li>
+              <li>Live pricing, flash sales, coupon codes, and inventory availability are controlled by the merchant and may change without notice.</li>
+            </ul>
+
+            <h2 className="text-lg font-bold font-serif text-rose-600 dark:text-rose-400">5. Questions & Feedback</h2>
+            <p className={theme === "dark" ? "text-stone-300" : "text-stone-700"}>
+              If you have any questions regarding our affiliate relationships, or wish to report a broken or inaccurate product link, please reach out to us directly at:
+            </p>
+            <p className="font-semibold text-rose-600 dark:text-rose-400">
+              Email: <a href="mailto:support@renufashionhub.in" className="underline">support@renufashionhub.in</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+const CookiePolicyPage = ({ theme, navigate }: { theme: string; navigate: any }) => {
+  useEffect(() => {
+    document.title = "Cookie Policy | Renu Fashion Hub";
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (!metaDesc) {
+      metaDesc = document.createElement('meta');
+      metaDesc.setAttribute('name', 'description');
+      document.head.appendChild(metaDesc);
+    }
+    metaDesc.setAttribute('content', 'Cookie Policy for Renu Fashion Hub explaining how cookies and tracking technologies are used, and how you can manage your preferences.');
+    window.scrollTo(0, 0);
+  }, []);
+
+  const schemaData = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Cookie Policy - Renu Fashion Hub",
+    "description": "Information on cookies, web beacons, analytics, and advertising tracking used on Renu Fashion Hub.",
+    "url": "https://www.renufashionhub.in/cookie-policy",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Renu Fashion Hub",
+      "url": "https://www.renufashionhub.in"
+    }
+  };
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-rose-50" : "bg-[#FFF7F9] text-[#1C1B18]"} p-4 sm:p-6 pb-24 font-sans`}
+    >
+      <script type="application/ld+json">
+        {JSON.stringify(schemaData)}
+      </script>
+
+      <div className="max-w-4xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <button 
+            onClick={() => navigate("/")} 
+            className={`p-3 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border flex items-center gap-2 group transition-all hover:bg-rose-500/10 hover:border-rose-500/50 w-fit cursor-pointer`}
+          >
+            <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+            <span className="text-xs font-bold uppercase tracking-wider">Back to Home</span>
+          </button>
+          
+          <div className="text-right">
+            <p className="text-xl font-black uppercase tracking-wider font-serif text-rose-500">
+              Renu Fashion Hub
+            </p>
+            <p className={`text-[10px] uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"} font-bold`}>
+              Cookie Policy
+            </p>
+          </div>
+        </div>
+
+        <div className={`p-6 sm:p-10 rounded-3xl ${theme === "dark" ? "bg-white/[0.02] border-white/10 shadow-2xl" : "bg-white border-stone-200 shadow-md"} border space-y-6 text-sm leading-relaxed`}>
+          <div className="border-b border-rose-500/20 pb-4">
+            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-rose-600 block mb-1">
+              Privacy & Controls
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-serif font-black tracking-tight text-stone-900 dark:text-stone-100">
+              Cookie & Tracking Technologies Policy
+            </h1>
+            <p className={`text-xs mt-2 ${theme === "dark" ? "text-stone-400" : "text-stone-500"}`}>
+              Last Updated: October 2026 • Governing Cookies, Local Storage & User Consent
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <h2 className="text-lg font-bold font-serif text-rose-600 dark:text-rose-400">1. What Are Cookies?</h2>
+            <p className={theme === "dark" ? "text-stone-300" : "text-stone-700"}>
+              Cookies are small text files placed on your browser or device by websites you visit. They allow websites to remember your device, preferences, login sessions, and collect anonymous traffic insights to enhance site functionality.
+            </p>
+
+            <h2 className="text-lg font-bold font-serif text-rose-600 dark:text-rose-400">2. Cookies We Use</h2>
+            <p className={theme === "dark" ? "text-stone-300" : "text-stone-700"}>
+              Renu Fashion Hub categorizes cookies into three essential tiers:
+            </p>
+
+            <div className="space-y-3">
+              <div className={`p-4 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-stone-50 border-stone-200"} border`}>
+                <h3 className="font-bold text-sm text-rose-500 mb-1">A. Strictly Necessary & Functional Cookies</h3>
+                <p className="text-xs">
+                  Required for core platform features such as remembering your Dark/Light theme mode, storing admin session verification (rfh_admin_session), and caching catalog data in IndexedDB for fast performance. These cookies do not track you across other websites.
+                </p>
+              </div>
+
+              <div className={`p-4 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-stone-50 border-stone-200"} border`}>
+                <h3 className="font-bold text-sm text-rose-500 mb-1">B. Performance & Analytics Cookies</h3>
+                <p className="text-xs">
+                  We utilize Google Analytics (measurement ID G-7L132HKM3C) to analyze aggregated traffic, popular fashion categories, and visitor engagement metrics. All data collected is strictly anonymized and helps us improve site speed and content navigation.
+                </p>
+              </div>
+
+              <div className={`p-4 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-stone-50 border-stone-200"} border`}>
+                <h3 className="font-bold text-sm text-rose-500 mb-1">C. Advertising & Partner Cookies</h3>
+                <p className="text-xs">
+                  We work with Google AdSense (publisher ca-pub-8650082341590465) to display non-intrusive advertisements that support the platform. Google and third-party advertising vendors may use cookies (such as the DoubleClick cookie) to serve ads based on your prior visits to this or other websites.
+                </p>
+              </div>
+            </div>
+
+            <h2 className="text-lg font-bold font-serif text-rose-600 dark:text-rose-400">3. How to Manage or Disable Cookies</h2>
+            <p className={theme === "dark" ? "text-stone-300" : "text-stone-700"}>
+              You have the right to accept or decline non-essential cookies. You can manage your preferences through:
+            </p>
+            <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm">
+              <li><strong>Browser Settings:</strong> You can configure Google Chrome, Mozilla Firefox, Apple Safari, or Microsoft Edge to block cookies or notify you when a cookie is placed.</li>
+              <li><strong>Google Ads Personalization:</strong> You can opt out of personalized Google advertising at any time by visiting <a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer" className="text-rose-600 underline">Google Ads Settings</a>.</li>
+              <li><strong>Industry Opt-Outs:</strong> Visit <a href="https://aboutads.info/choices" target="_blank" rel="noopener noreferrer" className="text-rose-600 underline">aboutads.info</a> or <a href="https://youronlinechoices.eu" target="_blank" rel="noopener noreferrer" className="text-rose-600 underline">Your Online Choices</a> to manage network advertising cookies.</li>
+            </ul>
+
+            <h2 className="text-lg font-bold font-serif text-rose-600 dark:text-rose-400">4. Contact Information</h2>
+            <p className={theme === "dark" ? "text-stone-300" : "text-stone-700"}>
+              For any questions regarding our use of cookies or privacy practices, email us at <a href="mailto:support@renufashionhub.in" className="text-rose-600 underline font-semibold">support@renufashionhub.in</a> or visit our <a href="/privacy-policy" onClick={(e) => { e.preventDefault(); navigate("/privacy-policy"); }} className="text-rose-600 underline font-semibold cursor-pointer">Privacy Policy</a>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+const CookieConsentBanner = ({ theme, navigate }: { theme: string; navigate: any }) => {
+  const [showBanner, setShowBanner] = useState(false);
+
+  useEffect(() => {
+    try {
+      const consent = localStorage.getItem("rfh_cookie_consent");
+      if (!consent) {
+        setShowBanner(true);
+      }
+    } catch (e) {}
+  }, []);
+
+  const handleAccept = () => {
+    try {
+      localStorage.setItem("rfh_cookie_consent", "accepted");
+    } catch (e) {}
+    setShowBanner(false);
+  };
+
+  const handleDecline = () => {
+    try {
+      localStorage.setItem("rfh_cookie_consent", "essential_only");
+    } catch (e) {}
+    setShowBanner(false);
+  };
+
+  if (!showBanner) return null;
+
+  return (
+    <div className="fixed bottom-4 inset-x-4 sm:inset-x-auto sm:right-6 sm:max-w-md z-[999] animate-fade-in">
+      <div className={`p-5 rounded-2xl border shadow-2xl backdrop-blur-xl ${
+        theme === "dark" 
+          ? "bg-[#14231E]/95 border-rose-500/20 text-stone-200" 
+          : "bg-white/95 border-rose-200 text-stone-800"
+      }`}>
+        <div className="flex items-start gap-3 mb-3">
+          <div className="p-2 rounded-xl bg-rose-500/10 text-rose-500 flex-shrink-0">
+            <Sparkles className="w-5 h-5" />
+          </div>
+          <div>
+            <h4 className="text-sm font-bold font-serif text-stone-900 dark:text-stone-100">
+              Cookie & Privacy Notice
+            </h4>
+            <p className="text-xs mt-1 leading-relaxed text-stone-600 dark:text-stone-300">
+              We use cookies to analyze site traffic, personalize content, and support our free fashion guides via relevant advertising. Read our{" "}
+              <a 
+                href="/cookie-policy" 
+                onClick={(e) => { e.preventDefault(); navigate("/cookie-policy"); }}
+                className="text-rose-600 dark:text-rose-400 underline font-semibold cursor-pointer"
+              >
+                Cookie Policy
+              </a>.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-rose-500/10">
+          <button
+            onClick={handleDecline}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+              theme === "dark"
+                ? "border-white/10 hover:bg-white/5 text-stone-400"
+                : "border-stone-200 hover:bg-stone-100 text-stone-600"
+            }`}
+          >
+            Essential Only
+          </button>
+          <button
+            onClick={handleAccept}
+            className="px-4 py-1.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-rose-600 to-rose-500 hover:opacity-95 shadow-md transition-all active:scale-95"
+          >
+            Accept All
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 
 
@@ -3106,6 +3515,20 @@ const BlogDetailPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; th
   const { id } = useParams();
   const blog = blogs.find(b => b.id.toString() === id || b.docId === id);
 
+  useEffect(() => {
+    if (blog) {
+      document.title = `${blog.seoTitle || blog.title} | Renu Fashion Hub`;
+      let metaDesc = document.querySelector('meta[name="description"]');
+      if (!metaDesc) {
+        metaDesc = document.createElement('meta');
+        metaDesc.setAttribute('name', 'description');
+        document.head.appendChild(metaDesc);
+      }
+      metaDesc.setAttribute('content', blog.metaDescription || blog.excerpt || blog.title);
+      window.scrollTo(0, 0);
+    }
+  }, [blog]);
+
   if (!blog) {
     if (!isLoaded) {
       return <PageLoader theme={theme} />;
@@ -3120,17 +3543,106 @@ const BlogDetailPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; th
     );
   }
 
+  // Sanitize internal links to use HTTPS
+  const sanitizedContent = (blog.content || "")
+    .replace(/http:\/\/renufashionhub\.in/g, "https://www.renufashionhub.in")
+    .replace(/http:\/\/www\.renufashionhub\.in/g, "https://www.renufashionhub.in");
+
+  const wordCount = sanitizedContent.replace(/<[^>]+>/g, " ").split(/\s+/).filter(Boolean).length;
+  const readTimeMinutes = Math.max(1, Math.round(wordCount / 220));
+
+  const blogSchema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": blog.title,
+    "description": blog.metaDescription || blog.excerpt || blog.title,
+    "image": blog.image || "https://www.renufashionhub.in/og-image.jpg",
+    "datePublished": blog.timestamp,
+    "dateModified": blog.timestamp,
+    "author": {
+      "@type": "Person",
+      "name": "Renu Agarwal",
+      "url": "https://www.renufashionhub.in/about"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Renu Fashion Hub",
+      "url": "https://www.renufashionhub.in"
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `https://www.renufashionhub.in/blog/${blog.id}`
+    }
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://www.renufashionhub.in/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Fashion Blog",
+        "item": "https://www.renufashionhub.in/blog"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": blog.title,
+        "item": `https://www.renufashionhub.in/blog/${blog.id}`
+      }
+    ]
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-rose-50" : "bg-[#FFF7F9] text-[#1C1B18]"} p-6 pb-24`}
+      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-rose-50" : "bg-[#FFF7F9] text-[#1C1B18]"} p-4 sm:p-6 pb-24`}
     >
-      <div className="max-w-2xl mx-auto">
+      <script type="application/ld+json">
+        {JSON.stringify(blogSchema)}
+      </script>
+      <script type="application/ld+json">
+        {JSON.stringify(breadcrumbSchema)}
+      </script>
+
+      <div className="max-w-3xl mx-auto">
+        {/* Breadcrumb Navigation */}
+        <nav aria-label="Breadcrumb" className={`mb-6 flex flex-wrap items-center gap-2 text-xs font-semibold ${
+          theme === "dark" ? "text-stone-400" : "text-stone-500"
+        }`}>
+          <a 
+            href="/" 
+            onClick={(e) => { e.preventDefault(); navigate("/"); }} 
+            className="hover:text-rose-500 transition-colors"
+          >
+            Home
+          </a>
+          <span>/</span>
+          <a 
+            href="/blog" 
+            onClick={(e) => { e.preventDefault(); navigate("/blog"); }} 
+            className="hover:text-rose-500 transition-colors"
+          >
+            Fashion Blog
+          </a>
+          <span>/</span>
+          <span className={`truncate max-w-[200px] sm:max-w-xs ${theme === "dark" ? "text-rose-400" : "text-rose-600"}`}>
+            {blog.title}
+          </span>
+        </nav>
+
         <button 
           onClick={() => navigate("/blog")} 
-          className={`mb-8 p-3 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border flex items-center gap-2 group transition-all hover:bg-rose-500/10 hover:border-rose-500/50 w-fit`}
+          className={`mb-8 p-2.5 sm:p-3 rounded-xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border flex items-center gap-2 group transition-all hover:bg-rose-500/10 hover:border-rose-500/50 w-fit cursor-pointer`}
         >
           <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
           <span className="text-xs font-bold uppercase tracking-wider">Back to All Blogs</span>
@@ -3148,10 +3660,21 @@ const BlogDetailPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; th
         )}
 
         <div className="space-y-4 mb-8">
-          <p className={`text-[11px] ${theme === "dark" ? "text-rose-400/80" : "text-rose-700/80"} font-black uppercase tracking-widest`}>
-            Published on {new Date(blog.timestamp || Date.now()).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-          </p>
-          <h1 className="text-3xl sm:text-4xl font-extrabold font-serif leading-tight">
+          <div className="flex flex-wrap items-center gap-3 text-[11px] font-bold uppercase tracking-wider">
+            <span className={theme === "dark" ? "text-rose-400" : "text-rose-700"}>
+              {new Date(blog.timestamp || Date.now()).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+            </span>
+            <span className="opacity-30">•</span>
+            <span className={theme === "dark" ? "text-stone-400" : "text-stone-500"}>
+              {readTimeMinutes} min read
+            </span>
+            <span className="opacity-30">•</span>
+            <span className="text-rose-500">
+              By Renu Agarwal
+            </span>
+          </div>
+
+          <h1 className="text-2xl sm:text-4xl font-extrabold font-serif leading-tight">
             {blog.title}
           </h1>
           <div className="w-20 h-1 bg-rose-500 rounded-full" />
@@ -3160,8 +3683,26 @@ const BlogDetailPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; th
         {/* Content with elegant formatting styles */}
         <div 
           className={`prose ${theme === "dark" ? "prose-invert text-white/85" : "prose-stone text-stone-800"} max-w-none text-base leading-relaxed space-y-6 blog-content`}
-          dangerouslySetInnerHTML={{ __html: blog.content }}
+          dangerouslySetInnerHTML={{ __html: sanitizedContent }}
         />
+
+        {/* Compliant In-Article Google Ad Placement */}
+        <GoogleAdSenseUnit theme={theme} className="my-8" />
+
+        {/* Editorial & Affiliate Transparency Footer Card */}
+        <div className={`mt-10 p-6 rounded-2xl border ${
+          theme === "dark" 
+            ? "bg-white/[0.02] border-white/10 text-stone-300" 
+            : "bg-rose-50/50 border-rose-200/60 text-stone-700"
+        } text-xs leading-relaxed space-y-2`}>
+          <div className="flex items-center gap-2 font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">
+            <Sparkles className="w-4 h-4" />
+            <span>Curator's Commitment & Affiliate Disclosure</span>
+          </div>
+          <p>
+            Renu Fashion Hub publishes honest, independent style and fabric reviews. Outbound shopping links in this article may be affiliate links through which we earn a small commission at no additional cost to you. Read our full <a href="/affiliate-disclosure" onClick={(e) => { e.preventDefault(); navigate("/affiliate-disclosure"); }} className="underline font-semibold cursor-pointer">Affiliate Disclosure</a> and <a href="/privacy-policy" onClick={(e) => { e.preventDefault(); navigate("/privacy-policy"); }} className="underline font-semibold cursor-pointer">Privacy Policy</a>.
+          </p>
+        </div>
       </div>
     </motion.div>
   );
@@ -3342,7 +3883,9 @@ const PostDetailPage = ({ posts, products, profile, theme, navigate, isMuted, se
                       <p className="text-[11px] font-bold truncate text-white">{product.name}</p>
                       <div className="flex items-center gap-2 mt-1">
                         <span className="text-[11px] font-bold text-white">₹{product.price}</span>
-                        <span className="text-[9px] text-white/30 line-through">₹{Math.round(Number(product.price) * 1.5)}</span>
+                        {(product as any).originalPrice && Number((product as any).originalPrice) > Number(product.price) && (
+                          <span className="text-[9px] text-white/40 line-through">₹{(product as any).originalPrice}</span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -4035,7 +4578,9 @@ const PostCard = React.memo(({ post, products, navigate, onTabChange, isMobile }
                   <p className="text-[11px] font-bold truncate text-white">{product.name}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="text-[11px] font-bold text-white">₹{product.price}</span>
-                    <span className="text-[9px] text-white/30 line-through">₹{Math.round(Number(product.price) * 1.5)}</span>
+                    {(product as any).originalPrice && Number((product as any).originalPrice) > Number(product.price) && (
+                      <span className="text-[9px] text-white/40 line-through">₹{(product as any).originalPrice}</span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -4392,36 +4937,52 @@ const CompanyStatisticsSection = ({
   );
 };
 
-const AdsterraNativeBanner = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
+const GoogleAdSenseUnit = ({ 
+  slot, 
+  format = "auto", 
+  responsive = true, 
+  className = "",
+  theme = "light" 
+}: { 
+  slot?: string; 
+  format?: string; 
+  responsive?: boolean; 
+  className?: string;
+  theme?: string;
+}) => {
+  const adRef = useRef<HTMLModElement>(null);
+  const pushed = useRef(false);
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container || container.dataset.loaded === "true") return;
-
-    container.dataset.loaded = "true";
-
-    const adContainer = document.createElement("div");
-    adContainer.id = "container-7585c795c316a4cb396001f3259d5998";
-
-    const script = document.createElement("script");
-    script.async = true;
-    script.setAttribute("data-cfasync", "false");
-    script.src =
-      "https://pl31309966.profitableratecpmnetwork.com/7585c795c316a4cb396001f3259d5998/invoke.js";
-
-    container.appendChild(script);
-    container.appendChild(adContainer);
-
-    return () => {
-      container.innerHTML = "";
-      delete container.dataset.loaded;
-    };
+    if (pushed.current) return;
+    try {
+      if (typeof window !== "undefined" && (window as any).adsbygoogle) {
+        ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+        pushed.current = true;
+      }
+    } catch (e) {
+      // Ignore adsbygoogle duplicate push errors
+    }
   }, []);
 
   return (
-    <div className="w-full my-6 flex justify-center overflow-hidden">
-      <div ref={containerRef} className="w-full" />
+    <div className={`w-full my-6 flex flex-col items-center justify-center overflow-hidden ${className}`}>
+      <span className={`text-[9px] font-bold uppercase tracking-[0.2em] mb-1.5 ${
+        theme === "dark" ? "text-stone-500" : "text-stone-400"
+      }`}>
+        Advertisement
+      </span>
+      <div className="w-full max-w-3xl min-h-[90px] flex items-center justify-center bg-black/[0.02] dark:bg-white/[0.02] rounded-xl border border-black/5 dark:border-white/5 overflow-hidden">
+        <ins
+          ref={adRef}
+          className="adsbygoogle"
+          style={{ display: "block", width: "100%", textAlign: "center" }}
+          data-ad-client="ca-pub-8650082341590465"
+          data-ad-slot={slot || "1234567890"}
+          data-ad-format={format}
+          data-full-width-responsive={responsive ? "true" : "false"}
+        />
+      </div>
     </div>
   );
 };
@@ -5046,8 +5607,8 @@ export default function App() {
     }
   }, [location.pathname, isLoaded, profile, posts, products, blogs, lastLoadedPath]);
 
-  const [newPost, setNewPost] = useState({ type: "image", url: "", taggedProducts: [] as number[] });
-  const [newProduct, setNewProduct] = useState({ name: "", price: "", url: "", buyUrl: "", description: "" });
+  const [newPost, setNewPost] = useState({ type: "image", url: "", name: "", description: "", category: "", taggedProducts: [] as number[] });
+  const [newProduct, setNewProduct] = useState({ name: "", price: "", url: "", buyUrl: "", description: "", category: "" });
   const [newBlog, setNewBlog] = useState({ title: "", category: "", excerpt: "", content: "", image: "", seoTitle: "", metaDescription: "", focusKeyword: "" });
   const [editorSelectionState, setEditorSelectionState] = useState({
     isBold: false,
@@ -7401,7 +7962,7 @@ export default function App() {
                         onFocus={updateEditorSelectionState}
                         onBlur={updateEditorSelectionState}
                         onPaste={handleSmartPaste}
-                        placeholder="Share your fashion tips, style stories, and lifestyle updates... Highlight keywords to italicize, bold, or link them!"
+                        data-placeholder="Share your fashion tips, style stories, and lifestyle updates... Highlight keywords to italicize, bold, or link them!"
                         className={`w-full min-h-[220px] p-4 text-sm font-normal focus:outline-none blog-content ${theme === "dark" ? "text-stone-100" : "text-stone-850"}`}
                       />
                     </div>
@@ -8217,7 +8778,7 @@ export default function App() {
             </h1>
             {/* Weekly Best Sellers Carousel */}
             <LatestArrivalsCarousel products={products} posts={posts} theme={theme} navigate={handleNavigate} />
-            <AdsterraNativeBanner />
+            <GoogleAdSenseUnit theme={theme} />
 
         {/* Tabs Navigation */}
         <motion.div 
@@ -8476,7 +9037,9 @@ export default function App() {
                               <p className="text-[11px] font-bold truncate text-white">{product.name}</p>
                               <div className="flex items-center gap-2 mt-1">
                                 <span className="text-[11px] font-bold text-white">₹{product.price}</span>
-                                <span className="text-[9px] text-white/30 line-through">₹{Math.round(Number(product.price) * 1.5)}</span>
+                                {(product as any).originalPrice && Number((product as any).originalPrice) > Number(product.price) && (
+                                  <span className="text-[9px] text-white/40 line-through">₹{(product as any).originalPrice}</span>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -8653,6 +9216,38 @@ export default function App() {
                 </motion.a>
                 <span className={`text-[8px] ${theme === "dark" ? "text-stone-700" : "text-stone-300"}`}>|</span>
                 <motion.a
+                  href="/affiliate-disclosure"
+                  whileHover={{ scale: 1.1, color: theme === "dark" ? "#FB7185" : "#E11D48" }}
+                  whileTap={{ scale: 0.93 }}
+                  transition={{ type: "spring", stiffness: 450, damping: 15 }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavigate("/affiliate-disclosure");
+                  }}
+                  className={`text-[9px] font-black uppercase tracking-[0.18em] transition-colors cursor-pointer outline-none ${
+                    theme === "dark" ? "text-rose-500" : "text-[#1C1B18]/80"
+                  }`}
+                >
+                  Affiliate
+                </motion.a>
+                <span className={`text-[8px] ${theme === "dark" ? "text-stone-700" : "text-stone-300"}`}>|</span>
+                <motion.a
+                  href="/cookie-policy"
+                  whileHover={{ scale: 1.1, color: theme === "dark" ? "#FB7185" : "#E11D48" }}
+                  whileTap={{ scale: 0.93 }}
+                  transition={{ type: "spring", stiffness: 450, damping: 15 }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavigate("/cookie-policy");
+                  }}
+                  className={`text-[9px] font-black uppercase tracking-[0.18em] transition-colors cursor-pointer outline-none ${
+                    theme === "dark" ? "text-rose-500" : "text-[#1C1B18]/80"
+                  }`}
+                >
+                  Cookies
+                </motion.a>
+                <span className={`text-[8px] ${theme === "dark" ? "text-stone-700" : "text-stone-300"}`}>|</span>
+                <motion.a
                   href="/contact"
                   whileHover={{ scale: 1.1, color: theme === "dark" ? "#FB7185" : "#E11D48" }}
                   whileTap={{ scale: 0.93 }}
@@ -8708,6 +9303,8 @@ export default function App() {
           <Route path="/privacy-policy" element={<PrivacyPolicyPage profile={profile} theme={theme} navigate={handleNavigate} />} />
           <Route path="/terms-of-service" element={<TermsOfServicePage profile={profile} theme={theme} navigate={handleNavigate} />} />
           <Route path="/disclaimer" element={<DisclaimerPage profile={profile} theme={theme} navigate={handleNavigate} />} />
+          <Route path="/affiliate-disclosure" element={<AffiliateDisclosurePage theme={theme} navigate={handleNavigate} />} />
+          <Route path="/cookie-policy" element={<CookiePolicyPage theme={theme} navigate={handleNavigate} />} />
           <Route path="/product/:id" element={<ProductDetailPage products={products} theme={theme} navigate={handleNavigate} isLoaded={isProductsLoaded} />} />
           <Route path="/post/:id" element={<PostDetailPage posts={posts} products={products} profile={profile} theme={theme} navigate={handleNavigate} isMuted={isMuted} setIsMuted={setIsMuted} isLoaded={isPostsLoaded} />} />
           <Route path="/blog" element={<BlogListPage blogs={blogs} theme={theme} navigate={handleNavigate} isLoaded={isBlogsLoaded} />} />
@@ -8717,6 +9314,9 @@ export default function App() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Global Cookie Consent Banner */}
+      <CookieConsentBanner theme={theme} navigate={handleNavigate} />
 
       {/* Global Contact Assistant - Support Quick Assist */}
       <SupportQuickAssist theme={theme} handleNavigate={handleNavigate} />

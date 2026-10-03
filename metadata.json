@@ -1,5 +1,6 @@
 {
   "name": "Renu Fashion Hub",
-  "description": "Premium Fashion Hub for the latest trends and styles.",
-  "requestFramePermissions": []
+  "description": "Women's fashion inspiration, sarees, kurtis, jewellery, outfit ideas and style guides.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

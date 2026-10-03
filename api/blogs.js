@@ -36,7 +36,7 @@ export default async function handler(req, res) {
     if (error) throw error;
 
     const mappedBlogs = (data || [])
-      .filter(b => b.id !== 999999 && b.category !== "site_settings")
+      .filter(b => b.id !== 999999 && b.id !== 1782274718063 && b.category !== "site_settings" && b.title !== "ggdf" && b.status !== "draft" && b.status !== "pending_review")
       .map(b => ({
         id: b.id,
         title: b.title,
@@ -47,6 +47,7 @@ export default async function handler(req, res) {
         seoTitle: b.seo_title || "",
         metaDescription: b.meta_description || "",
         focusKeyword: b.focus_keyword || "",
+        status: b.status || "published",
         timestamp: b.timestamp || new Date().toISOString()
       }));
 

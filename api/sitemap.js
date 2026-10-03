@@ -73,6 +73,8 @@ export default async function handler(req, res) {
       { loc: `${baseUrl}/privacy-policy`, changefreq: "yearly", priority: "0.3" },
       { loc: `${baseUrl}/terms-of-service`, changefreq: "yearly", priority: "0.3" },
       { loc: `${baseUrl}/disclaimer`, changefreq: "yearly", priority: "0.3" },
+      { loc: `${baseUrl}/affiliate-disclosure`, changefreq: "yearly", priority: "0.3" },
+      { loc: `${baseUrl}/cookie-policy`, changefreq: "yearly", priority: "0.3" },
     ];
 
     const urls = [];
