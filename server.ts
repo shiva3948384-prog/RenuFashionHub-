@@ -235,10 +235,17 @@ async function startServer() {
         const { data, error } = await supabase.from(tableName).select('*');
         if (!error && Array.isArray(data) && data.length > 0) {
           return data
-            .filter((row: any) => row.id !== 999999 && row.category !== "site_settings")
+            .filter((row: any) => {
+              if (row.id === 999999 || row.category === "site_settings") return false;
+              if (String(row.id) === "1782274718063" || row.id === 1782274718063) return false;
+              if (row.title === "ggdf") return false;
+              const status = (row.status || "").toLowerCase();
+              if (status === "draft" || status === "pending_review" || status === "private") return false;
+              return true;
+            })
             .map((row: any) => {
-              let lastmod = new Date().toISOString().split('.')[0] + 'Z';
-              const timestampField = row.timestamp || row.created_at;
+              let lastmod: string | null = null;
+              const timestampField = row.updated_at || row.timestamp || row.created_at;
               if (timestampField) {
                 try {
                   const d = new Date(timestampField);
@@ -262,10 +269,17 @@ async function startServer() {
 
     const localData = getLocalBackup(`${tableName}.json`) || [];
     return localData
-      .filter((row: any) => row.id !== 999999 && row.category !== "site_settings")
+      .filter((row: any) => {
+        if (row.id === 999999 || row.category === "site_settings") return false;
+        if (String(row.id) === "1782274718063" || row.id === 1782274718063) return false;
+        if (row.title === "ggdf") return false;
+        const status = (row.status || "").toLowerCase();
+        if (status === "draft" || status === "pending_review" || status === "private") return false;
+        return true;
+      })
       .map((row: any) => {
-        let lastmod = new Date().toISOString().split('.')[0] + 'Z';
-        const timestampField = row.timestamp || row.created_at;
+        let lastmod: string | null = null;
+        const timestampField = row.updated_at || row.timestamp || row.created_at;
         if (timestampField) {
           try {
             const d = new Date(timestampField);
@@ -1016,34 +1030,25 @@ async function startServer() {
       // Render Dynamic Products pages
       (products as any[]).forEach((p: any) => {
         const escapedId = escapeXml(encodeURIComponent(p.id));
-        xml += `  <url>
-    <loc>${baseUrl}/product/${escapedId}</loc>
-    <lastmod>${p.lastmod}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>\n`;
+        xml += `  <url>\n    <loc>${baseUrl}/product/${escapedId}</loc>\n`;
+        if (p.lastmod) xml += `    <lastmod>${p.lastmod}</lastmod>\n`;
+        xml += `    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
       });
 
       // Render Dynamic Lifestyle Posts/Vlogs Pages
       (posts as any[]).forEach((p: any) => {
         const escapedId = escapeXml(encodeURIComponent(p.id));
-        xml += `  <url>
-    <loc>${baseUrl}/post/${escapedId}</loc>
-    <lastmod>${p.lastmod}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>\n`;
+        xml += `  <url>\n    <loc>${baseUrl}/post/${escapedId}</loc>\n`;
+        if (p.lastmod) xml += `    <lastmod>${p.lastmod}</lastmod>\n`;
+        xml += `    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
       });
 
       // Render Dynamic Editorial Blog Posts Pages (only published, non-test articles)
-      (blogs as any[]).filter((b: any) => b.id !== "1782274718063" && b.id !== 1782274718063).forEach((b: any) => {
+      (blogs as any[]).forEach((b: any) => {
         const escapedId = escapeXml(encodeURIComponent(b.id));
-        xml += `  <url>
-    <loc>${baseUrl}/blog/${escapedId}</loc>
-    <lastmod>${b.lastmod}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>\n`;
+        xml += `  <url>\n    <loc>${baseUrl}/blog/${escapedId}</loc>\n`;
+        if (b.lastmod) xml += `    <lastmod>${b.lastmod}</lastmod>\n`;
+        xml += `    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
       });
 
       xml += `</urlset>`;

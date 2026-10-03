@@ -1,6 +1,25 @@
 <!doctype html>
 <html lang="en-IN">
   <head>
+    <script>
+      // Defensive guard: Ensure window.fetch cannot throw "Cannot set property fetch of #<Window> which has only a getter"
+      // if any cached script or browser extension attempts an assignment.
+      (function() {
+        try {
+          var _origFetch = window.fetch;
+          Object.defineProperty(window, 'fetch', {
+            configurable: true,
+            enumerable: true,
+            get: function() { return _origFetch; },
+            set: function(fn) {
+              if (typeof fn === 'function') {
+                _origFetch = fn;
+              }
+            }
+          });
+        } catch (e) {}
+      })();
+    </script>
     <!-- Google AdSense Official Script -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8650082341590465"
       crossorigin="anonymous"></script>

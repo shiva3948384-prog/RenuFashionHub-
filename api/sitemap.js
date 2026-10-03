@@ -37,7 +37,14 @@ async function fetchCollection(tableName) {
       return [];
     }
     return (data || [])
-      .filter((row) => row.id !== 999999 && row.category !== "site_settings")
+      .filter((row) => {
+        if (row.id === 999999 || row.category === "site_settings") return false;
+        if (String(row.id) === "1782274718063" || row.id === 1782274718063) return false;
+        if (row.title === "ggdf") return false;
+        const status = (row.status || "").toLowerCase();
+        if (status === "draft" || status === "pending_review" || status === "private") return false;
+        return true;
+      })
       .map((row) => ({
         id: String(row.id),
         lastmod: realLastmod(row),

@@ -4952,27 +4952,84 @@ const GoogleAdSenseUnit = ({
 }) => {
   const adRef = useRef<HTMLModElement>(null);
   const pushed = useRef(false);
+  const [adStatus, setAdStatus] = useState<"loading" | "filled" | "unfilled">("loading");
 
   useEffect(() => {
-    if (pushed.current) return;
-    try {
-      if (typeof window !== "undefined" && (window as any).adsbygoogle) {
-        ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
-        pushed.current = true;
+    const el = adRef.current;
+    if (!el) return;
+
+    // Check initial status
+    const updateStatus = () => {
+      const statusAttr = el.getAttribute("data-ad-status");
+      if (statusAttr === "filled") {
+        setAdStatus("filled");
+      } else if (statusAttr === "unfilled") {
+        setAdStatus("unfilled");
+      } else if (el.innerHTML.trim().length > 0 && el.offsetHeight > 20) {
+        setAdStatus("filled");
       }
-    } catch (e) {
-      // Ignore adsbygoogle duplicate push errors
+    };
+
+    updateStatus();
+
+    // Observe changes to attributes (data-ad-status) and child nodes added by AdSense
+    const observer = new MutationObserver(() => {
+      updateStatus();
+    });
+
+    observer.observe(el, {
+      attributes: true,
+      attributeFilter: ["data-ad-status", "style", "class"],
+      childList: true,
+      subtree: true,
+    });
+
+    // Request ad render via adsbygoogle
+    if (!pushed.current) {
+      try {
+        if (typeof window !== "undefined") {
+          ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+          pushed.current = true;
+        }
+      } catch (e) {
+        // Ignore adsbygoogle duplicate push errors
+      }
     }
+
+    // Safety timeout: if after 5 seconds AdSense neither filled nor set unfilled, and slot has no content, collapse it
+    const timer = setTimeout(() => {
+      if (el.getAttribute("data-ad-status") !== "filled" && (!el.children.length || el.offsetHeight === 0)) {
+        setAdStatus((prev) => (prev === "loading" ? "unfilled" : prev));
+      }
+    }, 5000);
+
+    return () => {
+      observer.disconnect();
+      clearTimeout(timer);
+    };
   }, []);
 
+  const isFilled = adStatus === "filled";
+
   return (
-    <div className={`w-full my-6 flex flex-col items-center justify-center overflow-hidden ${className}`}>
-      <span className={`text-[9px] font-bold uppercase tracking-[0.2em] mb-1.5 ${
-        theme === "dark" ? "text-stone-500" : "text-stone-400"
+    <div 
+      className={`w-full overflow-hidden transition-all duration-300 ease-out ${
+        isFilled 
+          ? `my-6 opacity-100 flex flex-col items-center justify-center ${className}` 
+          : "h-0 my-0 py-0 opacity-0 pointer-events-none"
+      }`}
+      aria-hidden={!isFilled}
+    >
+      {isFilled && (
+        <span className={`text-[9px] font-bold uppercase tracking-[0.2em] mb-1.5 ${
+          theme === "dark" ? "text-stone-500" : "text-stone-400"
+        }`}>
+          Advertisement
+        </span>
+      )}
+      <div className={`w-full max-w-3xl flex items-center justify-center ${
+        isFilled ? "bg-black/[0.02] dark:bg-white/[0.02] rounded-xl border border-black/5 dark:border-white/5 overflow-hidden" : ""
       }`}>
-        Advertisement
-      </span>
-      <div className="w-full max-w-3xl min-h-[90px] flex items-center justify-center bg-black/[0.02] dark:bg-white/[0.02] rounded-xl border border-black/5 dark:border-white/5 overflow-hidden">
         <ins
           ref={adRef}
           className="adsbygoogle"
