@@ -15,12 +15,13 @@ const AUTHOR = 'Renu Agarwal';
 const SITE_NAME = 'Renu Fashion Hub';
 const MODEL = 'gemini-2.5-flash';
 
-const SUPABASE_URL = process.env.SUPABASE_URL || '';
+const RAW_SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const SUPABASE_URL = RAW_SUPABASE_URL || 'https://placeholder.supabase.co';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const CRON_SECRET = process.env.CRON_SECRET || '';
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY || 'placeholder-key', {
   auth: { persistSession: false, autoRefreshToken: false },
 });
 

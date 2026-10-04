@@ -7,6 +7,7 @@ import React, { useState, useRef, FormEvent, ChangeEvent, useEffect, useMemo, us
 import { Routes, Route, Link, useNavigate, useParams, useLocation, Navigate } from "react-router-dom";
 import { get, set } from "idb-keyval";
 import { motion, AnimatePresence } from "motion/react";
+import { useTheme, toggleDocumentTheme, getDocumentTheme } from "./theme";
 import { 
   Instagram, 
   Youtube, 
@@ -66,6 +67,14 @@ import {
   Edit,
   Download
 } from "lucide-react";
+
+import { Header } from "./components/Header";
+import { Hero } from "./components/Hero";
+import { ProductCard } from "./components/ProductCard";
+import { CategoryShowcase } from "./components/CategoryShowcase";
+import { BlogSpotlight } from "./components/BlogSpotlight";
+import { EditorialStory } from "./components/EditorialStory";
+import { Footer } from "./components/Footer";
 
 // Initial Mock Data
 const INITIAL_SOCIAL_LINKS = [
@@ -580,7 +589,7 @@ const PremiumButton = ({ children, onClick, className = "", variant = "primary",
       <motion.div
         variants={{
           initial: { color: variant === "primary" ? "#F43F5E" : "#ffffff" },
-          hover: { color: variant === "primary" ? "#0b1512" : "#000000" }
+          hover: { color: "#ffffff" }
         }}
         transition={{ duration: 0.3 }}
         className="relative z-10 flex items-center justify-center gap-3"
@@ -592,9 +601,10 @@ const PremiumButton = ({ children, onClick, className = "", variant = "primary",
   );
 };
 
-const InteractiveStarRating = ({ rating, onChange, theme, triggerSuccess }: { rating: number; onChange: (rating: number) => void; theme: string; triggerSuccess?: boolean }) => {
+const InteractiveStarRating = ({ rating, onChange, theme: propTheme, triggerSuccess }: { rating: number; onChange: (rating: number) => void; theme?: string; triggerSuccess?: boolean }) => {
   const [activeRating, setActiveRating] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const currentTheme = propTheme || getDocumentTheme();
 
   const handlePointer = (e: React.PointerEvent) => {
     if (!containerRef.current) return;
@@ -646,7 +656,7 @@ const InteractiveStarRating = ({ rating, onChange, theme, triggerSuccess }: { ra
             } : { 
               scale: isCurrentActive ? 1.8 : 1,
               y: isCurrentActive ? -12 : 0,
-              color: isActive ? "#F43F5E" : (theme === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)")
+              color: isActive ? "#F43F5E" : (currentTheme === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)")
             }}
             transition={triggerSuccess ? {
               duration: 0.5,
@@ -1110,7 +1120,7 @@ const ProductDetailPage = ({ products, theme, navigate, isLoaded }: { products: 
       return <PageLoader theme={theme} />;
     }
     return (
-      <div className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-rose-50" : "bg-[#FFF7F9] text-[#1C1B18]"} flex items-center justify-center p-6`}>
+      <div className={`min-h-screen ${theme === "dark" ? "bg-[#141211] text-stone-100" : "bg-[#FAF8F5] text-stone-900"} flex items-center justify-center p-6`}>
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Product Not Found</h1>
           <button onClick={() => navigate("/")} className="px-6 py-2 bg-gradient-to-r from-rose-600 to-rose-500 rounded-xl text-stone-950 font-bold hover:opacity-90">Back to Home</button>
@@ -1220,7 +1230,7 @@ const ProductDetailPage = ({ products, theme, navigate, isLoaded }: { products: 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-rose-50" : "bg-[#FFF7F9] text-[#1C1B18]"} p-4 sm:p-6 pb-24`}
+      className={`min-h-screen ${theme === "dark" ? "bg-[#141211] text-stone-100" : "bg-[#FAF8F5] text-stone-900"} p-4 sm:p-6 pb-24`}
     >
       <script type="application/ld+json">
         {JSON.stringify(productSchema)}
@@ -2125,7 +2135,7 @@ const AboutPage = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-rose-50" : "bg-[#FFF7F9] text-[#1C1B18]"} p-4 sm:p-6 pb-24 font-sans selection:bg-rose-500/30 overflow-x-hidden`}
+      className={`min-h-screen ${theme === "dark" ? "bg-[#141211] text-stone-100" : "bg-[#FAF8F5] text-stone-900"} p-4 sm:p-6 pb-24 font-sans selection:bg-rose-500/30 overflow-x-hidden`}
     >
       {/* Insert JSON-LD Schema dynamically inside the document */}
       <script type="application/ld+json">
@@ -2330,7 +2340,7 @@ const AboutPage = ({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className={`p-8 md:p-12 rounded-3xl ${theme === "dark" ? "bg-gradient-to-br from-emerald-950/10 via-[#0B1512] to-rose-950/10 border-white/10" : "bg-white border-stone-200"} border shadow-xl mb-12`}
+          className={`p-8 md:p-12 rounded-3xl ${theme === "dark" ? "bg-stone-900/60 border-white/10" : "bg-white border-stone-200"} border shadow-xl mb-12`}
         >
           <div className="flex items-center gap-3 border-b border-rose-500/25 pb-6 mb-8">
             <div className={`p-3 rounded-2xl ${theme === "dark" ? "bg-rose-500/10 text-rose-400" : "bg-rose-500/5 text-rose-600"} border border-rose-500/20`}>
@@ -2473,9 +2483,9 @@ const AboutPage = ({
                 <MediaImage 
                   url={profile.avatar} 
                   alt="Renu Agarwal" 
-                  className={`w-full h-full rounded-full object-cover border-4 ${theme === "dark" ? "border-[#0B1512]" : "border-white"}`}
+                  className={`w-full h-full rounded-full object-cover border-4 ${theme === "dark" ? "border-stone-900" : "border-white"}`}
                   fallback={
-                    <div className={`w-full h-full rounded-full ${theme === "dark" ? "bg-[#0B1512]" : "bg-[#FFF7F9]"} flex items-center justify-center`}>
+                    <div className={`w-full h-full rounded-full ${theme === "dark" ? "bg-stone-900 text-stone-400" : "bg-[#FAF8F5] text-stone-600"} flex items-center justify-center`}>
                       <User className="w-16 h-16 text-rose-500" />
                     </div>
                   }
@@ -2880,7 +2890,7 @@ const PrivacyPolicyPage = ({ profile, theme, navigate }: { profile: any; theme: 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512]" : "bg-[#FFF7F9]"} p-6 pb-24 font-sans`}
+      className={`min-h-screen ${theme === "dark" ? "bg-[#141211] text-stone-100" : "bg-[#FAF8F5] text-stone-900"} p-6 pb-24 font-sans`}
     >
       <div className="max-w-4xl mx-auto">
         <motion.div 
@@ -2999,7 +3009,7 @@ const DisclaimerPage = ({ profile, theme, navigate }: { profile: any; theme: str
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512]" : "bg-[#FFF7F9]"} p-4 sm:p-6 pb-24 font-sans`}
+      className={`min-h-screen ${theme === "dark" ? "bg-[#141211] text-stone-100" : "bg-[#FAF8F5] text-stone-900"} p-4 sm:p-6 pb-24 font-sans`}
     >
       {/* Dynamic structured JSON-LD data for maximum SEO impact */}
       <script type="application/ld+json">
@@ -3121,7 +3131,7 @@ const TermsOfServicePage = ({ profile, theme, navigate }: { profile: any; theme:
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512]" : "bg-[#FFF7F9]"} p-6 pb-24 font-sans`}
+      className={`min-h-screen ${theme === "dark" ? "bg-[#141211] text-stone-100" : "bg-[#FAF8F5] text-stone-900"} p-6 pb-24 font-sans`}
     >
       <div className="max-w-4xl mx-auto">
         <motion.div 
@@ -3208,7 +3218,7 @@ const AffiliateDisclosurePage = ({ theme, navigate }: { theme: string; navigate:
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-rose-50" : "bg-[#FFF7F9] text-[#1C1B18]"} p-4 sm:p-6 pb-24 font-sans`}
+      className={`min-h-screen ${theme === "dark" ? "bg-[#141211] text-stone-100" : "bg-[#FAF8F5] text-stone-900"} p-4 sm:p-6 pb-24 font-sans`}
     >
       <script type="application/ld+json">
         {JSON.stringify(schemaData)}
@@ -3321,7 +3331,7 @@ const CookiePolicyPage = ({ theme, navigate }: { theme: string; navigate: any })
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-rose-50" : "bg-[#FFF7F9] text-[#1C1B18]"} p-4 sm:p-6 pb-24 font-sans`}
+      className={`min-h-screen ${theme === "dark" ? "bg-[#141211] text-stone-100" : "bg-[#FAF8F5] text-stone-900"} p-4 sm:p-6 pb-24 font-sans`}
     >
       <script type="application/ld+json">
         {JSON.stringify(schemaData)}
@@ -3537,7 +3547,7 @@ const BlogListPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; them
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`min-h-screen ${dark ? "bg-[#0B1512] text-rose-50" : "bg-[#FFF7F9] text-[#1C1B18]"} pb-24`}
+      className={`min-h-screen ${dark ? "bg-[#141211] text-stone-100" : "bg-[#FAF8F5] text-stone-900"} pb-24`}
     >
       {/* Editorial Masthead */}
       <div className={`relative overflow-hidden border-b ${dark ? "border-white/10" : "border-black/10"}`}>
@@ -3781,7 +3791,7 @@ const BlogDetailPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; th
       return <PageLoader theme={theme} />;
     }
     return (
-      <div className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-rose-50" : "bg-[#FFF7F9] text-[#1C1B18]"} flex items-center justify-center p-6`}>
+      <div className={`min-h-screen ${theme === "dark" ? "bg-[#141211] text-stone-100" : "bg-[#FAF8F5] text-stone-900"} flex items-center justify-center p-6`}>
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4 font-serif">Article Not Found</h1>
           <button onClick={() => navigate("/blog")} className="px-6 py-2 bg-gradient-to-r from-rose-600 to-rose-500 rounded-xl text-stone-950 font-bold hover:opacity-90">Back to Blogs</button>
@@ -3852,7 +3862,7 @@ const BlogDetailPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; th
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-rose-50" : "bg-[#FFF7F9] text-[#1C1B18]"} p-4 sm:p-6 pb-24`}
+      className={`min-h-screen ${theme === "dark" ? "bg-[#141211] text-stone-100" : "bg-[#FAF8F5] text-stone-900"} p-4 sm:p-6 pb-24`}
     >
       <script type="application/ld+json">
         {JSON.stringify(blogSchema)}
@@ -3985,7 +3995,7 @@ const PostDetailPage = ({ posts, products, profile, theme, navigate, isMuted, se
       return <PageLoader theme={theme} />;
     }
     return (
-      <div className={`min-h-screen ${theme === "dark" ? "bg-[#0B1512] text-rose-50" : "bg-[#FFF7F9] text-[#1C1B18]"} flex items-center justify-center p-6`}>
+      <div className={`min-h-screen ${theme === "dark" ? "bg-[#141211] text-stone-100" : "bg-[#FAF8F5] text-stone-900"} flex items-center justify-center p-6`}>
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Post Not Found</h1>
           <button onClick={() => navigate("/")} className="px-6 py-2 bg-gradient-to-r from-rose-600 to-rose-500 rounded-xl text-stone-950 font-bold hover:opacity-90">Back to Home</button>
@@ -4459,7 +4469,7 @@ const LatestArrivalsCarousel = React.memo(({
 }: { 
   products: any[]; 
   posts: any[]; 
-  theme: "light" | "dark"; 
+  theme?: "dark" | "light"; 
   navigate: any 
 }) => {
   const scrollRef = React.useRef<HTMLDivElement>(null);
@@ -4518,9 +4528,7 @@ const LatestArrivalsCarousel = React.memo(({
                 navigate(`/post/${targetId}`);
               }
             }}
-            className={`flex-none w-52 rounded-2xl overflow-hidden cursor-pointer snap-start border ${
-              theme === "dark" ? "bg-white/[0.03] border-white/10 hover:border-rose-500/35" : "bg-black/[0.02] border-black/10 hover:border-rose-500/25"
-            } relative group transition-all duration-350 transform hover:-translate-y-0.5`}
+            className="flex-none w-52 rounded-2xl overflow-hidden cursor-pointer snap-start border bg-black/[0.02] dark:bg-white/[0.03] border-black/10 dark:border-white/10 hover:border-rose-500/25 dark:hover:border-rose-500/35 relative group transition-all duration-350 transform hover:-translate-y-0.5"
           >
             <div className="aspect-[3/4] overflow-hidden relative">
               {item.type === "video" ? (
@@ -4638,7 +4646,7 @@ const ProductFilter = React.memo(({
   activeCat: string; 
   setActiveCat: (v: string) => void; 
   categories: string[];
-  theme: "light" | "dark" 
+  theme?: "light" | "dark" 
 }) => {
   const handleWheelScroll = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
     if (e.deltaY !== 0) {
@@ -4649,27 +4657,19 @@ const ProductFilter = React.memo(({
   return (
     <div className="mb-6 space-y-3 select-none">
       <div className="relative">
-        <Search className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${
-          theme === "dark" ? "text-white/40" : "text-black/40"
-        }`} />
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-black/40 dark:text-white/40" />
         <input 
           type="text" 
           placeholder="Search items, premium sarees, design kurtas..."
           value={searchVal}
           onChange={(e) => setSearchVal(e.target.value)}
-          className={`w-full py-3.5 pl-10 pr-10 rounded-2xl text-xs font-semibold border transition-all ${
-            theme === "dark" 
-              ? "bg-white/[0.04] border-white/10 text-white placeholder-white/30 focus:border-purple-500/50 focus:bg-white/10" 
-              : "bg-black/[0.03] border-black/10 text-black placeholder-black/30 focus:border-purple-500/40 focus:bg-black/10"
-          } outline-none`}
+          className="w-full py-3.5 pl-10 pr-10 rounded-2xl text-xs font-semibold border transition-all bg-black/[0.03] dark:bg-white/[0.04] border-black/10 dark:border-white/10 text-black dark:text-white placeholder-black/30 dark:placeholder-white/30 focus:border-purple-500/40 dark:focus:border-purple-500/50 focus:bg-black/10 dark:focus:bg-white/10 outline-none"
         />
         {searchVal && (
           <button 
             type="button"
             onClick={() => setSearchVal("")}
-            className={`absolute right-3.5 top-1/2 -translate-y-1/2 p-1 rounded-full ${
-              theme === "dark" ? "bg-white/10 hover:bg-white/20" : "bg-black/15 hover:bg-black/25"
-            } transition-colors`}
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 rounded-full bg-black/15 hover:bg-black/25 dark:bg-white/10 dark:hover:bg-white/20 transition-colors"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -4693,8 +4693,8 @@ const ProductFilter = React.memo(({
               }}
               className={`flex-none px-4 py-2.5 rounded-xl text-[11px] font-bold transition-all duration-300 no-underline text-inherit ${
                 activeCat === cat 
-                  ? (theme === "dark" ? "bg-purple-500 text-white shadow-lg shadow-purple-500/25" : "bg-purple-600 text-white shadow-lg shadow-purple-600/15") 
-                  : (theme === "dark" ? "bg-white/5 border border-white/10 hover:bg-white/10 text-white/70" : "bg-black/5 border border-black/10 hover:bg-black/10 text-black/70")
+                  ? "bg-purple-600 dark:bg-purple-500 text-white shadow-lg shadow-purple-600/15 dark:shadow-purple-500/25" 
+                  : "bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/10 text-black/70 dark:text-white/70"
               }`}
             >
               {cat}
@@ -4720,42 +4720,6 @@ const EmptyState = React.memo(({ icon: Icon, message }: { icon: any; message: st
     </div>
     <p className="text-white/30 text-[10px] font-black uppercase tracking-[0.3em]">{message}</p>
   </motion.div>
-));
-
-const ProductCard = React.memo(({ product, navigate, isMobile }: { product: any; navigate: any; isMobile: boolean }) => (
-  <a
-    href={`/product/${product.id}`}
-    onClick={(e) => {
-      e.preventDefault();
-      navigate(`/product/${product.id}`);
-    }}
-    className="group cursor-pointer flex flex-col perf-card text-inherit no-underline"
-  >
-    <motion.div 
-      initial={isMobile ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-      whileInView={isMobile ? undefined : { opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-      className="flex flex-col w-full"
-    >
-      <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-white/5 border border-white/10 mb-2 relative">
-        <MediaImage 
-          url={product.url} 
-          alt={product.name}
-          imgWidth={800}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-          loading="lazy"
-        />
-        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-          <div className="px-4 py-2 rounded-full bg-white text-black text-[10px] font-bold shadow-xl">View Details</div>
-        </div>
-      </div>
-      <div className="px-1">
-        <h4 className="font-semibold text-[11px] truncate mb-0.5">{product.name}</h4>
-        <p className="text-white/40 text-[10px]">₹{product.price}</p>
-      </div>
-    </motion.div>
-  </a>
 ));
 
 const ShopPostCard = React.memo(({ post, navigate, isMobile }: { post: any; navigate: any; isMobile: boolean }) => (
@@ -5028,19 +4992,22 @@ const ShareModal = ({
   );
 };
 
-const AnimatedThemeToggle = React.memo(({ theme, toggleTheme }: { theme: "light" | "dark"; toggleTheme: () => void }) => {
-  const isDark = theme === "dark";
+const AnimatedThemeToggle = React.memo(({ theme: propTheme, toggleTheme: propToggleTheme }: { theme?: "light" | "dark"; toggleTheme?: () => void } = {}) => {
+  const hookTheme = useTheme();
+  const currentTheme = propTheme || hookTheme;
+  const isDark = currentTheme === "dark";
+  const handleToggle = propToggleTheme || toggleDocumentTheme;
 
   return (
     <motion.button
-      onClick={toggleTheme}
+      onClick={handleToggle}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.92 }}
       role="switch"
       aria-checked={isDark}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-      className={`relative w-16 h-8 rounded-full p-1 transition-colors duration-300 flex items-center cursor-pointer select-none overflow-hidden border ${
+      className={`relative w-16 h-8 rounded-full p-1 transition-colors duration-200 flex items-center cursor-pointer select-none overflow-hidden border ${
         isDark 
           ? "bg-gradient-to-r from-[#141226] via-[#1C1738] to-[#0F1424] border-purple-500/30 shadow-[inset_0_1px_4px_rgba(0,0,0,0.6)]" 
           : "bg-gradient-to-r from-amber-100/90 via-rose-100/80 to-amber-50 border-amber-300/60 shadow-[inset_0_1px_3px_rgba(0,0,0,0.08)]"
@@ -5056,7 +5023,7 @@ const AnimatedThemeToggle = React.memo(({ theme, toggleTheme }: { theme: "light"
             y: isDark ? 0 : -8,
             scale: isDark ? 1 : 0.6,
           }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.25 }}
           className="absolute left-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1 text-purple-200/80"
         >
           <Sparkles className="w-3 h-3 text-amber-200 animate-pulse" />
@@ -5071,7 +5038,7 @@ const AnimatedThemeToggle = React.memo(({ theme, toggleTheme }: { theme: "light"
             y: isDark ? 8 : 0,
             scale: isDark ? 0.6 : 1,
           }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.25 }}
           className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-0.5 text-amber-600/70"
         >
           <div className="w-2.5 h-1.5 rounded-full bg-amber-400/40 blur-[0.5px]" />
@@ -5081,7 +5048,6 @@ const AnimatedThemeToggle = React.memo(({ theme, toggleTheme }: { theme: "light"
 
       {/* Sliding Celestial Knob */}
       <motion.div
-        layout
         transition={{
           type: "spring",
           stiffness: 500,
@@ -5103,7 +5069,7 @@ const AnimatedThemeToggle = React.memo(({ theme, toggleTheme }: { theme: "light"
               initial={{ rotate: -90, opacity: 0, scale: 0.5 }}
               animate={{ rotate: 0, opacity: 1, scale: 1 }}
               exit={{ rotate: 90, opacity: 0, scale: 0.5 }}
-              transition={{ duration: 0.25, ease: "easeOut" }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
               className="flex items-center justify-center"
             >
               <Moon className="w-3.5 h-3.5 fill-indigo-900 text-indigo-900 stroke-[2.2]" />
@@ -5114,7 +5080,7 @@ const AnimatedThemeToggle = React.memo(({ theme, toggleTheme }: { theme: "light"
               initial={{ rotate: 90, opacity: 0, scale: 0.5 }}
               animate={{ rotate: 0, opacity: 1, scale: 1 }}
               exit={{ rotate: -90, opacity: 0, scale: 0.5 }}
-              transition={{ duration: 0.25, ease: "easeOut" }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
               className="flex items-center justify-center"
             >
               <Sun className="w-3.5 h-3.5 fill-white text-white stroke-[2.2]" />
@@ -5126,7 +5092,7 @@ const AnimatedThemeToggle = React.memo(({ theme, toggleTheme }: { theme: "light"
   );
 });
 
-const HeaderShareButton = React.memo(({ profileName, theme }: { profileName: string; theme: string }) => {
+const HeaderShareButton = React.memo(({ profileName, theme }: { profileName: string; theme?: string }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleShareClick = useCallback(async (e: React.MouseEvent) => {
@@ -5160,11 +5126,11 @@ const HeaderShareButton = React.memo(({ profileName, theme }: { profileName: str
     <>
       <button 
         onClick={handleShareClick}
-        className={`p-2 rounded-full ${theme === "dark" ? "bg-white/5 hover:bg-white/10 border-white/10" : "bg-black/5 hover:bg-black/10 border-black/10"} transition-colors border active:scale-95`}
+        className="p-2 rounded-full bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border-black/10 dark:border-white/10 transition-colors border active:scale-95"
         title="Share Renu Fashion Hub"
         aria-label="Share"
       >
-        <Share2 className={`w-5 h-5 ${theme === "dark" ? "text-white/70" : "text-black/70"}`} />
+        <Share2 className="w-5 h-5 text-black/70 dark:text-white/70" />
       </button>
 
       {isOpen && (
@@ -5174,7 +5140,6 @@ const HeaderShareButton = React.memo(({ profileName, theme }: { profileName: str
           profileName={profileName}
           customUrl="https://www.renufashionhub.in"
           customTitle="Renu Fashion Hub"
-          theme={theme}
         />
       )}
     </>
@@ -5243,7 +5208,7 @@ const PageLoader = ({ theme }: { theme: string }) => (
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
     exit={{ opacity: 0 }}
-    className={`fixed inset-0 left-0 top-0 w-screen h-screen z-[9999] flex flex-col items-center justify-center ${theme === "dark" ? "bg-[#0B1512] gold-grain-dark text-rose-50" : "bg-[#FFF7F9] gold-grain-light text-stone-900"}`}
+    className={`fixed inset-0 left-0 top-0 w-screen h-screen z-[9999] flex flex-col items-center justify-center ${theme === "dark" ? "bg-[#141211] text-stone-100" : "bg-[#FAF8F5] text-stone-900"}`}
   >
     <motion.div
       initial={{ opacity: 0, scale: 0.8 }}
@@ -5489,7 +5454,7 @@ const GoogleAdSenseUnit = ({
 
   return (
     <div 
-      className={`w-full overflow-hidden transition-all duration-300 ease-out ${
+      className={`w-full overflow-hidden transition-opacity duration-300 ease-out ${
         isFilled 
           ? `my-6 opacity-100 flex flex-col items-center justify-center ${className}` 
           : "h-0 my-0 py-0 opacity-0 pointer-events-none"
@@ -5497,9 +5462,7 @@ const GoogleAdSenseUnit = ({
       aria-hidden={!isFilled}
     >
       {isFilled && (
-        <span className={`text-[9px] font-bold uppercase tracking-[0.2em] mb-1.5 ${
-          theme === "dark" ? "text-stone-500" : "text-stone-400"
-        }`}>
+        <span className="text-[9px] font-bold uppercase tracking-[0.2em] mb-1.5 text-stone-400 dark:text-stone-500">
           Advertisement
         </span>
       )}
@@ -5557,16 +5520,10 @@ export default function App() {
       setIsNavigating(false);
     }, 550);
   }, [navigate]);
-  const [theme, setTheme] = useState<"dark" | "light">(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const saved = localStorage.getItem("rfh_theme");
-        if (saved === "dark" || saved === "light") return saved;
-        if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) return "dark";
-      } catch (e) {}
-    }
-    return "light";
-  });
+  // Decoupled theme: Document theme is driven by CSS (.dark on <html>) without triggering full-tree App re-renders.
+  const theme = getDocumentTheme();
+  const [isGlobalShareModalOpen, setIsGlobalShareModalOpen] = useState(false);
+  const isAdminRoute = location.pathname === "/admin" || location.pathname === "/login";
   const [activeTab, setActiveTab] = useState("shop");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -5996,20 +5953,7 @@ export default function App() {
   const [isMuted, setIsMuted] = useState(true);
 
   const toggleTheme = useCallback(() => {
-    setTheme((prev) => {
-      const next = prev === "dark" ? "light" : "dark";
-      try {
-        localStorage.setItem("rfh_theme", next);
-        document.documentElement.setAttribute('data-theme', next);
-        document.documentElement.className = next;
-        if (next === "dark") {
-          document.documentElement.classList.add("dark");
-        } else {
-          document.documentElement.classList.remove("dark");
-        }
-      } catch (e) {}
-      return next;
-    });
+    toggleDocumentTheme();
   }, []);
 
   const handleSetSelectedPost = useCallback((post: any) => {
@@ -6916,7 +6860,7 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className={`fixed inset-0 left-0 top-0 w-screen h-screen z-[9999] flex flex-col items-center justify-center ${theme === "dark" ? "bg-[#0B1512] gold-grain-dark text-rose-50" : "bg-[#FFF7F9] gold-grain-light text-stone-900"}`}
+            className={`fixed inset-0 left-0 top-0 w-screen h-screen z-[9999] flex flex-col items-center justify-center ${theme === "dark" ? "bg-[#141211] text-stone-100" : "bg-[#FAF8F5] text-stone-900"}`}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
@@ -6950,10 +6894,20 @@ export default function App() {
             </motion.div>
           </motion.div>
         ) : (
-          <div className="min-h-screen relative">
-            <AnnouncementBanner theme={theme} />
+          <div className="min-h-screen relative flex flex-col bg-[#FAF9F6] dark:bg-[#0C0A09] text-stone-900 dark:text-stone-50 transition-colors duration-200">
+            {!isAdminRoute && (
+              <Header
+                profileName={profile.name}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                handleNavigate={handleNavigate}
+                onOpenShareModal={() => setIsGlobalShareModalOpen(true)}
+                isAdminUser={isAdminUser}
+              />
+            )}
 
-            <Routes location={location}>
+            <div className="flex-1">
+              <Routes location={location}>
           <Route path="/admin" element={
         <motion.div
           key="admin"
@@ -6968,7 +6922,7 @@ export default function App() {
           ) : (
           <div className="pb-32">
         {/* Admin Header */}
-        <div className={`sticky top-0 z-50 ${theme === "dark" ? "bg-[#0B1512]/90 border-white/10" : "bg-[#FFF7F9]/90 border-black/10"} md:backdrop-blur-xl border-b px-6 py-4`}>
+        <div className={`sticky top-0 z-50 ${theme === "dark" ? "bg-[#1C1A19]/95 border-white/10" : "bg-white/95 border-black/10"} md:backdrop-blur-xl border-b px-6 py-4`}>
           <div className="max-w-2xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-xl bg-rose-500/10 border border-rose-500/20">
@@ -7081,7 +7035,7 @@ export default function App() {
                 initial={{ opacity: 0, scale: 0.95, y: 15 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 15 }}
-                className={`relative w-full max-w-md p-6 rounded-3xl ${theme === "dark" ? "bg-[#161f1c] border-white/10" : "bg-white border-black/10"} border shadow-2xl`}
+                className={`relative w-full max-w-md p-6 rounded-3xl ${theme === "dark" ? "bg-[#1C1A19] border-white/10" : "bg-white border-black/10"} border shadow-2xl`}
               >
                 <div className="flex justify-between items-center mb-4">
                   <h3 className={`text-sm font-black uppercase tracking-wider flex items-center gap-2 ${theme === "dark" ? "text-rose-400" : "text-rose-600"}`}>
@@ -7122,7 +7076,7 @@ export default function App() {
                         value={linkEditorModal.value}
                         onChange={(e) => setLinkEditorModal(prev => ({ ...prev, value: e.target.value, error: "" }))}
                         placeholder={linkEditorModal.type === "link" ? "https://example.com" : "hello@example.com"}
-                        className={`w-full ${theme === "dark" ? "bg-[#0b1512] border-white/10 text-white placeholder-white/30" : "bg-stone-50 border-black/10 text-black placeholder-black/40"} border rounded-xl px-4 py-3 focus:outline-none focus:border-rose-500/50 transition-colors text-sm font-semibold`}
+                        className={`w-full ${theme === "dark" ? "bg-stone-900 border-white/10 text-white placeholder-white/30" : "bg-stone-50 border-black/10 text-black placeholder-black/40"} border rounded-xl px-4 py-3 focus:outline-none focus:border-rose-500/50 transition-colors text-sm font-semibold`}
                       />
                       {linkEditorModal.error && (
                         <p className="text-red-500 text-xs font-bold mt-1.5 animate-pulse">
@@ -7392,9 +7346,9 @@ export default function App() {
 
                   <div>
                     <label className={`block text-[10px] font-bold uppercase tracking-widest ${theme === "dark" ? "text-stone-400" : "text-stone-500"} mb-1`}>Article Content *</label>
-                    <div className={`rounded-xl border ${theme === "dark" ? "bg-[#0b1512] border-white/10" : "bg-stone-50 border-black/10"} overflow-hidden`}>
+                    <div className={`rounded-xl border ${theme === "dark" ? "bg-stone-900 border-white/10" : "bg-stone-50 border-black/10"} overflow-hidden`}>
                       {/* Edit Editor Toolbar */}
-                      <div className={`p-1.5 border-b flex flex-wrap items-center gap-1.5 ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-[#FFF7F9] border-black/10"}`}>
+                      <div className={`p-1.5 border-b flex flex-wrap items-center gap-1.5 ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-stone-100 border-black/10"}`}>
                         <button
                           type="button"
                           onMouseDown={(e) => {
@@ -8153,48 +8107,107 @@ export default function App() {
             )}
 
             {adminTab === "messages" && (
-              <section className={`p-6 rounded-3xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border`}>
-                <h2 className="text-lg font-bold mb-6 flex items-center gap-2">
-                  <MessageSquare className="w-5 h-5 text-green-500" />
-                  User Messages
-                </h2>
+              <section className="p-6 md:p-8 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-stone-200 dark:border-stone-800">
+                  <div>
+                    <h2 className="text-xl font-serif font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                      <MessageSquare className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+                      Customer Inquiries & Messages
+                    </h2>
+                    <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+                      Messages received from the website contact page
+                    </p>
+                  </div>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/40 w-fit">
+                    {messages.length} {messages.length === 1 ? 'Message' : 'Messages'}
+                  </span>
+                </div>
                 
                 {messages.length === 0 ? (
-                  <div className="text-center py-12">
-                    <div className={`w-16 h-16 rounded-full ${theme === "dark" ? "bg-white/5" : "bg-black/5"} flex items-center justify-center mx-auto mb-4`}>
-                      <MessageSquare className={`w-8 h-8 ${theme === "dark" ? "text-white/20" : "text-black/20"}`} />
+                  <div className="text-center py-16 px-4">
+                    <div className="w-16 h-16 rounded-full bg-stone-100 dark:bg-stone-800/80 flex items-center justify-center mx-auto mb-4 text-stone-400">
+                      <MessageSquare className="w-8 h-8" />
                     </div>
-                    <p className={`${theme === "dark" ? "text-white/40" : "text-black/40"} text-sm`}>No messages yet</p>
+                    <h3 className="text-base font-bold text-stone-900 dark:text-stone-100 mb-1">No Inquiries Received Yet</h3>
+                    <p className="text-xs text-stone-500 dark:text-stone-400 max-w-sm mx-auto">
+                      When customers submit styling questions or purchase inquiries on the Contact page, they will appear here in high-contrast view.
+                    </p>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {messages.map((msg) => (
-                      <div key={msg.id} className={`p-4 rounded-2xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border relative group`}>
-                        <div className="flex justify-between items-start mb-3">
+                      <div 
+                        key={msg.id} 
+                        className="p-5 sm:p-6 rounded-xl bg-stone-50/80 dark:bg-stone-950/70 border border-stone-200/90 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700 transition-colors shadow-xs"
+                      >
+                        {/* Header: Sender Name & Actions */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-stone-200 dark:border-stone-800">
                           <div>
-                            <h3 className="font-bold text-sm">{msg.name}</h3>
-                            <p className="text-[10px] text-white/40">{msg.timestamp}</p>
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-bold text-base text-stone-900 dark:text-stone-50">{msg.name}</h3>
+                              <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                Verified
+                              </span>
+                            </div>
+                            <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+                              Received: {msg.timestamp || "Recently"}
+                            </p>
                           </div>
-                          <button 
-                            onClick={() => setItemToDelete({ type: 'message', id: msg.id })}
-                            className={`p-2 rounded-lg ${theme === "dark" ? "bg-red-500/20 text-red-400 border border-red-500/30" : "bg-red-500/10 text-red-600 border border-red-500/20"}`}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          
+                          <div className="flex items-center gap-2">
+                            {msg.email && (
+                              <a
+                                href={`mailto:${msg.email}?subject=Reply to inquiry on Renu Fashion Hub`}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 border border-stone-200 dark:border-stone-700 hover:border-rose-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors shadow-2xs"
+                              >
+                                <Mail className="w-3.5 h-3.5 text-rose-500" />
+                                Reply Email
+                              </a>
+                            )}
+                            {msg.mobile && (
+                              <a
+                                href={`tel:${msg.mobile}`}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 border border-stone-200 dark:border-stone-700 hover:border-rose-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors shadow-2xs"
+                              >
+                                <Phone className="w-3.5 h-3.5 text-rose-500" />
+                                Call
+                              </a>
+                            )}
+                            <button 
+                              onClick={() => setItemToDelete({ type: 'message', id: msg.id })}
+                              className="p-1.5 rounded-lg text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
+                              title="Delete message"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
-                        <div className="space-y-1 mb-3">
-                          <div className="flex items-center gap-2 text-[11px] text-white/60">
-                            <Mail className="w-3 h-3" />
-                            {msg.email}
-                          </div>
-                          <div className="flex items-center gap-2 text-[11px] text-white/60">
-                            <Phone className="w-3 h-3" />
-                            {msg.mobile}
+
+                        {/* Contact Meta Badges */}
+                        <div className="flex flex-wrap gap-4 text-xs font-medium text-stone-700 dark:text-stone-300 mb-3.5">
+                          {msg.email && (
+                            <div className="flex items-center gap-1.5 bg-white dark:bg-stone-900 px-3 py-1.5 rounded-md border border-stone-200/80 dark:border-stone-800">
+                              <Mail className="w-3.5 h-3.5 text-rose-500" />
+                              <span className="font-semibold text-stone-800 dark:text-stone-200 select-all">{msg.email}</span>
+                            </div>
+                          )}
+                          {msg.mobile && (
+                            <div className="flex items-center gap-1.5 bg-white dark:bg-stone-900 px-3 py-1.5 rounded-md border border-stone-200/80 dark:border-stone-800">
+                              <Phone className="w-3.5 h-3.5 text-rose-500" />
+                              <span className="font-semibold text-stone-800 dark:text-stone-200 select-all">{msg.mobile}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* High-Contrast Message Content Box */}
+                        <div>
+                          <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-1">
+                            Message Body
+                          </label>
+                          <div className="p-4 rounded-xl bg-white dark:bg-stone-900 border border-stone-200/90 dark:border-stone-800 text-sm leading-relaxed text-stone-900 dark:text-stone-100 font-sans whitespace-pre-wrap shadow-inner">
+                            {msg.message}
                           </div>
                         </div>
-                        <p className="text-xs text-white/80 leading-relaxed bg-black/20 p-3 rounded-xl border border-white/5">
-                          {msg.message}
-                        </p>
                       </div>
                     ))}
                   </div>
@@ -8307,9 +8320,9 @@ export default function App() {
                   {/* Document Rich-Text Formatting Controls */}
                   <div>
                     <label className={`block text-[10px] font-bold uppercase tracking-widest ${theme === "dark" ? "text-white/40" : "text-black/40"} mb-1`}>Article Content *</label>
-                    <div className={`rounded-xl border ${theme === "dark" ? "bg-[#0b1512] border-white/10" : "bg-stone-50 border-black/10"} overflow-hidden`}>
+                    <div className={`rounded-xl border ${theme === "dark" ? "bg-stone-900 border-white/10" : "bg-stone-50 border-black/10"} overflow-hidden`}>
                       {/* Editor Toolbar */}
-                      <div className={`p-1.5 border-b flex flex-wrap items-center gap-1.5 ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-[#FFF7F9] border-black/10"}`}>
+                      <div className={`p-1.5 border-b flex flex-wrap items-center gap-1.5 ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-stone-100 border-black/10"}`}>
                         <button
                           type="button"
                           onMouseDown={(e) => {
@@ -9083,385 +9096,124 @@ export default function App() {
         </motion.div>
           } />
           <Route path="/" element={
-        <motion.div
-          key="profile"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
-          className={`min-h-screen ${theme === "dark" ? "gold-grain-dark text-rose-50" : "gold-grain-light text-[#1C1B18]"} font-sans selection:bg-rose-500/30 transition-colors duration-300`}
-        >
-
-      {/* Background Gradient */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none will-change-transform">
-        <div 
-          className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] blur-[100px] rounded-full transition-colors duration-300"
-          style={{ backgroundColor: "var(--rf-glow-1)" }} 
-        />
-        <div 
-          className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] blur-[100px] rounded-full transition-colors duration-300" 
-          style={{ backgroundColor: "var(--rf-glow-2)" }}
-        />
-      </div>
-
-      <div className="relative w-full max-w-md md:max-w-3xl lg:max-w-6xl mx-auto px-6 md:px-8 lg:px-12 pt-16 pb-24">
-        {/* Header Actions */}
-        <div className="absolute top-6 left-6 flex gap-3 z-20">
-          <AnimatedThemeToggle theme={theme} toggleTheme={toggleTheme} />
-        </div>
-
-        <div className="absolute top-6 right-6 flex gap-3 z-20">
-          <HeaderShareButton profileName={profile.name} theme={theme} />
-        </div>
-
-        <div className="lg:grid lg:grid-cols-12 lg:gap-12 items-start mt-8">
-          {/* Left Column: Profile & Social Links & Action Buttons */}
-          <div 
-            ref={sidebarRef}
-            className="lg:col-span-5 space-y-6 lg:sticky"
-            style={isMobile ? {} : {
-              position: "sticky",
-              top: `calc(100vh - ${sidebarHeight + 40}px)`,
-              alignSelf: "start"
-            }}
-          >
-            
-            {/* Profile Section */}
-            <motion.div 
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-              className="flex flex-col items-center lg:items-start text-center lg:text-left"
+            <motion.div
+              key="home"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="w-full"
             >
-              <div className="relative mb-4">
-                <div className="w-28 h-28 rounded-full p-1 bg-gradient-to-tr from-rose-600 via-rose-400 to-yellow-300">
-                  <MediaImage 
-                    url={profile.avatar} 
-                    alt={profile.name} 
-                    className={`w-full h-full rounded-full object-cover border-4 ${theme === "dark" ? "border-[#0B1512]" : "border-white"}`}
-                    fallback={
-                      <div className={`w-full h-full rounded-full ${theme === "dark" ? "bg-[#0B1512]" : "bg-[#FFF7F9]"} flex items-center justify-center`}>
-                        <User className={`w-12 h-12 ${theme === "dark" ? "text-white/20" : "text-black/20"}`} />
-                      </div>
-                    }
+              {/* 1. Hero Section */}
+              <Hero
+                handleNavigate={handleNavigate}
+                featuredProduct={products[0]}
+                profileAvatar={profile.avatar}
+                profileName={profile.name}
+              />
+
+              {/* 2. Visual Category Showcase (5 curated routes) */}
+              <CategoryShowcase
+                handleNavigate={handleNavigate}
+                products={products}
+              />
+
+              {/* 3. Featured Curations & Discovery Section */}
+              <section id="collections-grid" className="py-12 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                {/* Section Header */}
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+                  <div>
+                    <div className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.2em] text-rose-600 dark:text-rose-400 mb-1.5">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Haute Couture Catalog</span>
+                    </div>
+                    <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-stone-900 dark:text-stone-50">
+                      {searchQuery 
+                        ? `Search Results for "${searchQuery}"` 
+                        : (selectedCategory && selectedCategory !== "All") 
+                          ? `${selectedCategory} Collection` 
+                          : "Curated Indian Styles & New Arrivals"}
+                    </h1>
+                  </div>
+                  <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 max-w-md">
+                    Handpicked pieces from verified boutique partners, offering genuine zari borders, breathable cottons, and heirloom bridal craftsmanship.
+                  </p>
+                </div>
+
+                {/* Weekly Best Sellers Carousel */}
+                <div className="mb-10">
+                  <LatestArrivalsCarousel products={products} posts={posts} navigate={handleNavigate} />
+                </div>
+
+                {/* AdSense Unit */}
+                <div className="mb-10">
+                  <GoogleAdSenseUnit />
+                </div>
+
+                {/* Filter & Search Bar */}
+                <div className="mb-8">
+                  <ProductFilter 
+                    searchVal={searchQuery} 
+                    setSearchVal={setSearchQuery} 
+                    activeCat={selectedCategory} 
+                    setActiveCat={setSelectedCategory} 
+                    categories={dynamicCategories}
                   />
                 </div>
-              </div>
-              
-              <div className="flex items-center justify-center lg:justify-start gap-2 mb-1">
-                <div className="text-2xl font-bold tracking-tight">{profile.name}</div>
-                <CheckCircle2 className="w-5 h-5 text-blue-500 fill-blue-500/10" />
-              </div>
-              <div className="flex items-center justify-center lg:justify-start gap-1.5 mb-2">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded-full">Verified Creator</span>
-              </div>
-              <a 
-                href="https://renufashionhub.in" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className={`${theme === "dark" ? "text-white/40 hover:text-white/60" : "text-black/40 hover:text-black/60"} text-xs mb-4 transition-colors flex items-center justify-center lg:justify-start gap-1`}
-              >
-                <Globe className="w-3 h-3" />
-                renufashionhub.in
-              </a>
-              
-              <p className={`${theme === "dark" ? "text-white/60" : "text-black/60"} text-sm leading-relaxed mb-6 whitespace-pre-line max-w-[280px] lg:max-w-none`}>
-                {profile.bio}
-              </p>
-            </motion.div>
 
-            {/* Social Links */}
-            <div className="space-y-3">
-              {INITIAL_SOCIAL_LINKS.map((social, index) => (
-                <motion.a 
-                  key={index}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  initial={{ opacity: 0, x: -30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
-                  whileHover="hover"
-                  className={`relative overflow-hidden flex items-center justify-between p-4 rounded-2xl ${theme === "dark" ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} transition-all border group`}
-                >
-                  <motion.div
-                    variants={{
-                      initial: { y: "100%" },
-                      hover: { y: 0 }
-                    }}
-                    transition={{ type: "tween", ease: [0.22, 1, 0.36, 1], duration: 0.4 }}
-                    className="absolute inset-0 bg-rose-500/10 -z-10"
-                  />
-                  <div className="relative z-10 flex items-center gap-4">
-                    <div className={`p-2 rounded-xl ${theme === "dark" ? "bg-white/5 group-hover:bg-white/10" : "bg-black/5 group-hover:bg-black/10"} transition-colors`}>
-                      <social.icon className={`w-5 h-5 ${social.color}`} />
-                    </div>
-                    <div>
-                      <p className={`text-sm font-bold ${theme === "dark" ? "text-white/90 group-hover:text-white" : "text-black/90 group-hover:text-black"} transition-colors`}>{social.handle}</p>
-                      <p className={`text-[10px] ${theme === "dark" ? "text-white/40" : "text-black/40"} uppercase tracking-widest`}>{social.label}</p>
-                    </div>
+                {/* Clean Segmented Tabs (Curated / Lookbooks / All Products) */}
+                <div className="flex items-center justify-between flex-wrap gap-4 mb-6 pb-4 border-b border-stone-200/80 dark:border-stone-800">
+                  <div className="inline-flex p-1 bg-stone-100 dark:bg-stone-900 rounded-xl border border-stone-200/60 dark:border-stone-800">
+                    {INITIAL_TABS.map((tab) => (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => handleSetActiveTab(tab.id)}
+                        className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                          activeTab === tab.id
+                            ? "bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 shadow-sm"
+                            : "text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
                   </div>
-                  <div className="relative z-10 flex items-center gap-2">
-                    <ExternalLink className={`w-4 h-4 ${theme === "dark" ? "text-white/20 group-hover:text-white/40" : "text-black/20 group-hover:text-black/40"} transition-colors`} />
-                  </div>
-                </motion.a>
-              ))}
-            </div>
 
-            {/* Contact, Blog, and About Buttons */}
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-4">
-                <PremiumButton
-                  onClick={() => handleNavigate("/contact")}
-                  className="w-full"
-                  variant={theme === "dark" ? "secondary" : "primary"}
-                >
-                  Contact Us
-                </PremiumButton>
-                <PremiumButton
-                  onClick={() => handleNavigate("/blog")}
-                  className="w-full animate-pulse-glow"
-                  variant="primary"
-                >
-                  <span className="flex items-center justify-center gap-2">
-                    <BookOpen className="w-4 h-4 text-white animate-pulse" />
-                    Fashion Blog
-                  </span>
-                </PremiumButton>
-              </div>
-              <PremiumButton
-                onClick={() => handleNavigate("/about")}
-                className="w-full"
-                variant={theme === "dark" ? "secondary" : "primary"}
-              >
-                <span className="flex items-center justify-center gap-2">
-                  <Sparkles className="w-4 h-4 text-rose-500" />
-                  About Renu Fashion Hub
-                </span>
-              </PremiumButton>
-
-              {/* Added Legal buttons adjacent to About button */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 relative z-30">
-                <motion.button
-                  whileHover={{ 
-                    scale: 1.04, 
-                    boxShadow: theme === "dark" ? "0 0 14px rgba(245, 158, 11, 0.35)" : "0 0 10px rgba(245, 158, 11, 0.22)",
-                    borderColor: "rgba(245, 158, 11, 0.45)",
-                    color: theme === "dark" ? "#FB7185" : "#BE123C"
-                  }}
-                  whileTap={{ scale: 0.96 }}
-                  transition={{ type: "spring", stiffness: 420, damping: 17 }}
-                  onClick={() => handleNavigate("/privacy-policy")}
-                  className={`py-3 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider transition-colors border ${
-                    theme === "dark" 
-                      ? "bg-white/[0.03] border-white/10 text-stone-300 hover:bg-white/[0.06]" 
-                      : "bg-white border-stone-200 text-stone-700 hover:bg-stone-50"
-                  } text-center truncate cursor-pointer select-none focus:outline-none`}
-                >
-                  Privacy Policy
-                </motion.button>
-                <motion.button
-                  whileHover={{ 
-                    scale: 1.04, 
-                    boxShadow: theme === "dark" ? "0 0 14px rgba(245, 158, 11, 0.35)" : "0 0 10px rgba(245, 158, 11, 0.22)",
-                    borderColor: "rgba(245, 158, 11, 0.45)",
-                    color: theme === "dark" ? "#FB7185" : "#BE123C"
-                  }}
-                  whileTap={{ scale: 0.96 }}
-                  transition={{ type: "spring", stiffness: 420, damping: 17 }}
-                  onClick={() => handleNavigate("/terms-of-service")}
-                  className={`py-3 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider transition-colors border ${
-                    theme === "dark" 
-                      ? "bg-white/[0.03] border-white/10 text-stone-300 hover:bg-white/[0.06]" 
-                      : "bg-white border-stone-200 text-stone-700 hover:bg-stone-50"
-                  } text-center truncate cursor-pointer select-none focus:outline-none`}
-                >
-                  Terms of Service
-                </motion.button>
-                <motion.button
-                  whileHover={{ 
-                    scale: 1.04, 
-                    boxShadow: theme === "dark" ? "0 0 14px rgba(245, 158, 11, 0.35)" : "0 0 10px rgba(245, 158, 11, 0.22)",
-                    borderColor: "rgba(245, 158, 11, 0.45)",
-                    color: theme === "dark" ? "#FB7185" : "#BE123C"
-                  }}
-                  whileTap={{ scale: 0.96 }}
-                  transition={{ type: "spring", stiffness: 420, damping: 17 }}
-                  onClick={() => handleNavigate("/disclaimer")}
-                  className={`py-3 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider transition-colors border ${
-                    theme === "dark" 
-                      ? "bg-white/[0.03] border-white/10 text-stone-300 hover:bg-white/[0.06]" 
-                      : "bg-white border-stone-200 text-stone-700 hover:bg-stone-50"
-                  } text-center truncate cursor-pointer select-none focus:outline-none`}
-                >
-                  Disclaimer
-                </motion.button>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Right Column: Carousel, Tabs & Dynamic Content List */}
-          <div className="lg:col-span-7 space-y-8 mt-10 lg:mt-0">
-            {/* Dynamic visible H1 tag for SEO compliance */}
-            <h1 className="text-xl sm:text-2xl font-black font-serif tracking-tight text-rose-950 dark:text-rose-100 leading-tight">
-              {searchQuery 
-                ? `Search Results for "${searchQuery}"` 
-                : (selectedCategory && selectedCategory !== "All") 
-                  ? selectedCategory 
-                  : "Renu Fashion Hub – Women's Fashion, Sarees, Kurtis, Jewellery & Style Guides"}
-            </h1>
-            {/* Weekly Best Sellers Carousel */}
-            <LatestArrivalsCarousel products={products} posts={posts} theme={theme} navigate={handleNavigate} />
-            <GoogleAdSenseUnit theme={theme} />
-
-        {/* Tabs Navigation */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className={`flex p-1.5 rounded-2xl ${theme === "dark" ? "bg-white/10 border-white/10" : "bg-black/10 border-black/10"} border md:backdrop-blur-2xl mb-6`}
-        >
-          {INITIAL_TABS.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => handleSetActiveTab(tab.id)}
-              className={`flex-1 py-3 rounded-xl text-xs font-bold transition-all relative overflow-hidden group ${
-                activeTab === tab.id 
-                  ? (theme === "dark" ? "text-white" : "text-black") 
-                  : (theme === "dark" ? "text-white/40" : "text-black/40")
-              }`}
-            >
-              <motion.div
-                initial={false}
-                animate={{ 
-                  y: activeTab === tab.id ? 0 : "100%",
-                  opacity: activeTab === tab.id ? 1 : 0
-                }}
-                transition={{ type: "tween", ease: [0.22, 1, 0.36, 1], duration: 0.4 }}
-                className={`absolute inset-0 -z-10 ${theme === "dark" ? "bg-rose-500/20" : "bg-rose-500/10"}`}
-              />
-              <span className="relative z-10">{tab.label}</span>
-              {activeTab === tab.id && (
-                <motion.div 
-                  layoutId="activeTabIndicator"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-500"
-                />
-              )}
-            </button>
-          ))}
-        </motion.div>
-
-        {/* Search Bar & Categories Horizontal Slider */}
-        <ProductFilter 
-          searchVal={searchQuery} 
-          setSearchVal={setSearchQuery} 
-          activeCat={selectedCategory} 
-          setActiveCat={setSelectedCategory} 
-          categories={dynamicCategories}
-          theme={theme} 
-        />
-
-        {/* Tab Content */}
-        <div className="min-h-[400px] will-change-contents">
-          <AnimatePresence mode="wait" initial={false}>
-            {activeTab === "shop" && (
-              <motion.div
-                key="shop"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4"
-              >
-                {filteredPosts.length === 0 && filteredProducts.length === 0 ? (
-                  <div className="col-span-full">
-                    <EmptyState icon={ShoppingBag} message={searchQuery || selectedCategory !== "All" ? "No items match your search" : "No any products yet"} />
-                  </div>
-                ) : (
-                  shopItems.map((_, index) => (
-                    <React.Fragment key={index}>
-                      {filteredPosts[index] && (
-                        <ShopPostCard post={filteredPosts[index]} navigate={handleNavigate} isMobile={isMobile} />
-                      )}
-                      {filteredProducts[index] && (
-                        <ProductCard product={filteredProducts[index]} navigate={handleNavigate} isMobile={isMobile} />
-                      )}
-                    </React.Fragment>
-                  ))
-                )}
-              </motion.div>
-            )}
-
-            {activeTab === "post" && (
-              <motion.div
-                key="post"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4"
-              >
-                {filteredPosts.length === 0 ? (
-                  <div className="col-span-full">
-                    <EmptyState icon={ImageIcon} message={searchQuery || selectedCategory !== "All" ? "No posts match your search" : "No posts yet"} />
-                  </div>
-                ) : (
-                  filteredPosts.map((post: any) => (
-                    <ShopPostCard key={post.id} post={post} navigate={handleNavigate} isMobile={isMobile} />
-                  ))
-                )}
-              </motion.div>
-            )}
-
-            {activeTab === "products" && (
-              <motion.div
-                key="products"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                className="space-y-4"
-              >
-                {/* Price Sort Selector Bar */}
-                <div className={`flex items-center justify-between gap-1.5 p-2 rounded-2xl border ${
-                  theme === "dark" 
-                    ? "bg-[#141B19]/40 border-white/10" 
-                    : "bg-[#1C1B18]/5 border-[#1C1B18]/10"
-                }`}>
-                  <span className={`text-[8.5px] font-black uppercase tracking-wider ${theme === "dark" ? "text-rose-100/90" : "text-[#1C1B18]"} flex items-center gap-1 flex-shrink-0`}>
-                    <ArrowUpDown className="w-3 h-3 text-rose-500" /> Price:
-                  </span>
-                  <div className="flex items-center gap-1.5 flex-1 justify-end min-w-0">
+                  {/* Price Sort Controls */}
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 dark:text-stone-500 flex items-center gap-1">
+                      <ArrowUpDown className="w-3 h-3 text-rose-500" /> Sort:
+                    </span>
                     <button
+                      type="button"
                       onClick={() => setSortBy("default")}
-                      className={`px-2 py-1.5 rounded-xl text-[8.5px] font-black uppercase tracking-tight transition-all duration-300 flex-shrink-0 ${
+                      className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${
                         sortBy === "default"
-                          ? (theme === "dark" ? "bg-rose-500 text-stone-950 shadow-md shadow-rose-500/20" : "bg-stone-900 text-stone-50 shadow-md shadow-black/10")
-                          : (theme === "dark" ? "bg-white/5 border border-white/5 hover:bg-white/15 text-stone-300 shadow-sm" : "bg-black/5 border border-transparent hover:bg-black/10 text-stone-700")
+                          ? "bg-rose-600 text-white shadow-xs"
+                          : "bg-stone-100 dark:bg-stone-900 text-stone-600 dark:text-stone-400 hover:text-stone-900"
                       }`}
                     >
                       Featured
                     </button>
                     <button
+                      type="button"
                       onClick={() => setSortBy("price-asc")}
-                      className={`px-2 py-1.5 rounded-xl text-[8.5px] font-black uppercase tracking-tight transition-all duration-300 flex-shrink-0 ${
+                      className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${
                         sortBy === "price-asc"
-                          ? (theme === "dark" ? "bg-rose-500 text-stone-950 shadow-md shadow-rose-500/20" : "bg-stone-900 text-stone-50 shadow-md shadow-black/10")
-                          : (theme === "dark" ? "bg-white/5 border border-white/5 hover:bg-white/15 text-stone-300 shadow-sm" : "bg-black/5 border border-transparent hover:bg-black/10 text-stone-700")
+                          ? "bg-rose-600 text-white shadow-xs"
+                          : "bg-stone-100 dark:bg-stone-900 text-stone-600 dark:text-stone-400 hover:text-stone-900"
                       }`}
                     >
                       Low to High
                     </button>
                     <button
+                      type="button"
                       onClick={() => setSortBy("price-desc")}
-                      className={`px-2 py-1.5 rounded-xl text-[8.5px] font-black uppercase tracking-tight transition-all duration-300 flex-shrink-0 ${
+                      className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${
                         sortBy === "price-desc"
-                          ? (theme === "dark" ? "bg-rose-500 text-stone-950 shadow-md shadow-rose-500/20" : "bg-stone-900 text-stone-50 shadow-md shadow-black/10")
-                          : (theme === "dark" ? "bg-white/5 border border-white/5 hover:bg-white/15 text-stone-300 shadow-sm" : "bg-black/5 border border-transparent hover:bg-black/10 text-stone-700")
+                          ? "bg-rose-600 text-white shadow-xs"
+                          : "bg-stone-100 dark:bg-stone-900 text-stone-600 dark:text-stone-400 hover:text-stone-900"
                       }`}
                     >
                       High to Low
@@ -9469,343 +9221,186 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
-                  {filteredProducts.length === 0 ? (
-                    <div className="col-span-full">
-                      <EmptyState icon={Tag} message={searchQuery || selectedCategory !== "All" ? "No products match your search" : "No any products yet"} />
-                    </div>
-                  ) : (
-                    filteredProducts.map((product: any) => (
-                      <ProductCard key={product.id} product={product} navigate={handleNavigate} isMobile={isMobile} />
-                    ))
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Full Screen Post View */}
-        <AnimatePresence>
-          {selectedPost && (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[200] bg-black flex flex-col"
-            >
-              {/* Close Button */}
-              <button 
-                onClick={() => setSelectedPost(null)}
-                className="absolute top-6 right-6 z-[210] p-3 rounded-full bg-black/80 md:backdrop-blur-xl text-white border border-white/10 hover:bg-black/60 transition-all"
-              >
-                <X className="w-6 h-6" />
-              </button>
-
-              <div className="flex-1 relative flex items-center justify-center overflow-hidden">
-                {selectedPost.type === "video" ? (
-                  <div className="w-full h-full">
-                    <VideoEmbed url={selectedPost.url} isMuted={isMuted} />
-                  </div>
-                ) : (
-                  <MediaImage 
-                    url={selectedPost.url} 
-                    className="w-full h-full object-contain" 
-                  />
-                )}
-
-                {/* Top Overlay Controls */}
-                <div className="absolute top-6 left-6 z-20 flex items-center gap-3">
-                  <motion.button 
-                    whileTap={{ scale: 0.8 }}
-                    whileHover={{ scale: 1.15 }}
-                    onClick={() => setIsMuted(!isMuted)}
-                    className="p-4 rounded-full bg-black/50 md:backdrop-blur-2xl text-white hover:bg-black/70 transition-all border border-white/20 shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
-                  >
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={isMuted ? "muted" : "unmuted"}
-                        initial={{ opacity: 0, scale: 0.2, rotate: -45 }}
-                        animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                        exit={{ opacity: 0, scale: 0.2, rotate: 45 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                      >
-                        {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
-                      </motion.div>
-                    </AnimatePresence>
-                  </motion.button>
-                </div>
-              </div>
-
-              {/* Bottom Overlay: Info & Products */}
-              <div className="p-6 bg-gradient-to-t from-black via-black/80 to-transparent">
-                {/* User Info */}
-                <div className="flex items-center gap-4 mb-6">
-                  <MediaImage 
-                    url={profile.avatar} 
-                    className="w-12 h-12 rounded-full border-2 border-white/40 object-cover shadow-2xl" 
-                  />
-                  <div>
-                    <h4 className="text-base font-black text-white tracking-tight leading-tight">
-                      {profile.name}
-                    </h4>
-                    <p className="text-xs text-white/50 font-bold tracking-wide">
-                      renufashionhub.in
-                    </p>
-                  </div>
-                </div>
-
-                {/* Tagged Products Section */}
-                {selectedPost.taggedProducts && selectedPost.taggedProducts.length > 0 && (
-                  <div className="space-y-4">
-                    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x" onWheel={(e) => { if (e.deltaY !== 0) { e.currentTarget.scrollLeft += e.deltaY; } }}>
-                      {selectedPost.taggedProducts.map((productId: number) => {
-                        const product = products.find((p: any) => p.id === productId);
-                        if (!product) return null;
-                        return (
-                          <div 
-                            key={productId} 
-                            onClick={() => product.buyUrl && window.open(product.buyUrl, "_blank")}
-                            className="flex-shrink-0 w-64 p-2 rounded-2xl bg-white/10 md:backdrop-blur-xl border border-white/20 hover:bg-white/20 transition-all cursor-pointer group/item flex gap-3 snap-center"
-                          >
-                            <MediaImage url={product.url} className="w-20 h-20 object-cover rounded-xl" />
-                            <div className="flex-1 min-w-0 flex flex-col justify-center">
-                              <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Meesho</p>
-                              <p className="text-[11px] font-bold truncate text-white">{product.name}</p>
-                              <div className="flex items-center gap-2 mt-1">
-                                <span className="text-[11px] font-bold text-white">₹{product.price}</span>
-                                {(product as any).originalPrice && Number((product as any).originalPrice) > Number(product.price) && (
-                                  <span className="text-[9px] text-white/40 line-through">₹{(product as any).originalPrice}</span>
-                                )}
-                              </div>
-                            </div>
+                {/* Tab Products / Posts Grid */}
+                <div className="min-h-[400px]">
+                  <AnimatePresence mode="wait" initial={false}>
+                    {activeTab === "shop" && (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+                        {filteredPosts.length === 0 && filteredProducts.length === 0 ? (
+                          <div className="col-span-full">
+                            <EmptyState icon={ShoppingBag} message={searchQuery || selectedCategory !== "All" ? "No items match your search" : "No products yet"} />
                           </div>
-                        );
-                      })}
-                    </div>
-                    
-                    <PremiumButton 
-                      onClick={() => {
-                        if (selectedPost.taggedProducts?.[0]) {
-                          const product = products.find((p: any) => p.id === selectedPost.taggedProducts[0]);
-                          if (product?.buyUrl) window.open(product.buyUrl, "_blank");
-                        }
-                      }}
-                      className="w-full"
-                      icon={ShoppingBag}
+                        ) : (
+                          shopItems.map((_, index) => (
+                            <React.Fragment key={index}>
+                              {filteredPosts[index] && (
+                                <ShopPostCard post={filteredPosts[index]} navigate={handleNavigate} isMobile={isMobile} />
+                              )}
+                              {filteredProducts[index] && (
+                                <ProductCard product={filteredProducts[index]} navigate={handleNavigate} isMobile={isMobile} />
+                              )}
+                            </React.Fragment>
+                          ))
+                        )}
+                      </div>
+                    )}
+
+                    {activeTab === "post" && (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+                        {filteredPosts.length === 0 ? (
+                          <div className="col-span-full">
+                            <EmptyState icon={ImageIcon} message={searchQuery || selectedCategory !== "All" ? "No posts match your search" : "No posts yet"} />
+                          </div>
+                        ) : (
+                          filteredPosts.map((post: any) => (
+                            <ShopPostCard key={post.id} post={post} navigate={handleNavigate} isMobile={isMobile} />
+                          ))
+                        )}
+                      </div>
+                    )}
+
+                    {activeTab === "products" && (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+                        {filteredProducts.length === 0 ? (
+                          <div className="col-span-full">
+                            <EmptyState icon={Tag} message={searchQuery || selectedCategory !== "All" ? "No products match your search" : "No products yet"} />
+                          </div>
+                        ) : (
+                          filteredProducts.map((product: any) => (
+                            <ProductCard key={product.id} product={product} navigate={handleNavigate} isMobile={isMobile} />
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </section>
+
+              {/* 4. Full Screen Post View */}
+              <AnimatePresence>
+                {selectedPost && (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-[200] bg-black flex flex-col"
+                  >
+                    {/* Close Button */}
+                    <button 
+                      onClick={() => setSelectedPost(null)}
+                      className="absolute top-6 right-6 z-[210] p-3 rounded-full bg-black/80 md:backdrop-blur-xl text-white border border-white/10 hover:bg-black/60 transition-all cursor-pointer"
                     >
-                      Shop Tagged Products
-                    </PremiumButton>
-                  </div>
+                      <X className="w-6 h-6" />
+                    </button>
+
+                    <div className="flex-1 relative flex items-center justify-center overflow-hidden">
+                      {selectedPost.type === "video" ? (
+                        <div className="w-full h-full">
+                          <VideoEmbed url={selectedPost.url} isMuted={isMuted} />
+                        </div>
+                      ) : (
+                        <MediaImage 
+                          url={selectedPost.url} 
+                          className="w-full h-full object-contain" 
+                        />
+                      )}
+
+                      {/* Top Overlay Controls */}
+                      <div className="absolute top-6 left-6 z-20 flex items-center gap-3">
+                        <motion.button 
+                          whileTap={{ scale: 0.8 }}
+                          whileHover={{ scale: 1.15 }}
+                          onClick={() => setIsMuted(!isMuted)}
+                          className="p-4 rounded-full bg-black/50 md:backdrop-blur-2xl text-white hover:bg-black/70 transition-all border border-white/20 shadow-[0_10px_30px_rgba(0,0,0,0.5)] cursor-pointer"
+                        >
+                          <AnimatePresence mode="wait">
+                            <motion.div
+                              key={isMuted ? "muted" : "unmuted"}
+                              initial={{ opacity: 0, scale: 0.2, rotate: -45 }}
+                              animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                              exit={{ opacity: 0, scale: 0.2, rotate: 45 }}
+                              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                            >
+                              {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
+                            </motion.div>
+                          </AnimatePresence>
+                        </motion.button>
+                      </div>
+                    </div>
+
+                    {/* Bottom Overlay: Info & Products */}
+                    <div className="p-6 bg-gradient-to-t from-black via-black/80 to-transparent">
+                      {/* User Info */}
+                      <div className="flex items-center gap-4 mb-6">
+                        <MediaImage 
+                          url={profile.avatar} 
+                          className="w-12 h-12 rounded-full border-2 border-white/40 object-cover shadow-2xl" 
+                        />
+                        <div>
+                          <h4 className="text-base font-black text-white tracking-tight leading-tight">
+                            {profile.name}
+                          </h4>
+                          <p className="text-xs text-white/50 font-bold tracking-wide">
+                            renufashionhub.in
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Tagged Products Section */}
+                      {selectedPost.taggedProducts && selectedPost.taggedProducts.length > 0 && (
+                        <div className="space-y-4">
+                          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x" onWheel={(e) => { if (e.deltaY !== 0) { e.currentTarget.scrollLeft += e.deltaY; } }}>
+                            {selectedPost.taggedProducts.map((productId: number) => {
+                              const product = products.find((p: any) => p.id === productId);
+                              if (!product) return null;
+                              return (
+                                <div 
+                                  key={productId} 
+                                  onClick={() => product.buyUrl && window.open(product.buyUrl, "_blank")}
+                                  className="flex-shrink-0 w-64 p-2 rounded-2xl bg-white/10 md:backdrop-blur-xl border border-white/20 hover:bg-white/20 transition-all cursor-pointer group/item flex gap-3 snap-center"
+                                >
+                                  <MediaImage url={product.url} className="w-20 h-20 object-cover rounded-xl" />
+                                  <div className="flex-1 min-w-0 flex flex-col justify-center">
+                                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Meesho</p>
+                                    <p className="text-[11px] font-bold truncate text-white">{product.name}</p>
+                                    <div className="flex items-center gap-2 mt-1">
+                                      <span className="text-[11px] font-bold text-white">₹{product.price}</span>
+                                      {(product as any).originalPrice && Number((product as any).originalPrice) > Number(product.price) && (
+                                        <span className="text-[9px] text-white/40 line-through">₹{(product as any).originalPrice}</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                          
+                          <PremiumButton 
+                            onClick={() => {
+                              if (selectedPost.taggedProducts?.[0]) {
+                                const product = products.find((p: any) => p.id === selectedPost.taggedProducts[0]);
+                                if (product?.buyUrl) window.open(product.buyUrl, "_blank");
+                              }
+                            }}
+                            className="w-full cursor-pointer"
+                            icon={ShoppingBag}
+                          >
+                            Shop Tagged Products
+                          </PremiumButton>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
                 )}
-              </div>
+              </AnimatePresence>
+
+              {/* 5. Editorial Curator Story & Trust Section */}
+              <EditorialStory profile={profile} handleNavigate={handleNavigate} />
+
+              {/* 6. Blog Spotlight / Lookbooks */}
+              <BlogSpotlight blogs={blogs} handleNavigate={handleNavigate} />
+
             </motion.div>
-          )}
-        </AnimatePresence>
-
-
-          </div> {/* End of Right Column */}
-        </div> {/* End of lg:grid Grid */}
-
-        {/* Footer */}
-        <motion.footer 
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 1, ease: "easeOut" }}
-          className="mt-16 mb-12 px-4"
-        >
-          {/* Elegant Divider with Center Badge */}
-          <div className="relative flex items-center justify-center my-10">
-            <div className={`absolute left-0 right-0 h-[1px] ${
-              theme === "dark" 
-                ? "bg-gradient-to-r from-transparent via-white/10 to-transparent" 
-                : "bg-gradient-to-r from-transparent via-black/10 to-transparent"
-            }`} />
-            <div 
-              className={`relative z-10 px-4 py-1.5 rounded-full border text-[9px] font-black uppercase tracking-widest flex items-center gap-2 shadow-sm ${
-                theme === "dark" 
-                  ? "bg-[#09100E] border-white/10 text-rose-500/80" 
-                  : "bg-white border-black/10 text-rose-600/80"
-              }`}
-            >
-              <Sparkles className="w-3.5 h-3.5 animate-pulse text-rose-500" />
-              <span>Premium Experience</span>
-            </div>
-          </div>
-
-          <div className="max-w-md mx-auto flex flex-col items-center gap-6">
-            {/* Top Side: Exquisite Designer Card */}
-            <motion.div 
-              whileHover={{ y: -2 }}
-              transition={{ duration: 0.2 }}
-              className={`flex items-center gap-3.5 p-3.5 rounded-2xl border transition-all ${
-                theme === "dark" 
-                  ? "bg-white/[0.02] hover:bg-white/[0.04] border-white/10 text-rose-50 shadow-[0_4px_24px_rgba(0,0,0,0.4)]" 
-                  : "bg-[#1C1B18]/[0.01] hover:bg-[#1C1B18]/[0.03] border-black/10 text-[#1C1B18] shadow-[0_4px_24px_rgba(0,0,0,0.02)]"
-              }`}
-            >
-              <div className={`p-2 rounded-xl ${
-                theme === "dark" 
-                  ? "bg-gradient-to-br from-rose-500/10 to-rose-500/15 border border-white/5" 
-                  : "bg-gradient-to-br from-rose-500/5 to-rose-500/10 border border-black/5"
-              }`}>
-                <Phone className="w-3.5 h-3.5 text-rose-500 animate-pulse" />
-              </div>
-              <div className="text-left leading-tight">
-                <span className={`block text-[8px] font-extrabold uppercase tracking-widest ${
-                  theme === "dark" ? "text-white/40" : "text-black/40"
-                }`}>
-                  Designed by
-                </span>
-                <span className="block text-[11px] font-black uppercase tracking-wider mt-0.5">
-                  Shiva
-                </span>
-              </div>
-              <a 
-                href="https://wa.me/917248763036" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[9px] font-black uppercase tracking-wider ml-1.5 hover:scale-105 active:scale-95 transition-all shadow-md ${
-                  theme === "dark" 
-                    ? "bg-rose-500 hover:bg-rose-400 text-stone-950 border-rose-400 shadow-rose-500/10" 
-                    : "bg-stone-900 hover:bg-stone-800 text-stone-50 border-stone-800 shadow-black/10"
-                }`}
-              >
-                <span>+91 72487 63036</span>
-                <ExternalLink className="w-2.5 h-2.5" />
-              </a>
-            </motion.div>
-
-            {/* Bottom Side: Brand Statement, Copyright, and Privacy Policy in a Single Layout */}
-            <div className="flex flex-col items-center gap-2 w-full max-w-sm">
-              <div 
-                className={`w-full flex items-center justify-center p-3 rounded-xl border text-[8.5px] font-black uppercase tracking-[0.18em] transition-all whitespace-nowrap overflow-x-hidden ${
-                  theme === "dark" 
-                    ? "bg-[#09100E] border-white/5 text-rose-500/60 shadow-[0_2px_12px_rgba(0,0,0,0.2)]" 
-                    : "bg-stone-50 border-black/5 text-[#1C1B18]/60 shadow-[0_2px_12px_rgba(0,0,0,0.01)]"
-                }`}
-              >
-                &copy; 2026 Renu Fashion Hub. All Rights Reserved.
-              </div>
-              <div className="flex flex-wrap gap-x-3 gap-y-1.5 items-center justify-center max-w-sm">
-                <motion.a
-                  href="/about"
-                  whileHover={{ scale: 1.1, color: theme === "dark" ? "#FB7185" : "#E11D48" }}
-                  whileTap={{ scale: 0.93 }}
-                  transition={{ type: "spring", stiffness: 450, damping: 15 }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleNavigate("/about");
-                  }}
-                  className={`text-[9px] font-black uppercase tracking-[0.18em] transition-colors cursor-pointer outline-none ${
-                    theme === "dark" ? "text-rose-500" : "text-[#1C1B18]/80"
-                  }`}
-                >
-                  About Us
-                </motion.a>
-                <span className={`text-[8px] ${theme === "dark" ? "text-stone-700" : "text-stone-300"}`}>|</span>
-                <motion.a
-                  href="/privacy-policy"
-                  whileHover={{ scale: 1.1, color: theme === "dark" ? "#FB7185" : "#E11D48" }}
-                  whileTap={{ scale: 0.93 }}
-                  transition={{ type: "spring", stiffness: 450, damping: 15 }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleNavigate("/privacy-policy");
-                  }}
-                  className={`text-[9px] font-black uppercase tracking-[0.18em] transition-colors cursor-pointer outline-none ${
-                    theme === "dark" ? "text-rose-500" : "text-[#1C1B18]/80"
-                  }`}
-                >
-                  Privacy
-                </motion.a>
-                <span className={`text-[8px] ${theme === "dark" ? "text-stone-700" : "text-stone-300"}`}>|</span>
-                <motion.a
-                  href="/terms-of-service"
-                  whileHover={{ scale: 1.1, color: theme === "dark" ? "#FB7185" : "#E11D48" }}
-                  whileTap={{ scale: 0.93 }}
-                  transition={{ type: "spring", stiffness: 450, damping: 15 }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleNavigate("/terms-of-service");
-                  }}
-                  className={`text-[9px] font-black uppercase tracking-[0.18em] transition-colors cursor-pointer outline-none ${
-                    theme === "dark" ? "text-rose-500" : "text-[#1C1B18]/80"
-                  }`}
-                >
-                  Terms
-                </motion.a>
-                <span className={`text-[8px] ${theme === "dark" ? "text-stone-700" : "text-stone-300"}`}>|</span>
-                <motion.a
-                  href="/disclaimer"
-                  whileHover={{ scale: 1.1, color: theme === "dark" ? "#FB7185" : "#E11D48" }}
-                  whileTap={{ scale: 0.93 }}
-                  transition={{ type: "spring", stiffness: 450, damping: 15 }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleNavigate("/disclaimer");
-                  }}
-                  className={`text-[9px] font-black uppercase tracking-[0.18em] transition-colors cursor-pointer outline-none ${
-                    theme === "dark" ? "text-rose-500" : "text-[#1C1B18]/80"
-                  }`}
-                >
-                  Disclaimer
-                </motion.a>
-                <span className={`text-[8px] ${theme === "dark" ? "text-stone-700" : "text-stone-300"}`}>|</span>
-                <motion.a
-                  href="/affiliate-disclosure"
-                  whileHover={{ scale: 1.1, color: theme === "dark" ? "#FB7185" : "#E11D48" }}
-                  whileTap={{ scale: 0.93 }}
-                  transition={{ type: "spring", stiffness: 450, damping: 15 }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleNavigate("/affiliate-disclosure");
-                  }}
-                  className={`text-[9px] font-black uppercase tracking-[0.18em] transition-colors cursor-pointer outline-none ${
-                    theme === "dark" ? "text-rose-500" : "text-[#1C1B18]/80"
-                  }`}
-                >
-                  Affiliate
-                </motion.a>
-                <span className={`text-[8px] ${theme === "dark" ? "text-stone-700" : "text-stone-300"}`}>|</span>
-                <motion.a
-                  href="/cookie-policy"
-                  whileHover={{ scale: 1.1, color: theme === "dark" ? "#FB7185" : "#E11D48" }}
-                  whileTap={{ scale: 0.93 }}
-                  transition={{ type: "spring", stiffness: 450, damping: 15 }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleNavigate("/cookie-policy");
-                  }}
-                  className={`text-[9px] font-black uppercase tracking-[0.18em] transition-colors cursor-pointer outline-none ${
-                    theme === "dark" ? "text-rose-500" : "text-[#1C1B18]/80"
-                  }`}
-                >
-                  Cookies
-                </motion.a>
-                <span className={`text-[8px] ${theme === "dark" ? "text-stone-700" : "text-stone-300"}`}>|</span>
-                <motion.a
-                  href="/contact"
-                  whileHover={{ scale: 1.1, color: theme === "dark" ? "#FB7185" : "#E11D48" }}
-                  whileTap={{ scale: 0.93 }}
-                  transition={{ type: "spring", stiffness: 450, damping: 15 }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleNavigate("/contact");
-                  }}
-                  className={`text-[9px] font-black uppercase tracking-[0.18em] transition-colors cursor-pointer outline-none ${
-                    theme === "dark" ? "text-rose-500" : "text-[#1C1B18]/80"
-                  }`}
-                >
-                  Contact
-                </motion.a>
-              </div>
-            </div>
-          </div>
-        </motion.footer>
-
-      </div>
-        </motion.div>
           } />
           <Route path="/about" element={
             <AboutPage 
@@ -9836,9 +9431,22 @@ export default function App() {
           <Route path="/blog/:id" element={<BlogDetailPage blogs={blogs} theme={theme} navigate={handleNavigate} isLoaded={isBlogsLoaded} />} />
           <Route path="*" element={<PageNotFoundPage theme={theme} navigate={handleNavigate} />} />
         </Routes>
+            </div>
+            {!isAdminRoute && (
+              <Footer handleNavigate={handleNavigate} profileName={profile.name} />
+            )}
           </div>
         )}
       </AnimatePresence>
+
+      {/* Global Share Modal */}
+      <ShareModal 
+        isOpen={isGlobalShareModalOpen} 
+        onClose={() => setIsGlobalShareModalOpen(false)} 
+        profileName={profile.name}
+        customUrl="https://www.renufashionhub.in"
+        customTitle="Renu Fashion Hub"
+      />
 
       {/* Global Cookie Consent Banner */}
       <CookieConsentBanner theme={theme} navigate={handleNavigate} />

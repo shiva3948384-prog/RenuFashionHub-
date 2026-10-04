@@ -5,10 +5,11 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const baseUrl = "https://www.renufashionhub.in";
-const SUPABASE_URL = process.env.SUPABASE_URL || "";
+const RAW_SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "";
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const SUPABASE_URL = RAW_SUPABASE_URL || "https://placeholder.supabase.co";
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY || "placeholder-key", {
   auth: { persistSession: false, autoRefreshToken: false }
 });
 

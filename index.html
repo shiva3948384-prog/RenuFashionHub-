@@ -2,6 +2,19 @@
 <html lang="en-IN">
   <head>
     <script>
+      // Compatibility: Support scripts that assign window.fetch in restricted iframe environments
+      (function() {
+        try {
+          var _currentFetch = window.fetch;
+          Object.defineProperty(window, 'fetch', {
+            get: function() { return _currentFetch; },
+            set: function(fn) { _currentFetch = fn; },
+            configurable: true,
+            enumerable: true
+          });
+        } catch (e) {}
+      })();
+
       (function() {
         try {
           var t = localStorage.getItem('rfh_theme');

@@ -7,8 +7,9 @@ import { applySameOriginHeaders, requireAdmin } from './_auth.js';
 
 dotenv.config();
 
-const SUPABASE_URL = process.env.SUPABASE_URL || "";
+const RAW_SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "";
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const SUPABASE_URL = RAW_SUPABASE_URL || "https://placeholder.supabase.co";
 
 const PROFILE_FILE_PATH = path.join(process.cwd(), "backups", "settings_profile.json");
 const DEFAULT_PROFILE = {
@@ -20,7 +21,7 @@ const DEFAULT_PROFILE = {
 };
 
 // Initialize Supabase with Service Role key to bypass RLS policies
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY || "placeholder-key", {
   auth: {
     persistSession: false,
     autoRefreshToken: false,

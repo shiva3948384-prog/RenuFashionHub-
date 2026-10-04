@@ -18,10 +18,11 @@ const defaultImage = `${baseUrl}/og-image.jpg`;
 const defaultTitle = "Renu Fashion Hub | Sarees, Kurtis, Jewellery & Style Guides by Renu Agarwal";
 const defaultDescription = "Renu Fashion Hub by Renu Agarwal — women's fashion inspiration, saree & kurti styling, jewellery picks, outfit ideas and honest shopping guides for Indian women.";
 
-const SUPABASE_URL = process.env.SUPABASE_URL || "";
+const RAW_SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "";
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const SUPABASE_URL = RAW_SUPABASE_URL || "https://placeholder.supabase.co";
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY || "placeholder-key", {
   auth: { persistSession: false, autoRefreshToken: false }
 });
 

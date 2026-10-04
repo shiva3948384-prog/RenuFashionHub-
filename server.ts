@@ -1,4 +1,5 @@
 import express from "express";
+import http from "http";
 import path from "path";
 import { fileURLToPath } from "url";
 import { createServer as createViteServer } from "vite";
@@ -38,7 +39,7 @@ async function startServer() {
 
   const baseUrl = "https://www.renufashionhub.in";
 
-  const SUPABASE_URL = process.env.SUPABASE_URL || "https://placeholder.supabase.co";
+  const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "https://placeholder.supabase.co";
   const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "placeholder-key";
   const ADMIN_COOKIE_NAME = "rfh_admin_session";
   const ADMIN_SESSION_TTL_SECONDS = 60 * 60 * 8;
@@ -1591,10 +1592,16 @@ async function startServer() {
     }
   });
 
+  const httpServer = http.createServer(app);
+
   // Vite development vs production asset serving configuration
   if (process.env.NODE_ENV !== "production") {
+    const isHmrDisabled = process.env.DISABLE_HMR === "true";
     viteDevServer = await createViteServer({
-      server: { middlewareMode: true },
+      server: {
+        middlewareMode: true,
+        hmr: isHmrDisabled ? false : { server: httpServer },
+      },
       appType: "custom",
     });
     app.use(viteDevServer.middlewares);
@@ -1636,7 +1643,16 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
+  httpServer.on("error", (err: any) => {
+    if (err.code === "EADDRINUSE") {
+      console.error(`Port ${PORT} is already in use (EADDRINUSE). Exiting to permit clean supervisor restart.`);
+      process.exit(1);
+    } else {
+      console.error("HTTP Server Error:", err);
+    }
+  });
+
+  httpServer.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on port ${PORT} with dynamic sitemap generation.`);
   });
 }
