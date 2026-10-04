@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Fetch Diagnostic</title>
+</head>
+<body>
+  <h1>Fetch Diagnostic</h1>
+
+  <script>
+    console.log("FETCH TYPE:", typeof window.fetch);
+
+    console.log(
+      "FETCH DESCRIPTOR:",
+      Object.getOwnPropertyDescriptor(window, "fetch")
+    );
+
+    fetch("/api/health")
+      .then(response => response.json())
+      .then(data => {
+        console.log("FETCH SUCCESS:", data);
+      })
+      .catch(error => {
+        console.error("FETCH FAILURE:", error);
+      });
+  </script>
+</body>
+</html>

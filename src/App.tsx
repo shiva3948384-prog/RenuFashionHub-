@@ -288,19 +288,11 @@ const VideoEmbed = React.memo(({ url, isMuted = true, minimal = false, isPlaying
     }
   }, [isInView, isProfile]);
 
-  const handleRipple = (e: React.MouseEvent | React.TouchEvent) => {
-    const clientX = 'touches' in e ? (e as React.TouchEvent).touches[0].clientX : (e as React.MouseEvent).clientX;
-    const clientY = 'touches' in e ? (e as React.TouchEvent).touches[0].clientY : (e as React.MouseEvent).clientY;
-    window.dispatchEvent(new CustomEvent("custom-ripple", { detail: { x: clientX, y: clientY } }));
-  };
-
   if (isDirectVideo) {
     return (
       <div 
         className={`relative w-full h-full bg-black overflow-hidden ${minimal ? 'pointer-events-none' : ''}`} 
         ref={containerRef}
-        onMouseDown={handleRipple}
-        onTouchStart={handleRipple}
       >
         {/* Blurred Background for Premium Feel - Only in non-minimal mode and non-mobile */}
         {!minimal && mediaUrl && (
@@ -325,8 +317,6 @@ const VideoEmbed = React.memo(({ url, isMuted = true, minimal = false, isPlaying
             preload="metadata"
             controlsList="nodownload noplaybackrate"
             disablePictureInPicture
-            onMouseDown={handleRipple}
-            onTouchStart={handleRipple}
             onLoadedData={() => onReady?.()}
             onCanPlay={() => onReady?.()}
             onError={() => onReady?.()}
@@ -371,27 +361,16 @@ const VideoEmbed = React.memo(({ url, isMuted = true, minimal = false, isPlaying
     <div 
       className={`w-full h-full bg-black/20 relative ${minimal ? 'pointer-events-none' : ''}`} 
       ref={containerRef}
-      onMouseDown={handleRipple}
-      onTouchStart={handleRipple}
     >
       {shouldRenderIframe && embedUrl ? (
-        <>
-          <iframe
-            src={embedUrl}
-            className="w-full h-full border-0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerPolicy="no-referrer-when-downgrade"
-            allowFullScreen
-            loading="lazy"
-          />
-          {/* Transparent overlay to catch clicks for ripples without blocking iframe (using pointer-events: none is not enough, so we use a small delay or just accept it) */}
-          {/* Actually, if we want ripples, we need to catch the click. 
-              We'll use a transparent div that dispatches ripple and then becomes pointer-events: none for a moment? 
-              No, that's too complex. Let's just use a div that dispatches ripple and the iframe is behind it.
-              But then the user can't click play.
-              Wait! If we use a custom play button, we can handle everything.
-          */}
-        </>
+        <iframe
+          src={embedUrl}
+          className="w-full h-full border-0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerPolicy="no-referrer-when-downgrade"
+          allowFullScreen
+          loading="lazy"
+        />
       ) : (
         <div className="w-full h-full flex items-center justify-center">
           <Play className="w-8 h-8 text-white/20 animate-pulse" />
@@ -401,26 +380,17 @@ const VideoEmbed = React.memo(({ url, isMuted = true, minimal = false, isPlaying
   );
 });
 
-const CustomCursor = ({ theme, isMobile }: { theme: string, isMobile: boolean }) => {
-  const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
+const CustomCursor = React.memo(({ isMobile }: { isMobile?: boolean }) => {
   const dotRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
-  const currentDotPos = useRef<{ x: number, y: number }>({ x: -100, y: -100 });
-  const addRippleRef = useRef<(x: number, y: number) => void>(() => {});
 
   useEffect(() => {
-    const addRipple = (x: number, y: number) => {
-      const id = Date.now() + Math.random();
-      setRipples((prev) => [...prev, { id, x, y }]);
-      setTimeout(() => {
-        setRipples((prev) => prev.filter((r) => r.id !== id));
-      }, 600);
-    };
-    addRippleRef.current = addRipple;
-  }, []);
-
-  useEffect(() => {
+    // Disable completely on mobile and coarse pointer devices
     if (isMobile) return;
+    if (typeof window !== "undefined" && window.matchMedia && window.matchMedia("(hover: none) and (pointer: coarse)").matches) {
+      return;
+    }
+
     let targetX = -100;
     let targetY = -100;
     let dotX = -100;
@@ -428,36 +398,39 @@ const CustomCursor = ({ theme, isMobile }: { theme: string, isMobile: boolean })
     let ringX = -100;
     let ringY = -100;
     let isPointer = false;
-    let isClicking = false;
-    let requestRef: number;
-    let lastScrollRippleTime = 0;
+    let requestRef: number = 0;
+    let isRunning = false;
 
     const handleMouseMove = (e: MouseEvent) => {
       targetX = e.clientX;
       targetY = e.clientY;
-      currentDotPos.current = { x: targetX, y: targetY };
       
-      const target = e.target as HTMLElement;
-      isPointer = window.getComputedStyle(target).cursor === "pointer" || 
-                  target.tagName === "BUTTON" || 
-                  target.tagName === "A" ||
-                  !!target.closest("button") || 
-                  !!target.closest("a");
+      const target = e.target as HTMLElement | null;
+      if (target) {
+        isPointer = Boolean(
+          target.tagName === "BUTTON" || 
+          target.tagName === "A" || 
+          target.tagName === "INPUT" ||
+          target.closest("button, a, [role='button'], .cursor-pointer")
+        );
+      }
+
+      if (!isRunning) {
+        isRunning = true;
+        requestRef = requestAnimationFrame(tick);
+      }
     };
 
-    const handleMouseDown = () => {
-      isClicking = true;
+    const handleMouseLeave = () => {
+      targetX = -100;
+      targetY = -100;
+      if (dotRef.current) dotRef.current.style.opacity = "0";
+      if (ringRef.current) ringRef.current.style.opacity = "0";
     };
-
-    const handleMouseUp = () => {
-      isClicking = false;
-    };
-
-    // Scroll triggers for ripples removed as requested
 
     const tick = () => {
-      const dotEase = 0.25;
-      const ringEase = 0.12;
+      const dotEase = 0.28;
+      const ringEase = 0.14;
       
       dotX += (targetX - dotX) * dotEase;
       dotY += (targetY - dotY) * dotEase;
@@ -465,123 +438,57 @@ const CustomCursor = ({ theme, isMobile }: { theme: string, isMobile: boolean })
       ringX += (targetX - ringX) * ringEase;
       ringY += (targetY - ringY) * ringEase;
 
-      currentDotPos.current = { x: dotX, y: dotY };
-
       if (targetX === -100) {
         if (dotRef.current) dotRef.current.style.opacity = "0";
         if (ringRef.current) ringRef.current.style.opacity = "0";
-      } else {
-        if (dotRef.current) dotRef.current.style.opacity = "1";
-        if (ringRef.current) ringRef.current.style.opacity = "1";
+        isRunning = false;
+        return;
       }
 
-      let dotScale = 1;
-      let ringScale = 1;
-      let borderW = "2px";
+      if (dotRef.current) dotRef.current.style.opacity = "1";
+      if (ringRef.current) ringRef.current.style.opacity = "1";
 
-      if (isClicking) {
-        dotScale = 0.5;
-        ringScale = 1.3;
-      } else if (isPointer) {
-        dotScale = 1.4;
-        ringScale = 1.8;
-        borderW = "1px";
-      }
+      // Smooth pointer feedback only: NO CLICK RIPPLE, NO EXPANDING CIRCLES, NO GLOW RING ON CLICK
+      const dotScale = isPointer ? 1.25 : 1;
+      const ringScale = isPointer ? 1.35 : 1;
 
       if (dotRef.current) {
         dotRef.current.style.transform = `translate3d(${dotX - 6}px, ${dotY - 6}px, 0) scale(${dotScale})`;
       }
       if (ringRef.current) {
-        ringRef.current.style.transform = `translate3d(${ringX - 20}px, ${ringY - 20}px, 0) scale(${ringScale})`;
-        ringRef.current.style.borderWidth = borderW;
+        ringRef.current.style.transform = `translate3d(${ringX - 18}px, ${ringY - 18}px, 0) scale(${ringScale})`;
       }
 
       requestRef = requestAnimationFrame(tick);
     };
 
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
-    window.addEventListener("mousedown", handleMouseDown, { passive: true });
-    window.addEventListener("mouseup", handleMouseUp, { passive: true });
-    
-    // Scroll and wheel listeners for ripples removed as requested
-
-    requestRef = requestAnimationFrame(tick);
+    document.addEventListener("mouseleave", handleMouseLeave);
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mousedown", handleMouseDown);
-      window.removeEventListener("mouseup", handleMouseUp);
-      // Scroll cleanups removed
-      cancelAnimationFrame(requestRef);
+      document.removeEventListener("mouseleave", handleMouseLeave);
+      if (requestRef) cancelAnimationFrame(requestRef);
     };
   }, [isMobile]);
 
-  useEffect(() => {
-    const handleMouseDownGlobal = (e: MouseEvent) => {
-      const { x, y } = currentDotPos.current;
-      if (x !== -100 && y !== -100) {
-        addRippleRef.current(x, y);
-      } else {
-        addRippleRef.current(e.clientX, e.clientY);
-      }
-    };
-
-    const handleCustomRippleGlobal = (e: any) => {
-      if (e.detail) {
-        addRippleRef.current(e.detail.x, e.detail.y);
-      }
-    };
-
-    window.addEventListener("mousedown", handleMouseDownGlobal, { passive: true });
-    window.addEventListener("custom-ripple", handleCustomRippleGlobal);
-
-    return () => {
-      window.removeEventListener("mousedown", handleMouseDownGlobal);
-      window.removeEventListener("custom-ripple", handleCustomRippleGlobal);
-    };
-  }, []);
+  if (isMobile) return null;
 
   return (
-    <>
-      {!isMobile && (
-        <div className="hidden md:block pointer-events-none fixed inset-0 z-[100000]">
-          <div
-            ref={dotRef}
-            style={{ opacity: 0, position: 'fixed', left: 0, top: 0, width: '12px', height: '12px' }}
-            className="bg-rose-500 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.5)] transition-[opacity] duration-150 ease-out gpu-accelerated"
-          />
-          <div
-            ref={ringRef}
-            style={{ opacity: 0, position: 'fixed', left: 0, top: 0, width: '40px', height: '40px' }}
-            className="border-2 border-rose-500/40 rounded-full transition-[opacity] duration-200 ease-out gpu-accelerated"
-          />
-        </div>
-      )}
-
-      {/* Ripple Effect (Desktop & Mobile) */}
-      <div className="fixed inset-0 pointer-events-none z-[99999] overflow-hidden">
-        <AnimatePresence>
-          {ripples.map((ripple) => (
-            <motion.div
-              key={ripple.id}
-              initial={{ opacity: 0.8, scale: 0 }}
-              animate={{ opacity: 0, scale: isMobile ? 4 : 6 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-              className="absolute w-12 h-12 border-4 border-rose-500 rounded-full shadow-[0_0_30px_rgba(245,158,11,0.6)] gpu-accelerated"
-              style={{ 
-                left: ripple.x,
-                top: ripple.y,
-                marginLeft: '-24px',
-                marginTop: '-24px'
-              }}
-            />
-          ))}
-        </AnimatePresence>
-      </div>
-    </>
+    <div className="hidden md:block pointer-events-none fixed inset-0 z-[100000]">
+      <div
+        ref={dotRef}
+        style={{ opacity: 0, position: 'fixed', left: 0, top: 0, width: '12px', height: '12px' }}
+        className="bg-rose-500 rounded-full shadow-sm transition-opacity duration-150 ease-out gpu-accelerated"
+      />
+      <div
+        ref={ringRef}
+        style={{ opacity: 0, position: 'fixed', left: 0, top: 0, width: '36px', height: '36px' }}
+        className="border-2 border-rose-500/40 rounded-full transition-opacity duration-200 ease-out gpu-accelerated"
+      />
+    </div>
   );
-};
+});
 
 const PremiumButton = ({ children, onClick, className = "", variant = "primary", icon: Icon }: { children: React.ReactNode, onClick?: (e?: any) => void, className?: string, variant?: "primary" | "secondary", icon?: any }) => {
   return (
@@ -897,7 +804,6 @@ const ProductDetailPage = ({ products, theme, navigate, isLoaded }: { products: 
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [triggerSuccessStars, setTriggerSuccessStars] = useState(false);
   const [showCopiedToast, setShowCopiedToast] = useState(false);
-  const [showShareModal, setShowShareModal] = useState(false);
   const reviewsContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -1127,18 +1033,7 @@ const ProductDetailPage = ({ products, theme, navigate, isLoaded }: { products: 
                   Buy Now
                 </PremiumButton>
               )}
-              <button
-                onClick={() => setShowShareModal(true)}
-                className={`flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl border font-bold text-xs uppercase tracking-wider transition-all duration-300 hover:scale-[1.02] active:scale-95 ${
-                  theme === "dark" 
-                    ? "bg-white/5 hover:bg-white/10 border-white/10 text-rose-50" 
-                    : "bg-black/5 hover:bg-black/10 border-black/10 text-[#1C1B18]"
-                } ${product.buyUrl ? 'flex-1' : 'w-full'} cursor-pointer`}
-                title="Share & Copy Link"
-              >
-                <Share2 className="w-3.5 h-3.5" />
-                <span>Copy Link</span>
-              </button>
+              <ProductShareButton product={product} theme={theme} />
             </div>
 
             {/* Reviews Block */}
@@ -1261,20 +1156,6 @@ const ProductDetailPage = ({ products, theme, navigate, isLoaded }: { products: 
             <Check className="w-4 h-4 animate-bounce" />
             Link Copied!
           </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Share Modal */}
-      <AnimatePresence>
-        {showShareModal && (
-          <ShareModal
-            isOpen={showShareModal}
-            onClose={() => setShowShareModal(false)}
-            profileName={product.name}
-            customUrl={`http://renufashionhub.in/product/${product.id}`}
-            customTitle={`Renu Fashion Hub - Check out ${product.name}`}
-            theme={theme}
-          />
         )}
       </AnimatePresence>
     </motion.div>
@@ -3736,12 +3617,6 @@ const PostDetailPage = ({ posts, products, profile, theme, navigate, isMuted, se
     );
   }
 
-  const triggerRipple = (e: React.MouseEvent | React.TouchEvent) => {
-    const clientX = 'touches' in e ? (e as React.TouchEvent).touches[0].clientX : (e as React.MouseEvent).clientX;
-    const clientY = 'touches' in e ? (e as React.TouchEvent).touches[0].clientY : (e as React.MouseEvent).clientY;
-    window.dispatchEvent(new CustomEvent("custom-ripple", { detail: { x: clientX, y: clientY } }));
-  };
-
   const handleNext = (e?: React.MouseEvent | React.TouchEvent) => {
     e?.stopPropagation();
     const nextIndex = (currentIndex + 1) % posts.length;
@@ -3763,8 +3638,6 @@ const PostDetailPage = ({ posts, products, profile, theme, navigate, isMuted, se
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[200] bg-black flex flex-col"
       onClick={() => setShowControls(true)}
-      onMouseDown={triggerRipple}
-      onTouchStart={triggerRipple}
     >
       <button 
         onClick={() => navigate("/")}
@@ -3778,8 +3651,6 @@ const PostDetailPage = ({ posts, products, profile, theme, navigate, isMuted, se
           <div 
             className="w-full h-full" 
             onClick={(e) => { e.stopPropagation(); setIsPlaying(!isPlaying); }}
-            onMouseDown={triggerRipple}
-            onTouchStart={triggerRipple}
           >
             <VideoEmbed url={post.url} isMuted={isMuted} isPlaying={isPlaying} />
           </div>
@@ -3799,8 +3670,6 @@ const PostDetailPage = ({ posts, products, profile, theme, navigate, isMuted, se
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={handlePrev}
-                onMouseDown={(e) => { e.stopPropagation(); triggerRipple(e); }}
-                onTouchStart={(e) => { e.stopPropagation(); triggerRipple(e); }}
                 className="p-5 rounded-full bg-black/60 md:backdrop-blur-md text-white border border-white/20 pointer-events-auto hover:bg-black/80 transition-all shadow-2xl"
               >
                 <SkipBack className="w-8 h-8 fill-white" />
@@ -3809,8 +3678,6 @@ const PostDetailPage = ({ posts, products, profile, theme, navigate, isMuted, se
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={(e) => { e.stopPropagation(); setIsPlaying(!isPlaying); }}
-                onMouseDown={(e) => { e.stopPropagation(); triggerRipple(e); }}
-                onTouchStart={(e) => { e.stopPropagation(); triggerRipple(e); }}
                 className="p-10 rounded-full bg-black/60 md:backdrop-blur-md text-white border border-white/20 pointer-events-auto hover:bg-black/80 transition-all shadow-2xl"
               >
                 {isPlaying ? <Pause className="w-12 h-12 fill-white" /> : <Play className="w-12 h-12 fill-white ml-2" />}
@@ -3819,8 +3686,6 @@ const PostDetailPage = ({ posts, products, profile, theme, navigate, isMuted, se
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={handleNext}
-                onMouseDown={(e) => { e.stopPropagation(); triggerRipple(e); }}
-                onTouchStart={(e) => { e.stopPropagation(); triggerRipple(e); }}
                 className="p-5 rounded-full bg-black/60 md:backdrop-blur-md text-white border border-white/20 pointer-events-auto hover:bg-black/80 transition-all shadow-2xl"
               >
                 <SkipForward className="w-8 h-8 fill-white" />
@@ -4677,7 +4542,7 @@ const ShareModal = ({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/75"
       />
       <motion.div 
         initial={{ scale: 0.95, opacity: 0, y: 15 }}
@@ -4761,6 +4626,216 @@ const ShareModal = ({
     </div>
   );
 };
+
+const AnimatedThemeToggle = React.memo(({ theme, toggleTheme }: { theme: "light" | "dark"; toggleTheme: () => void }) => {
+  const isDark = theme === "dark";
+
+  return (
+    <motion.button
+      onClick={toggleTheme}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.92 }}
+      role="switch"
+      aria-checked={isDark}
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+      className={`relative w-16 h-8 rounded-full p-1 transition-colors duration-300 flex items-center cursor-pointer select-none overflow-hidden border ${
+        isDark 
+          ? "bg-gradient-to-r from-[#141226] via-[#1C1738] to-[#0F1424] border-purple-500/30 shadow-[inset_0_1px_4px_rgba(0,0,0,0.6)]" 
+          : "bg-gradient-to-r from-amber-100/90 via-rose-100/80 to-amber-50 border-amber-300/60 shadow-[inset_0_1px_3px_rgba(0,0,0,0.08)]"
+      }`}
+    >
+      {/* Background celestial micro-details */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {/* Night Stars */}
+        <motion.div
+          initial={false}
+          animate={{
+            opacity: isDark ? 1 : 0,
+            y: isDark ? 0 : -8,
+            scale: isDark ? 1 : 0.6,
+          }}
+          transition={{ duration: 0.3 }}
+          className="absolute left-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1 text-purple-200/80"
+        >
+          <Sparkles className="w-3 h-3 text-amber-200 animate-pulse" />
+          <span className="w-1 h-1 rounded-full bg-rose-200/90 shadow-[0_0_4px_#fff]" />
+        </motion.div>
+
+        {/* Day Sun Beams / Cloud Hint */}
+        <motion.div
+          initial={false}
+          animate={{
+            opacity: isDark ? 0 : 1,
+            y: isDark ? 8 : 0,
+            scale: isDark ? 0.6 : 1,
+          }}
+          transition={{ duration: 0.3 }}
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-0.5 text-amber-600/70"
+        >
+          <div className="w-2.5 h-1.5 rounded-full bg-amber-400/40 blur-[0.5px]" />
+          <div className="w-1.5 h-1.5 rounded-full bg-rose-400/40 -ml-1 blur-[0.5px]" />
+        </motion.div>
+      </div>
+
+      {/* Sliding Celestial Knob */}
+      <motion.div
+        layout
+        transition={{
+          type: "spring",
+          stiffness: 500,
+          damping: 30,
+        }}
+        animate={{
+          x: isDark ? 32 : 0,
+        }}
+        className={`relative z-10 w-6 h-6 rounded-full flex items-center justify-center ${
+          isDark
+            ? "bg-gradient-to-tr from-slate-100 via-purple-100 to-indigo-100 text-indigo-950 shadow-[0_2px_10px_rgba(168,85,247,0.45)] border border-purple-200/60"
+            : "bg-gradient-to-tr from-amber-400 via-orange-400 to-rose-400 text-white shadow-[0_2px_10px_rgba(245,158,11,0.55)] border border-amber-200/60"
+        }`}
+      >
+        <AnimatePresence mode="wait" initial={false}>
+          {isDark ? (
+            <motion.div
+              key="moon"
+              initial={{ rotate: -90, opacity: 0, scale: 0.5 }}
+              animate={{ rotate: 0, opacity: 1, scale: 1 }}
+              exit={{ rotate: 90, opacity: 0, scale: 0.5 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className="flex items-center justify-center"
+            >
+              <Moon className="w-3.5 h-3.5 fill-indigo-900 text-indigo-900 stroke-[2.2]" />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="sun"
+              initial={{ rotate: 90, opacity: 0, scale: 0.5 }}
+              animate={{ rotate: 0, opacity: 1, scale: 1 }}
+              exit={{ rotate: -90, opacity: 0, scale: 0.5 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className="flex items-center justify-center"
+            >
+              <Sun className="w-3.5 h-3.5 fill-white text-white stroke-[2.2]" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </motion.button>
+  );
+});
+
+const HeaderShareButton = React.memo(({ profileName, theme }: { profileName: string; theme: string }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleShareClick = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const shareUrl = "https://www.renufashionhub.in";
+    const shareTitle = "Renu Fashion Hub";
+    const shareText = `Discover sarees, kurtis, jewellery & styling guides by ${profileName || "Renu Agarwal"} on Renu Fashion Hub!`;
+
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl,
+        });
+        return;
+      } catch (err: any) {
+        if (err?.name === "AbortError") {
+          return;
+        }
+      }
+    }
+    setIsOpen(true);
+  }, [profileName]);
+
+  const handleClose = useCallback(() => {
+    setIsOpen(false);
+  }, []);
+
+  return (
+    <>
+      <button 
+        onClick={handleShareClick}
+        className={`p-2 rounded-full ${theme === "dark" ? "bg-white/5 hover:bg-white/10 border-white/10" : "bg-black/5 hover:bg-black/10 border-black/10"} transition-colors border active:scale-95`}
+        title="Share Renu Fashion Hub"
+        aria-label="Share"
+      >
+        <Share2 className={`w-5 h-5 ${theme === "dark" ? "text-white/70" : "text-black/70"}`} />
+      </button>
+
+      {isOpen && (
+        <ShareModal 
+          isOpen={isOpen} 
+          onClose={handleClose} 
+          profileName={profileName}
+          customUrl="https://www.renufashionhub.in"
+          customTitle="Renu Fashion Hub"
+          theme={theme}
+        />
+      )}
+    </>
+  );
+});
+
+const ProductShareButton = React.memo(({ product, theme }: { product: any; theme: string }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleShareClick = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const shareUrl = typeof window !== "undefined" ? window.location.href : `https://www.renufashionhub.in/product/${product.id}`;
+    const shareTitle = product.name || "Product on Renu Fashion Hub";
+    const shareText = `Check out ${product.name} on Renu Fashion Hub!`;
+
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl,
+        });
+        return;
+      } catch (err: any) {
+        if (err?.name === "AbortError") return;
+      }
+    }
+    setIsOpen(true);
+  }, [product]);
+
+  const handleClose = useCallback(() => {
+    setIsOpen(false);
+  }, []);
+
+  return (
+    <>
+      <button
+        onClick={handleShareClick}
+        className={`flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl border font-bold text-xs uppercase tracking-wider active:scale-95 ${
+          theme === "dark" 
+            ? "bg-white/5 hover:bg-white/10 border-white/10 text-rose-50" 
+            : "bg-black/5 hover:bg-black/10 border-black/10 text-[#1C1B18]"
+        } ${product.buyUrl ? 'flex-1' : 'w-full'} cursor-pointer`}
+        title="Share & Copy Link"
+      >
+        <Share2 className="w-3.5 h-3.5" />
+        <span>Share Link</span>
+      </button>
+
+      {isOpen && (
+        <ShareModal 
+          isOpen={isOpen} 
+          onClose={handleClose} 
+          profileName="Renu Fashion Hub"
+          customUrl={typeof window !== "undefined" ? window.location.href : `https://www.renufashionhub.in/product/${product.id}`}
+          customTitle={product.name}
+          theme={theme}
+        />
+      )}
+    </>
+  );
+});
 
 const PageLoader = ({ theme }: { theme: string }) => (
   <motion.div
@@ -5056,7 +5131,7 @@ export default function App() {
     if (!sidebarRef.current) return;
     const resizeObserver = new ResizeObserver((entries) => {
       for (let entry of entries) {
-        setSidebarHeight(entry.target.getBoundingClientRect().height || entry.contentRect.height);
+        setSidebarHeight(entry.contentRect.height);
       }
     });
     resizeObserver.observe(sidebarRef.current);
@@ -5081,7 +5156,16 @@ export default function App() {
       setIsNavigating(false);
     }, 550);
   }, [navigate]);
-  const [theme, setTheme] = useState<"dark" | "light">("light");
+  const [theme, setTheme] = useState<"dark" | "light">(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("rfh_theme");
+        if (saved === "dark" || saved === "light") return saved;
+        if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) return "dark";
+      } catch (e) {}
+    }
+    return "light";
+  });
   const [activeTab, setActiveTab] = useState("shop");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -5089,7 +5173,6 @@ export default function App() {
   const [loginData, setLoginData] = useState({ username: "", password: "" });
   const [loginError, setLoginError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [showShareModal, setShowShareModal] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isProductsLoaded, setIsProductsLoaded] = useState(false);
@@ -5366,21 +5449,15 @@ export default function App() {
 
   // Synchronize theme on mount and change
   useEffect(() => {
-    get("rfh_theme").then((savedTheme) => {
-      if (savedTheme === "dark" || savedTheme === "light") {
-        setTheme(savedTheme);
+    try {
+      document.documentElement.setAttribute('data-theme', theme);
+      document.documentElement.className = theme;
+      if (theme === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
       }
-    });
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    document.documentElement.className = theme;
-    if (theme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
+    } catch (e) {}
   }, [theme]);
 
   useEffect(() => {
@@ -5518,10 +5595,21 @@ export default function App() {
   const [isMuted, setIsMuted] = useState(true);
 
   const toggleTheme = useCallback(() => {
-    const newTheme = theme === "dark" ? "light" : "dark";
-    setTheme(newTheme);
-    set("rfh_theme", newTheme);
-  }, [theme]);
+    setTheme((prev) => {
+      const next = prev === "dark" ? "light" : "dark";
+      try {
+        localStorage.setItem("rfh_theme", next);
+        document.documentElement.setAttribute('data-theme', next);
+        document.documentElement.className = next;
+        if (next === "dark") {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+      } catch (e) {}
+      return next;
+    });
+  }, []);
 
   const handleSetSelectedPost = useCallback((post: any) => {
     setSelectedPost(post);
@@ -6416,7 +6504,7 @@ export default function App() {
 
   return (
     <>
-      <CustomCursor theme={theme} isMobile={isMobile} />
+      <CustomCursor isMobile={isMobile} />
       <AnimatePresence>
         {isNavigating && <PageLoader theme={theme} />}
       </AnimatePresence>
@@ -8604,34 +8692,25 @@ export default function App() {
         >
 
       {/* Background Gradient */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className={`absolute top-[-10%] left-[-10%] w-[40%] h-[40%] ${theme === "dark" ? "bg-emerald-900/15" : "bg-rose-100/30"} blur-[120px] rounded-full`} />
-        <div className={`absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] ${theme === "dark" ? "bg-rose-900/10" : "bg-rose-100/10"} blur-[120px] rounded-full`} />
+      <div className="fixed inset-0 overflow-hidden pointer-events-none will-change-transform">
+        <div 
+          className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] blur-[100px] rounded-full transition-colors duration-300"
+          style={{ backgroundColor: "var(--rf-glow-1)" }} 
+        />
+        <div 
+          className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] blur-[100px] rounded-full transition-colors duration-300" 
+          style={{ backgroundColor: "var(--rf-glow-2)" }}
+        />
       </div>
 
       <div className="relative w-full max-w-md md:max-w-3xl lg:max-w-6xl mx-auto px-6 md:px-8 lg:px-12 pt-16 pb-24">
         {/* Header Actions */}
         <div className="absolute top-6 left-6 flex gap-3 z-20">
-          <button 
-            onClick={toggleTheme}
-            className={`p-2 rounded-full ${theme === "dark" ? "bg-white/5 hover:bg-white/10 border-white/10" : "bg-black/5 hover:bg-black/10 border-black/10"} transition-colors border group`}
-            title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
-          >
-            {theme === "dark" ? (
-              <Sun className="w-5 h-5 text-white/70" />
-            ) : (
-              <Moon className="w-5 h-5 text-black/70" />
-            )}
-          </button>
+          <AnimatedThemeToggle theme={theme} toggleTheme={toggleTheme} />
         </div>
 
         <div className="absolute top-6 right-6 flex gap-3 z-20">
-          <button 
-            onClick={() => setShowShareModal(true)}
-            className={`p-2 rounded-full ${theme === "dark" ? "bg-white/5 hover:bg-white/10 border-white/10" : "bg-black/5 hover:bg-black/10 border-black/10"} transition-colors border`}
-          >
-            <Share2 className={`w-5 h-5 ${theme === "dark" ? "text-white/70" : "text-black/70"}`} />
-          </button>
+          <HeaderShareButton profileName={profile.name} theme={theme} />
         </div>
 
         <div className="lg:grid lg:grid-cols-12 lg:gap-12 items-start mt-8">
@@ -9324,19 +9403,6 @@ export default function App() {
           </div>
         </motion.footer>
 
-        {/* Share Modal */}
-        <AnimatePresence>
-          {showShareModal && (
-            <ShareModal 
-              isOpen={showShareModal} 
-              onClose={() => setShowShareModal(false)} 
-              profileName={profile.name}
-              customUrl="http://renufashionhub.in"
-              customTitle="Renu Fashion Hub"
-              theme={theme}
-            />
-          )}
-        </AnimatePresence>
       </div>
         </motion.div>
           } />

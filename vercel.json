@@ -1,6 +1,30 @@
 {
+  "trailingSlash": false,
   "crons": [
     { "path": "/api/auto-blog?limit=2", "schedule": "0 4 * * *" }
+  ],
+  "redirects": [
+    {
+      "source": "/:path*/",
+      "destination": "/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "renufashionhub.in"
+        }
+      ],
+      "destination": "https://www.renufashionhub.in/$1",
+      "permanent": true
+    },
+    {
+      "source": "/about-us",
+      "destination": "/about",
+      "permanent": true
+    }
   ],
   "headers": [
     {
@@ -55,7 +79,13 @@
     { "source": "/privacy-policy", "destination": "/api/seo-render?type=page&name=privacy" },
     { "source": "/terms-of-service", "destination": "/api/seo-render?type=page&name=terms" },
     { "source": "/disclaimer", "destination": "/api/seo-render?type=page&name=disclaimer" },
+    { "source": "/affiliate-disclosure", "destination": "/api/seo-render?type=page&name=affiliate" },
+    { "source": "/cookie-policy", "destination": "/api/seo-render?type=page&name=cookie" },
 
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    { "source": "/admin(.*)", "destination": "/index.html" },
+    { "source": "/login(.*)", "destination": "/index.html" },
+    { "source": "/diagnostic", "destination": "/diagnostic.html" },
+
+    { "source": "/((?!api/|assets/|favicon|og-image|apple-touch|robots|sitemap|ads|llms|diagnostic).*)", "destination": "/api/seo-render?type=404" }
   ]
 }

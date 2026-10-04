@@ -2,21 +2,34 @@
 <html lang="en-IN">
   <head>
     <script>
-      // Defensive guard: Ensure window.fetch cannot throw "Cannot set property fetch of #<Window> which has only a getter"
-      // if any cached script or browser extension attempts an assignment.
       (function() {
         try {
-          var _origFetch = window.fetch;
-          Object.defineProperty(window, 'fetch', {
-            configurable: true,
-            enumerable: true,
-            get: function() { return _origFetch; },
-            set: function(fn) {
-              if (typeof fn === 'function') {
-                _origFetch = fn;
+          var t = localStorage.getItem('rfh_theme');
+          if (!t) {
+            t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          document.documentElement.className = t;
+          document.documentElement.setAttribute('data-theme', t);
+        } catch (e) {}
+      })();
+
+      // Safe cleanup: Ensure any legacy advertising Service Workers and old ad caches are completely unregistered
+      (function() {
+        try {
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+              for (var i = 0; i < registrations.length; i++) {
+                registrations[i].unregister();
               }
-            }
-          });
+            }).catch(function() {});
+          }
+          if ('caches' in window) {
+            caches.keys().then(function(keys) {
+              for (var i = 0; i < keys.length; i++) {
+                caches.delete(keys[i]);
+              }
+            }).catch(function() {});
+          }
         } catch (e) {}
       })();
     </script>

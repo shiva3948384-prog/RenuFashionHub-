@@ -249,12 +249,33 @@ async function fetchOne(table, id) {
   }
 }
 
+function build404Payload() {
+  return {
+    is404: true,
+    title: "404 Not Found | Renu Fashion Hub",
+    description: "The page you are looking for does not exist, has been removed, or is temporarily unavailable. Browse the latest Indian fashion, sarees, and styling guides on Renu Fashion Hub.",
+    image: defaultImage,
+    url: null,
+    ogType: "website",
+    h1: "404 — Page Not Found",
+    body: "We couldn't find the page you were looking for. Explore our curated collections of sarees, kurtis, jewellery and styling guides, or return to the homepage.",
+    extraHead: '<meta name="robots" content="noindex, follow" />',
+  };
+}
+
 /* ---------- SEO payload builders ---------- */
 
 async function buildPayload(type, id, pageName) {
+  if (type === "404") {
+    return build404Payload();
+  }
+
   // Static pages
   if (type === "page") {
-    const page = staticPages[pageName] || staticPages.home;
+    if (!pageName || !staticPages[pageName]) {
+      return build404Payload();
+    }
+    const page = staticPages[pageName];
     const url = `${baseUrl}${page.path}`;
     const scripts = [];
     scripts.push(websiteAndOrgLd());
@@ -309,6 +330,7 @@ async function buildPayload(type, id, pageName) {
         };
       }
     }
+    return build404Payload();
   }
 
   // Product
@@ -351,6 +373,7 @@ async function buildPayload(type, id, pageName) {
         };
       }
     }
+    return build404Payload();
   }
 
   // Post
@@ -385,10 +408,11 @@ async function buildPayload(type, id, pageName) {
         };
       }
     }
+    return build404Payload();
   }
 
-  // Fallback = home
-  return buildPayload("page", null, "home");
+  // Fallback for any unknown route is 404
+  return build404Payload();
 }
 
 /* ---------- HTML template loader ---------- */
@@ -415,7 +439,7 @@ export default async function handler(req, res) {
     payload = await buildPayload(type, id, name);
   } catch (err) {
     console.error("seo-handler payload error:", err);
-    payload = await buildPayload("page", null, "home");
+    payload = build404Payload();
   }
 
   let html = loadTemplate();
@@ -429,24 +453,30 @@ export default async function handler(req, res) {
     // Strip existing JSON-LD scripts to avoid duplicates from the base template
     html = html.replace(/<script\s+type=["']application\/ld\+json["'][\s\S]*?<\/script>/gi, "");
 
+    const is404 = Boolean(payload.is404);
     const t = escapeHtml(payload.title);
     const d = escapeHtml(payload.description);
-    const u = escapeHtml(payload.url);
+    const u = payload.url ? escapeHtml(payload.url) : null;
     const img = escapeHtml(payload.image);
     const ogType = escapeHtml(payload.ogType);
+
+    const canonicalTag = u ? `<link rel="canonical" href="${u}" />` : "";
+    const robotsTag = is404
+      ? `<meta name="robots" content="noindex, follow" />`
+      : `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />`;
 
     const injected = `
     <title>${t}</title>
     <meta name="description" content="${d}" />
     <meta name="author" content="${escapeHtml(authorName)}" />
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-    <link rel="canonical" href="${u}" />
+    ${robotsTag}
+    ${canonicalTag}
 
     <meta property="og:site_name" content="${escapeHtml(siteName)}" />
     <meta property="og:title" content="${t}" />
     <meta property="og:description" content="${d}" />
     <meta property="og:type" content="${ogType}" />
-    <meta property="og:url" content="${u}" />
+    ${u ? `<meta property="og:url" content="${u}" />` : ""}
     <meta property="og:image" content="${img}" />
     <meta property="og:locale" content="en_IN" />
 
@@ -460,9 +490,22 @@ export default async function handler(req, res) {
 
     html = html.replace(/<\/head>/i, `${injected}\n</head>`);
 
-    // Inject crawler-visible content inside <noscript> so AI crawlers
-    // (which do not execute JS) can read the page's headline and summary.
-    const noscriptBlock = `
+    // Inject crawler-visible content inside <noscript>
+    const noscriptBlock = is404
+      ? `
+    <noscript>
+      <h1>404 — Page Not Found</h1>
+      <p>The page you are looking for does not exist or has been moved.</p>
+      <ul>
+        <li><a href="${baseUrl}/">Homepage</a></li>
+        <li><a href="${baseUrl}/blog">Fashion Blog</a></li>
+        <li><a href="${baseUrl}/contact">Contact Support</a></li>
+        <li><a href="${baseUrl}/?category=Sarees">Sarees Collection</a></li>
+        <li><a href="${baseUrl}/?category=Kurtas">Kurtis & Kurta Sets</a></li>
+        <li><a href="${baseUrl}/?category=Jewelry">Jewellery Collection</a></li>
+      </ul>
+    </noscript>`
+      : `
     <noscript>
       <h1>${escapeHtml(payload.h1)}</h1>
       <p>${escapeHtml(payload.body)}</p>
@@ -482,7 +525,12 @@ export default async function handler(req, res) {
     console.error("seo-handler injection failed:", err);
   }
 
+  const httpStatus = payload.is404 ? 404 : 200;
   res.setHeader("Content-Type", "text/html; charset=utf-8");
-  res.setHeader("Cache-Control", "public, max-age=60, s-maxage=3600, stale-while-revalidate=86400");
-  res.status(200).send(html);
+  if (payload.is404) {
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  } else {
+    res.setHeader("Cache-Control", "public, max-age=60, s-maxage=3600, stale-while-revalidate=86400");
+  }
+  res.status(httpStatus).send(html);
 }

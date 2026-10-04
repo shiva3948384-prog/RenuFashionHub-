@@ -119,6 +119,9 @@ async function startServer() {
   }
 
   function verifyAdminPassword(password: string) {
+    if (process.env.ADMIN_PASSWORD && safeEqual(password, process.env.ADMIN_PASSWORD)) {
+      return true;
+    }
     const salt = process.env.ADMIN_PASSWORD_SALT || "";
     const expectedHash = process.env.ADMIN_PASSWORD_HASH || "";
     if (!password || !salt || !expectedHash) return false;
@@ -1074,122 +1077,326 @@ async function startServer() {
     }
   });
 
+  // Normalization middleware: Permanent 308 redirect for trailing slashes on non-root paths
+  app.use((req, res, next) => {
+    if (req.path.length > 1 && req.path.endsWith("/")) {
+      const query = req.url.slice(req.path.length);
+      const safePath = req.path.slice(0, -1);
+      return res.redirect(308, safePath + query);
+    }
+    next();
+  });
+
+  // Apex domain normalization: Permanent 308 redirect to canonical www host
+  app.use((req, res, next) => {
+    const host = req.headers.host || "";
+    if (host === "renufashionhub.in") {
+      return res.redirect(308, `https://www.renufashionhub.in${req.url}`);
+    }
+    next();
+  });
+
+  // URL alias permanent redirect
+  app.get("/about-us", (req, res) => {
+    res.redirect(308, "/about");
+  });
+
+  const staticPages: Record<string, { title: string; description: string; path: string; ogType: string; h1: string; body: string }> = {
+    home: {
+      title: "Renu Fashion Hub | Sarees, Kurtis, Jewellery & Style Guides by Renu Agarwal",
+      description: "Renu Fashion Hub by Renu Agarwal — women's fashion inspiration, saree & kurti styling, jewellery picks, outfit ideas and honest shopping guides for Indian women.",
+      path: "/",
+      ogType: "website",
+      h1: "Renu Fashion Hub — Women's Fashion, Sarees, Kurtis, Jewellery & Style Guides",
+      body: "Renu Fashion Hub, curated by Renu Agarwal, is a destination for Indian women's fashion inspiration: saree styling, kurti trends, lehenga guides, jewellery picks, western outfit ideas, seasonal shopping guides and honest beauty tips."
+    },
+    about: {
+      title: "About Renu Agarwal | Founder of Renu Fashion Hub",
+      description: "Meet Renu Agarwal — fashion creator behind Renu Fashion Hub. Her styling journey, editorial mission and philosophy behind every saree, kurti and jewellery pick on the site.",
+      path: "/about",
+      ogType: "profile",
+      h1: "About Renu Agarwal",
+      body: "Renu Agarwal is a fashion and lifestyle creator with over 1M followers across Instagram, YouTube and Facebook. Renu Fashion Hub is her curated catalog and editorial home for Indian women's fashion — sarees, kurtis, lehengas, jewellery and everyday styling inspiration."
+    },
+    blog: {
+      title: "Fashion Blog | Saree, Kurti & Styling Guides — Renu Fashion Hub",
+      description: "Fashion blog by Renu Agarwal. Trend reports, saree draping guides, kurti pairing ideas, lehenga inspiration, jewellery styling and seasonal shopping guides for Indian women.",
+      path: "/blog",
+      ogType: "website",
+      h1: "Renu Fashion Hub Blog",
+      body: "Editorial fashion articles by Renu Agarwal covering saree draping and styling, kurti trends, lehenga inspiration, western outfit ideas, jewellery picks and seasonal shopping guides for Indian women."
+    },
+    contact: {
+      title: "Contact Renu Fashion Hub | Styling Enquiries & Support",
+      description: "Contact Renu Fashion Hub for styling enquiries, collaboration requests, product questions or support. Email, phone and location details for Renu Agarwal's team.",
+      path: "/contact",
+      ogType: "website",
+      h1: "Contact Renu Fashion Hub",
+      body: "Get in touch with the Renu Fashion Hub team for styling questions, collaboration enquiries or support with products featured on the site."
+    },
+    privacy: {
+      title: "Privacy Policy | Renu Fashion Hub",
+      description: "Privacy policy of Renu Fashion Hub — what data we collect, how analytics is used, cookie policy and how your contact information is handled.",
+      path: "/privacy-policy",
+      ogType: "website",
+      h1: "Privacy Policy",
+      body: "This privacy policy explains what data Renu Fashion Hub collects, how analytics and cookies are used, and how visitor information is handled."
+    },
+    terms: {
+      title: "Terms of Service | Renu Fashion Hub",
+      description: "Terms of service for Renu Fashion Hub — operating rules for the catalog, affiliate product recommendations, user-generated content and intellectual property.",
+      path: "/terms-of-service",
+      ogType: "website",
+      h1: "Terms of Service",
+      body: "Terms of service governing use of Renu Fashion Hub, affiliate product recommendations and any user-submitted content."
+    },
+    disclaimer: {
+      title: "Disclaimer | Renu Fashion Hub",
+      description: "Disclaimer for Renu Fashion Hub — affiliate commission disclosure, third-party product responsibility and accuracy of styling recommendations.",
+      path: "/disclaimer",
+      ogType: "website",
+      h1: "Disclaimer",
+      body: "Renu Fashion Hub may earn affiliate commissions on some product links. Product availability and pricing are governed by third-party retailers."
+    },
+    affiliate: {
+      title: "Affiliate Disclosure | Renu Fashion Hub",
+      description: "Transparent affiliate disclosure for Renu Fashion Hub adhering to ASCI and FTC guidelines — how commissions support our free styling guides at zero extra cost to you.",
+      path: "/affiliate-disclosure",
+      ogType: "website",
+      h1: "Affiliate Disclosure",
+      body: "Renu Fashion Hub partners with trusted retail affiliate networks. When you purchase via our styling recommendations, we may earn a small referral commission at no additional cost to you."
+    },
+    cookie: {
+      title: "Cookie Policy | Renu Fashion Hub",
+      description: "Cookie policy of Renu Fashion Hub — details on essential, analytics, and advertising cookies used, and how to manage your privacy and consent preferences.",
+      path: "/cookie-policy",
+      ogType: "website",
+      h1: "Cookie Policy",
+      body: "Learn about the cookies and tracking technologies used on Renu Fashion Hub, why they are used, and how you can control your browser cookies."
+    },
+  };
+
+  const CATEGORY_LINKS = [
+    { href: "/?category=Sarees", label: "Sarees" },
+    { href: "/?category=Kurtas", label: "Kurtis & Kurta Sets" },
+    { href: "/?category=Lehengas", label: "Lehengas" },
+    { href: "/?category=Dresses", label: "Western Dresses" },
+    { href: "/?category=Jewelry", label: "Jewellery" },
+  ];
+
+  let viteDevServer: any = null;
+
   // Dynamic SEO and metadata injector for specific route requests
-  async function serveSeoHtml(req: any, res: any, type: string) {
-    let title = "Renu Fashion Hub | Premium Fashion & Style Hub";
-    let description = "Premium Fashion • Latest Trends • Style Hub. Elevating your style every day ✨";
-    let image = `${baseUrl}/favicon.svg`;
-    let url = `${baseUrl}/`;
+  async function serveSeoHtml(req: any, res: any, type: string, pageName?: string) {
+    let is404 = false;
+    let title = "Renu Fashion Hub | Sarees, Kurtis, Jewellery & Style Guides by Renu Agarwal";
+    let description = "Renu Fashion Hub by Renu Agarwal — women's fashion inspiration, saree & kurti styling, jewellery picks, outfit ideas and honest shopping guides for Indian women.";
+    let image = `${baseUrl}/og-image.jpg`;
+    let url: string | null = `${baseUrl}/`;
+    let ogType = "website";
+    let h1 = "Renu Fashion Hub";
+    let body = "";
 
     try {
-      const { id } = req.params;
-      if (id) {
-        const cleanId = String(id).split('?')[0];
-
-        if (type === "blog" && !isNaN(parseInt(cleanId, 10))) {
+      if (type === "404") {
+        is404 = true;
+      } else if (type === "page" && pageName && staticPages[pageName]) {
+        const page = staticPages[pageName];
+        title = page.title;
+        description = page.description;
+        url = `${baseUrl}${page.path}`;
+        ogType = page.ogType;
+        h1 = page.h1;
+        body = page.body;
+      } else if (type === "blog") {
+        const { id } = req.params;
+        const cleanId = String(id || "").split("?")[0];
+        const numeric = parseInt(cleanId, 10);
+        if (!isNaN(numeric)) {
           const { data, error } = await supabase
-            .from('blogs')
-            .select('*')
-            .eq('id', parseInt(cleanId, 10))
+            .from("blogs")
+            .select("*")
+            .eq("id", numeric)
             .single();
 
-          if (!error && data) {
-            title = data.seo_title || `${data.title} - Renu Fashion Hub`;
+          if (!error && data && data.id !== 999999 && data.category !== "site_settings") {
+            title = data.seo_title || `${data.title} | Renu Fashion Hub`;
             description = data.meta_description || data.excerpt || description;
             image = data.image_url || image;
             url = `${baseUrl}/blog/${cleanId}`;
+            ogType = "article";
+            h1 = data.title;
+            body = data.excerpt || data.content || "";
+          } else {
+            is404 = true;
           }
-        } else if (type === "product" && !isNaN(parseInt(cleanId, 10))) {
+        } else {
+          is404 = true;
+        }
+      } else if (type === "product") {
+        const { id } = req.params;
+        const cleanId = String(id || "").split("?")[0];
+        const numeric = parseInt(cleanId, 10);
+        if (!isNaN(numeric)) {
           const { data, error } = await supabase
-            .from('products')
-            .select('*')
-            .eq('id', parseInt(cleanId, 10))
+            .from("products")
+            .select("*")
+            .eq("id", numeric)
             .single();
 
           if (!error && data) {
-            title = `${data.name} - Renu Fashion Hub`;
-            description = data.description || description;
+            title = `${data.name} | Renu Fashion Hub`;
+            description = data.description || `${data.name} — fashion pick, styling details and shopping guide at Renu Fashion Hub.`;
             image = data.image_url || image;
             url = `${baseUrl}/product/${cleanId}`;
+            ogType = "product";
+            h1 = data.name;
+            body = data.description || "";
+          } else {
+            is404 = true;
           }
-        } else if (type === "post" && !isNaN(parseInt(cleanId, 10))) {
+        } else {
+          is404 = true;
+        }
+      } else if (type === "post") {
+        const { id } = req.params;
+        const cleanId = String(id || "").split("?")[0];
+        const numeric = parseInt(cleanId, 10);
+        if (!isNaN(numeric)) {
           const { data, error } = await supabase
-            .from('posts')
-            .select('*')
-            .eq('id', parseInt(cleanId, 10))
+            .from("posts")
+            .select("*")
+            .eq("id", numeric)
             .single();
 
           if (!error && data) {
-            title = `Post #${cleanId} - Renu Fashion Hub`;
-            description = "Watch the latest outfit style, custom lookbook, and collection recommendation video at Renu Fashion Hub.";
+            title = `${data.caption ? String(data.caption).slice(0, 60) : `Fashion Style Post ${cleanId}`} | Renu Fashion Hub`;
+            description = data.caption || "Latest outfit style, lookbook and collection recommendation from Renu Fashion Hub.";
+            image = data.type === "image" && data.url ? data.url : image;
             url = `${baseUrl}/post/${cleanId}`;
+            ogType = "article";
+            h1 = title.replace(" | Renu Fashion Hub", "");
+            body = data.caption || "";
+          } else {
+            is404 = true;
           }
+        } else {
+          is404 = true;
         }
+      } else {
+        is404 = true;
       }
     } catch (dbErr) {
       console.error("Database lookup error in server seo handler:", dbErr);
+      is404 = true;
     }
 
-    // Read index.html
+    if (is404) {
+      title = "404 Not Found | Renu Fashion Hub";
+      description = "The page you are looking for does not exist, has been removed, or is temporarily unavailable. Browse the latest Indian fashion, sarees, and styling guides on Renu Fashion Hub.";
+      url = null; // Omit canonical tag completely on 404
+      h1 = "404 — Page Not Found";
+      body = "We couldn't find the page you were looking for. Explore our curated collections of sarees, kurtis, jewellery and styling guides, or return to the homepage.";
+    }
+
+    // Read index.html (in development, load live root index.html and transform via Vite)
     let html = "";
-    const distPath = path.join(process.cwd(), 'dist');
-    try {
-      html = fs.readFileSync(path.join(distPath, 'index.html'), 'utf8');
-    } catch (fileErr) {
+    const distPath = path.join(process.cwd(), "dist");
+    const isDev = process.env.NODE_ENV !== "production";
+
+    if (isDev) {
       try {
-        html = fs.readFileSync(path.join(process.cwd(), 'index.html'), 'utf8');
+        html = fs.readFileSync(path.join(process.cwd(), "index.html"), "utf8");
       } catch (e) {
-        html = `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>${escapeXml(title)}</title>
-    <meta name="description" content="${escapeXml(description)}" />
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
-</html>`;
+        html = `<!doctype html><html lang="en-IN"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>${escapeXml(title)}</title></head><body><div id="root"></div></body></html>`;
+      }
+      if (viteDevServer) {
+        try {
+          html = await viteDevServer.transformIndexHtml(req.originalUrl || req.url, html);
+        } catch (viteErr) {
+          console.error("Vite transformIndexHtml error:", viteErr);
+        }
+      }
+    } else {
+      try {
+        html = fs.readFileSync(path.join(distPath, "index.html"), "utf8");
+      } catch (fileErr) {
+        try {
+          html = fs.readFileSync(path.join(process.cwd(), "index.html"), "utf8");
+        } catch (e) {
+          html = `<!doctype html><html lang="en-IN"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>${escapeXml(title)}</title></head><body><div id="root"></div></body></html>`;
+        }
       }
     }
 
     try {
       // Strip any existing title, meta description, keywords, og:*, twitter:*, and canonical link tags to avoid duplicates
-      html = html.replace(/<title>.*?<\/title>/gi, '');
-      html = html.replace(/<meta\s+[^>]*name=["']description["'][^>]*>/gi, '');
-      html = html.replace(/<meta\s+[^>]*name=["']keywords["'][^>]*>/gi, '');
-      html = html.replace(/<meta\s+[^>]*property=["']og:title["'][^>]*>/gi, '');
-      html = html.replace(/<meta\s+[^>]*property=["']og:description["'][^>]*>/gi, '');
-      html = html.replace(/<meta\s+[^>]*property=["']og:image["'][^>]*>/gi, '');
-      html = html.replace(/<meta\s+[^>]*property=["']og:url["'][^>]*>/gi, '');
-      html = html.replace(/<meta\s+[^>]*name=["']twitter:card["'][^>]*>/gi, '');
-      html = html.replace(/<meta\s+[^>]*name=["']twitter:title["'][^>]*>/gi, '');
-      html = html.replace(/<meta\s+[^>]*name=["']twitter:description["'][^>]*>/gi, '');
-      html = html.replace(/<meta\s+[^>]*name=["']twitter:image["'][^>]*>/gi, '');
-      html = html.replace(/<link\s+[^>]*rel=["']canonical["'][^>]*>/gi, '');
+      html = html.replace(/<title>.*?<\/title>/gi, "");
+      html = html.replace(/<meta\s+[^>]*name=["']description["'][^>]*>/gi, "");
+      html = html.replace(/<meta\s+[^>]*name=["']keywords["'][^>]*>/gi, "");
+      html = html.replace(/<meta\s+[^>]*name=["']robots["'][^>]*>/gi, "");
+      html = html.replace(/<meta\s+[^>]*property=["']og:title["'][^>]*>/gi, "");
+      html = html.replace(/<meta\s+[^>]*property=["']og:description["'][^>]*>/gi, "");
+      html = html.replace(/<meta\s+[^>]*property=["']og:image["'][^>]*>/gi, "");
+      html = html.replace(/<meta\s+[^>]*property=["']og:url["'][^>]*>/gi, "");
+      html = html.replace(/<meta\s+[^>]*property=["']og:type["'][^>]*>/gi, "");
+      html = html.replace(/<meta\s+[^>]*name=["']twitter:card["'][^>]*>/gi, "");
+      html = html.replace(/<meta\s+[^>]*name=["']twitter:title["'][^>]*>/gi, "");
+      html = html.replace(/<meta\s+[^>]*name=["']twitter:description["'][^>]*>/gi, "");
+      html = html.replace(/<meta\s+[^>]*name=["']twitter:image["'][^>]*>/gi, "");
+      html = html.replace(/<link\s+[^>]*rel=["']canonical["'][^>]*>/gi, "");
 
-      // Inject our fresh, correct tags right before </head>
+      const canonicalTag = url ? `<link rel="canonical" href="${escapeXml(url)}" />` : "";
+      const robotsTag = is404
+        ? `<meta name="robots" content="noindex, follow" />`
+        : `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />`;
+
       const cleanMeta = `
       <title>${escapeXml(title)}</title>
       <meta name="description" content="${escapeXml(description)}" />
-      <link rel="canonical" href="${escapeXml(url)}" />
+      ${robotsTag}
+      ${canonicalTag}
       <meta property="og:title" content="${escapeXml(title)}" />
       <meta property="og:description" content="${escapeXml(description)}" />
+      <meta property="og:type" content="${escapeXml(ogType)}" />
       <meta property="og:image" content="${escapeXml(image)}" />
-      <meta property="og:url" content="${escapeXml(url)}" />
+      ${url ? `<meta property="og:url" content="${escapeXml(url)}" />` : ""}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content="${escapeXml(title)}" />
       <meta name="twitter:description" content="${escapeXml(description)}" />
       <meta name="twitter:image" content="${escapeXml(image)}" />
 `;
       html = html.replace(/<\/head>/i, `${cleanMeta}\n</head>`);
+
+      // Inject fallback body into <div id="root"> if 404
+      if (is404) {
+        const root404 = `<div id="root"><div data-seo-fallback="1" style="max-width: 680px; margin: 48px auto; padding: 32px 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; text-align: center; color: #1c1917;">
+        <h1 style="font-size: 32px; font-weight: 800; margin-bottom: 12px; color: #881337;">404 — Page Not Found</h1>
+        <p style="font-size: 16px; color: #57534e; margin-bottom: 24px; line-height: 1.6;">The page you are looking for does not exist, has been removed, or is temporarily unavailable.</p>
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 32px;">
+          <a href="${baseUrl}/" style="display: inline-block; padding: 12px 24px; background: #e11d48; color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: 600; font-size: 14px;">Return to Homepage</a>
+          <a href="${baseUrl}/blog" style="display: inline-block; padding: 12px 24px; background: #f5f5f4; color: #1c1917; text-decoration: none; border-radius: 9999px; font-weight: 600; font-size: 14px; border: 1px solid #e7e5e4;">Explore Fashion Blog</a>
+          <a href="${baseUrl}/contact" style="display: inline-block; padding: 12px 24px; background: #f5f5f4; color: #1c1917; text-decoration: none; border-radius: 9999px; font-weight: 600; font-size: 14px; border: 1px solid #e7e5e4;">Contact Support</a>
+        </div>
+        <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 12px; color: #1c1917;">Browse Popular Collections</h2>
+        <ul style="list-style: none; padding: 0; margin: 0 auto; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+          ${CATEGORY_LINKS.map(link => `<li><a href="${link.href}" style="color: #e11d48; text-decoration: underline; font-weight: 500;">${escapeXml(link.label)}</a></li>`).join('')}
+        </ul>
+      </div></div>`;
+        html = html.replace(/<div id="root">\s*<\/div>/i, root404);
+      }
     } catch (replaceErr) {
       console.error("Replacement failed in server seo handler:", replaceErr);
     }
 
     res.setHeader("Content-Type", "text/html; charset=utf-8");
-    res.status(200).send(html);
+    if (is404) {
+      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+      res.status(404).send(html);
+    } else {
+      res.setHeader("Cache-Control", "public, max-age=60, s-maxage=3600, stale-while-revalidate=86400");
+      res.status(200).send(html);
+    }
   }
 
   // Bind SEO handlers to routes before serving general SPA fallback
@@ -1215,22 +1422,83 @@ async function startServer() {
     }
   });
 
+  app.get("/diagnostic", (req, res) => {
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.sendFile(path.join(process.cwd(), "public", "diagnostic.html"));
+  });
+
+  // Static SEO routes
+  app.get("/", (req, res) => serveSeoHtml(req, res, "page", "home"));
+  app.get("/about", (req, res) => serveSeoHtml(req, res, "page", "about"));
+  app.get("/blog", (req, res) => serveSeoHtml(req, res, "page", "blog"));
+  app.get("/contact", (req, res) => serveSeoHtml(req, res, "page", "contact"));
+  app.get("/privacy-policy", (req, res) => serveSeoHtml(req, res, "page", "privacy"));
+  app.get("/terms-of-service", (req, res) => serveSeoHtml(req, res, "page", "terms"));
+  app.get("/disclaimer", (req, res) => serveSeoHtml(req, res, "page", "disclaimer"));
+  app.get("/affiliate-disclosure", (req, res) => serveSeoHtml(req, res, "page", "affiliate"));
+  app.get("/cookie-policy", (req, res) => serveSeoHtml(req, res, "page", "cookie"));
+
+  // Index.html direct request route
+  app.get("/index.html", (req, res) => serveSeoHtml(req, res, "page", "home"));
+
+  // Dynamic SEO routes
   app.get("/blog/:id", (req, res) => serveSeoHtml(req, res, "blog"));
   app.get("/product/:id", (req, res) => serveSeoHtml(req, res, "product"));
   app.get("/post/:id", (req, res) => serveSeoHtml(req, res, "post"));
 
+  // Admin & Login routes
+  app.get(["/admin", "/login"], (req, res) => {
+    res.setHeader("X-Robots-Tag", "noindex, nofollow");
+    const distPath = path.join(process.cwd(), "dist");
+    if (fs.existsSync(path.join(distPath, "index.html"))) {
+      res.sendFile(path.join(distPath, "index.html"));
+    } else {
+      res.sendFile(path.join(process.cwd(), "index.html"));
+    }
+  });
+
   // Vite development vs production asset serving configuration
   if (process.env.NODE_ENV !== "production") {
-    const vite = await createViteServer({
+    viteDevServer = await createViteServer({
       server: { middlewareMode: true },
-      appType: "spa",
+      appType: "custom",
     });
-    app.use(vite.middlewares);
+    app.use(viteDevServer.middlewares);
+
+    const distPath = path.join(process.cwd(), "dist");
+    if (fs.existsSync(path.join(distPath, "assets"))) {
+      app.use("/assets", express.static(path.join(distPath, "assets")));
+    }
+
+    // In dev mode, any unmatched route returns 404 via serveSeoHtml
+    app.use((req, res, next) => {
+      if (req.method === "GET") {
+        if (
+          req.path.startsWith("/api/") ||
+          req.path.startsWith("/@") ||
+          req.path.startsWith("/src/") ||
+          req.path.startsWith("/assets/") ||
+          req.path.startsWith("/node_modules/") ||
+          req.path.includes(".")
+        ) {
+          return next();
+        }
+        return serveSeoHtml(req, res, "404");
+      }
+      next();
+    });
   } else {
-    const distPath = path.join(process.cwd(), 'dist');
+    const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+    // In production, any unmatched route returns 404 via serveSeoHtml
+    app.use((req, res, next) => {
+      if (req.method === "GET") {
+        if (req.path.startsWith("/api/") || req.path.startsWith("/assets/") || req.path.includes(".")) {
+          return next();
+        }
+        return serveSeoHtml(req, res, "404");
+      }
+      next();
     });
   }
 
