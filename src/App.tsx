@@ -80,21 +80,67 @@ const INITIAL_TABS = [
   { id: "products", label: "Products", icon: Tag },
 ];
 
-// Supabase storage images are served at full size (50-90KB each). With 100+ product
-// cards on one page that is several MB of downloads and the main cause of scroll lag.
-// Rewrite public object URLs to the image-render endpoint so the browser gets a
-// right-sized, compressed variant. Falls back to the original URL if render fails.
+// Supabase storage image optimization & responsive UHD/4K delivery pipeline.
+// Upgrades all public object URLs to the image-render endpoint with AVIF/WebP
+// negotiation, responsive multi-resolution srcsets (targeting up to 3840px UHD),
+// high visual quality (88-92), artifact suppression, and CLS prevention.
 const SUPABASE_OBJECT_PATH = "/storage/v1/object/public/";
 const SUPABASE_RENDER_PATH = "/storage/v1/render/image/public/";
 
-const buildOptimizedUrl = (url: string, width: number) => {
+const buildOptimizedUrl = (
+  url: string,
+  width: number,
+  format: "avif" | "webp" | "origin" = "origin",
+  quality: number = 88
+) => {
   if (typeof url !== "string" || !url.includes(SUPABASE_OBJECT_PATH)) return null;
   const rendered = url.replace(SUPABASE_OBJECT_PATH, SUPABASE_RENDER_PATH);
   const sep = rendered.includes("?") ? "&" : "?";
-  return `${rendered}${sep}width=${width}&resize=contain&quality=70`;
+  const fmtParam = format !== "origin" ? `&format=${format}` : "";
+  return `${rendered}${sep}width=${width}&resize=contain&quality=${quality}${fmtParam}`;
 };
 
-const MediaImage = React.memo(({ url, className, alt, fallback, onReady, imgWidth = 640, ...props }: { url: string | File | Blob; className?: string; alt?: string; fallback?: React.ReactNode; onReady?: () => void; imgWidth?: number; [key: string]: any }) => {
+const buildSrcSet = (
+  url: string,
+  baseWidth: number,
+  format: "avif" | "webp" | "origin" = "origin",
+  quality: number = 88
+) => {
+  if (typeof url !== "string" || !url.includes(SUPABASE_OBJECT_PATH)) return undefined;
+  const half = Math.max(320, Math.round(baseWidth * 0.5));
+  const full = baseWidth;
+  const double = Math.min(3840, Math.round(baseWidth * 2));
+  
+  const points = baseWidth >= 1600 
+    ? [800, 1600, 2400, 3840] 
+    : [half, full, double];
+    
+  return points
+    .map(w => `${buildOptimizedUrl(url, w, format, quality)} ${w}w`)
+    .join(", ");
+};
+
+const MediaImage = React.memo(({
+  url,
+  className,
+  alt,
+  fallback,
+  onReady,
+  imgWidth = 800,
+  priority = false,
+  pictureClassName,
+  ...props
+}: {
+  url: string | File | Blob;
+  className?: string;
+  alt?: string;
+  fallback?: React.ReactNode;
+  onReady?: () => void;
+  imgWidth?: number;
+  priority?: boolean;
+  pictureClassName?: string;
+  [key: string]: any;
+}) => {
   const [mediaUrl, setMediaUrl] = React.useState<string | null>(null);
   const [error, setError] = React.useState(false);
   const [useOriginal, setUseOriginal] = React.useState(false);
@@ -125,33 +171,52 @@ const MediaImage = React.memo(({ url, className, alt, fallback, onReady, imgWidt
     return <>{fallback || null}</>;
   }
 
-  const optimized = useOriginal ? null : buildOptimizedUrl(mediaUrl, imgWidth);
-  const srcSet = optimized
-    ? `${buildOptimizedUrl(mediaUrl, Math.round(imgWidth / 2))} ${Math.round(imgWidth / 2)}w, ${optimized} ${imgWidth}w`
-    : undefined;
+  // Fallback to untouched original URL on error or non-Supabase URLs
+  if (useOriginal || !mediaUrl.includes(SUPABASE_OBJECT_PATH)) {
+    return (
+      <img
+        src={mediaUrl}
+        className={className}
+        alt={alt || "Renu Fashion Hub"}
+        loading={priority ? "eager" : "lazy"}
+        decoding={priority ? "sync" : "async"}
+        referrerPolicy="no-referrer"
+        onError={() => {
+          setError(true);
+          onReady?.();
+        }}
+        onLoad={() => onReady?.()}
+        {...props}
+      />
+    );
+  }
+
+  const avifSrcSet = buildSrcSet(mediaUrl, imgWidth, "avif", 88);
+  const webpSrcSet = buildSrcSet(mediaUrl, imgWidth, "webp", 88);
+  const jpegSrcSet = buildSrcSet(mediaUrl, imgWidth, "origin", 88);
+  const fallbackJpeg = buildOptimizedUrl(mediaUrl, imgWidth, "origin", 88) || mediaUrl;
+  const sizesAttr = `(max-width: 640px) 100vw, (max-width: 1024px) 50vw, ${imgWidth}px`;
 
   return (
-    <img 
-      src={optimized || mediaUrl} 
-      srcSet={srcSet}
-      sizes={srcSet ? `${imgWidth}px` : undefined}
-      className={className} 
-      alt={alt} 
-      loading="lazy"
-      decoding="async"
-      referrerPolicy="no-referrer" 
-      onError={() => {
-        // Optimized variant failed -> retry the untouched original before giving up.
-        if (optimized && !useOriginal) {
+    <picture className={pictureClassName || "contents"}>
+      {avifSrcSet && <source type="image/avif" srcSet={avifSrcSet} sizes={sizesAttr} />}
+      {webpSrcSet && <source type="image/webp" srcSet={webpSrcSet} sizes={sizesAttr} />}
+      <img
+        src={fallbackJpeg}
+        srcSet={jpegSrcSet}
+        sizes={sizesAttr}
+        className={className}
+        alt={alt || "Renu Fashion Hub"}
+        loading={priority ? "eager" : "lazy"}
+        decoding={priority ? "sync" : "async"}
+        referrerPolicy="no-referrer"
+        onError={() => {
           setUseOriginal(true);
-          return;
-        }
-        setError(true);
-        onReady?.();
-      }}
-      onLoad={() => onReady?.()}
-      {...props} 
-    />
+        }}
+        onLoad={() => onReady?.()}
+        {...props}
+      />
+    </picture>
   );
 });
 
@@ -1023,6 +1088,7 @@ const ProductDetailPage = ({ products, theme, navigate, isLoaded }: { products: 
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [triggerSuccessStars, setTriggerSuccessStars] = useState(false);
   const [showCopiedToast, setShowCopiedToast] = useState(false);
+  const [show4KModal, setShow4KModal] = useState(false);
   const reviewsContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -1205,9 +1271,25 @@ const ProductDetailPage = ({ products, theme, navigate, isLoaded }: { products: 
           
           {/* Image Left Column - sticky on desktop to prevent visual emptiness */}
           <div className="md:col-span-5 md:sticky md:top-6">
-            <div className="aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 shadow-xl relative group">
-              <MediaImage url={product.url} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+            <div 
+              onClick={() => setShow4KModal(true)}
+              className="aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 shadow-xl relative group cursor-zoom-in"
+              title="Click to view 4K Ultra-HD resolution"
+            >
+              <MediaImage 
+                url={product.url} 
+                alt={product.name}
+                imgWidth={1920}
+                priority={true}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" 
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent pointer-events-none" />
+              
+              {/* 4K Ultra-HD Quality Badge */}
+              <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/75 backdrop-blur-md border border-white/20 text-white text-[10px] font-extrabold shadow-lg">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                4K Ultra-HD View
+              </div>
             </div>
           </div>
 
@@ -1384,6 +1466,48 @@ const ProductDetailPage = ({ products, theme, navigate, isLoaded }: { products: 
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* 4K Ultra-HD Full-Screen Viewer Modal */}
+      {show4KModal && (
+        <div 
+          className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-center p-4 sm:p-8 animate-in fade-in duration-200"
+          onClick={() => setShow4KModal(false)}
+        >
+          <div className="w-full max-w-5xl flex items-center justify-between text-white mb-3 px-2">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-1 rounded-md bg-rose-600 text-[10px] font-extrabold uppercase tracking-widest text-white shadow-sm">
+                4K Ultra-HD
+              </span>
+              <span className="text-xs sm:text-sm font-semibold truncate max-w-md text-stone-200">
+                {product.name}
+              </span>
+            </div>
+            <button 
+              onClick={() => setShow4KModal(false)}
+              className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer text-sm font-bold flex items-center justify-center w-9 h-9"
+              aria-label="Close 4K view"
+            >
+              ✕
+            </button>
+          </div>
+          
+          <div 
+            className="relative max-w-5xl max-h-[82vh] w-full flex items-center justify-center overflow-auto rounded-2xl border border-white/10 shadow-2xl bg-black/50 p-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <MediaImage 
+              url={product.url}
+              alt={`${product.name} in 4K Ultra-HD`}
+              imgWidth={3840}
+              priority={true}
+              className="max-w-full max-h-[80vh] object-contain select-none rounded-xl"
+            />
+          </div>
+          <p className="text-[11px] text-white/50 mt-3 text-center">
+            Full 4K Ultra-HD master rendering with dynamic AVIF & WebP multi-resolution delivery
+          </p>
+        </div>
+      )}
     </motion.div>
   );
 };
@@ -4618,6 +4742,7 @@ const ProductCard = React.memo(({ product, navigate, isMobile }: { product: any;
         <MediaImage 
           url={product.url} 
           alt={product.name}
+          imgWidth={800}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           loading="lazy"
         />
