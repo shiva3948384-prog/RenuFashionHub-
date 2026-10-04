@@ -64,9 +64,19 @@
 
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
 
-    { "source": "/api/settings/profile", "destination": "/api/settings-profile" },
-    { "source": "/api/products/:id/reviews", "destination": "/api/products?id=:id&action=reviews" },
+    { "source": "/api/settings/profile", "destination": "/api/admin-sync?action=profile" },
+    { "source": "/api/admin-sync", "destination": "/api/admin-sync" },
+
+    { "source": "/api/blogs", "destination": "/api/content?entity=blogs" },
+    { "source": "/api/posts", "destination": "/api/content?entity=posts" },
+    { "source": "/api/products/:id/reviews", "destination": "/api/content?entity=products&id=:id&action=reviews" },
+    { "source": "/api/products", "destination": "/api/content?entity=products" },
+
     { "source": "/api/messages/:id", "destination": "/api/messages?id=:id" },
+    { "source": "/api/messages", "destination": "/api/messages" },
+    { "source": "/api/admin-auth", "destination": "/api/admin-auth" },
+    { "source": "/api/download-image", "destination": "/api/download-image" },
+    { "source": "/api/health", "destination": "/api/health" },
 
     { "source": "/blog/:id", "destination": "/api/seo-render?type=blog&id=:id" },
     { "source": "/product/:id", "destination": "/api/seo-render?type=product&id=:id" },

@@ -6,7 +6,7 @@
 // internal links. This wrapper renders that same per-page content as real HTML
 // inside <div id="root">, which React replaces on hydration.
 
-import seoHandler from './seo-handler.js';
+import seoHandler from './_seo-handler.js';
 
 const BASE_URL = 'https://www.renufashionhub.in';
 

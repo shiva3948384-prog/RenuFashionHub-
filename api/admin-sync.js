@@ -1,4 +1,6 @@
 // Serverless helper to synchronize frontend changes directly to Supabase
+import fs from 'fs';
+import path from 'path';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import { applySameOriginHeaders, requireAdmin } from './_auth.js';
@@ -7,6 +9,15 @@ dotenv.config();
 
 const SUPABASE_URL = process.env.SUPABASE_URL || "";
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+
+const PROFILE_FILE_PATH = path.join(process.cwd(), "backups", "settings_profile.json");
+const DEFAULT_PROFILE = {
+  name: "Renu Fashion Hub",
+  bio: "Fashion Hub & Affiliate Store",
+  avatar: "",
+  privacyPolicy: "",
+  termsOfService: ""
+};
 
 // Initialize Supabase with Service Role key to bypass RLS policies
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
@@ -89,6 +100,108 @@ async function upsertRecords(table, records) {
 }
 
 export default async function handler(req, res) {
+  const { action } = req.query || {};
+
+  // Handle settings profile: GET/POST /api/settings/profile
+  if (action === "profile") {
+    applySameOriginHeaders(req, res, 'GET,POST,OPTIONS');
+
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
+
+    if (req.method === 'GET') {
+      try {
+        if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+          const { data, error } = await supabase
+            .from("blogs")
+            .select("*")
+            .eq("id", 999999)
+            .single();
+
+          if (!error && data) {
+            try {
+              const parsed = JSON.parse(data.content);
+              return res.status(200).json(parsed);
+            } catch (e) {
+              console.error("Failed to parse settings JSON from database, trying fallback:", e);
+            }
+          }
+        }
+
+        const tmpPath = "/tmp/settings_profile.json";
+        if (fs.existsSync(tmpPath)) {
+          const data = fs.readFileSync(tmpPath, "utf8");
+          return res.status(200).json(JSON.parse(data));
+        } else if (fs.existsSync(PROFILE_FILE_PATH)) {
+          const data = fs.readFileSync(PROFILE_FILE_PATH, "utf8");
+          return res.status(200).json(JSON.parse(data));
+        } else {
+          return res.status(200).json(DEFAULT_PROFILE);
+        }
+      } catch (err) {
+        return res.status(200).json(DEFAULT_PROFILE);
+      }
+    }
+
+    if (req.method === 'POST') {
+      if (!requireAdmin(req, res)) return;
+
+      try {
+        const data = req.body || {};
+
+        let avatarUrl = data.avatar || "";
+        if (avatarUrl && avatarUrl.startsWith("data:image/") && SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+          const uploadedUrl = await uploadImageToStorage("blog-images", 999999, avatarUrl);
+          if (uploadedUrl) {
+            avatarUrl = uploadedUrl;
+            data.avatar = uploadedUrl;
+          }
+        }
+
+        try {
+          if (!fs.existsSync(path.dirname(PROFILE_FILE_PATH))) {
+            fs.mkdirSync(path.dirname(PROFILE_FILE_PATH), { recursive: true });
+          }
+          fs.writeFileSync(PROFILE_FILE_PATH, JSON.stringify(data, null, 2), "utf8");
+        } catch (fileErr) {
+          const tmpPath = "/tmp/settings_profile.json";
+          try {
+            fs.writeFileSync(tmpPath, JSON.stringify(data, null, 2), "utf8");
+          } catch (e) {
+            console.error("Failed to write to tmp file:", e);
+          }
+        }
+
+        if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+          const { error } = await supabase
+            .from("blogs")
+            .upsert({
+              id: 999999,
+              title: data.name || "Renu Fashion Hub",
+              excerpt: data.bio || "Fashion Hub & Affiliate Store",
+              content: JSON.stringify(data),
+              category: "site_settings",
+              image_url: avatarUrl,
+              timestamp: new Date().toISOString()
+            });
+
+          if (error) {
+            console.error("Failed to upsert settings to Supabase:", error.message);
+          }
+        }
+
+        return res.status(200).json({ success: true, data });
+      } catch (err) {
+        console.error("Vercel API POST /api/settings/profile error:", err);
+        return res.status(500).json({ error: err.message || String(err) });
+      }
+    }
+
+    return res.status(405).json({ error: 'Method not allowed.' });
+  }
+
+  // Handle standard bulk admin-sync
   applySameOriginHeaders(req, res, 'POST,OPTIONS');
 
   if (req.method === 'OPTIONS') {
