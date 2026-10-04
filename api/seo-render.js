@@ -21,11 +21,11 @@ const NAV_LINKS = [
 ];
 
 const CATEGORY_LINKS = [
-  { href: '/?category=Sarees', label: 'Sarees' },
-  { href: '/?category=Kurtas', label: 'Kurtis & Kurta Sets' },
-  { href: '/?category=Lehengas', label: 'Lehengas' },
-  { href: '/?category=Dresses', label: 'Western Dresses' },
-  { href: '/?category=Jewelry', label: 'Jewellery' },
+  { href: '/category/sarees', label: 'Sarees' },
+  { href: '/category/kurtas', label: 'Kurtis & Kurta Sets' },
+  { href: '/category/lehengas', label: 'Lehengas' },
+  { href: '/category/dresses', label: 'Western Dresses' },
+  { href: '/category/jewelry', label: 'Jewellery' },
 ];
 
 function escapeHtml(str) {
@@ -56,6 +56,11 @@ function buildRootBlock(html, is404 = false) {
         ${CATEGORY_LINKS.map(link => `<li><a href="${link.href}" style="color: #e11d48; text-decoration: underline; font-weight: 500;">${escapeHtml(link.label)}</a></li>`).join('')}
       </ul>
     </div></div>`;
+  }
+
+  const noscriptMatch = html.match(/<noscript>([\s\S]*?)<\/noscript>/i);
+  if (noscriptMatch && noscriptMatch[1].includes('data-seo-fallback="1"')) {
+    return `<div id="root">${noscriptMatch[1]}</div>`;
   }
 
   const noscript = firstMatch(html, /<noscript>([\s\S]*?)<\/noscript>/i);

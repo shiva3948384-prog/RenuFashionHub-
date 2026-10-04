@@ -7,6 +7,7 @@ import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
 import fs from "fs";
 import crypto from "crypto";
+import { CATEGORY_CONFIGS, getCategorySlug } from "./api/_seo-handler.js";
 
 dotenv.config();
 
@@ -1028,6 +1029,32 @@ async function startServer() {
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
+  <!-- Category Landing Pages -->
+  <url>
+    <loc>${baseUrl}/category/sarees</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/category/kurtas</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/category/lehengas</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/category/dresses</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/category/jewelry</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
 `;
 
       // Render Dynamic Products pages
@@ -1177,11 +1204,11 @@ async function startServer() {
   };
 
   const CATEGORY_LINKS = [
-    { href: "/?category=Sarees", label: "Sarees" },
-    { href: "/?category=Kurtas", label: "Kurtis & Kurta Sets" },
-    { href: "/?category=Lehengas", label: "Lehengas" },
-    { href: "/?category=Dresses", label: "Western Dresses" },
-    { href: "/?category=Jewelry", label: "Jewellery" },
+    { href: "/category/sarees", label: "Sarees" },
+    { href: "/category/kurtas", label: "Kurtis & Kurta Sets" },
+    { href: "/category/lehengas", label: "Lehengas" },
+    { href: "/category/dresses", label: "Western Dresses" },
+    { href: "/category/jewelry", label: "Jewellery" },
   ];
 
   let viteDevServer: any = null;
@@ -1200,6 +1227,20 @@ async function startServer() {
     try {
       if (type === "404") {
         is404 = true;
+      } else if (type === "category") {
+        const rawSlug = String(req.params.slug || "").toLowerCase().trim();
+        const cleanSlug = rawSlug === "jewellery" ? "jewelry" : rawSlug;
+        const conf = (CATEGORY_CONFIGS as any)[cleanSlug];
+        if (conf) {
+          title = conf.title;
+          description = conf.description;
+          url = `${baseUrl}/category/${cleanSlug}`;
+          ogType = "website";
+          h1 = conf.h1;
+          body = conf.intro;
+        } else {
+          is404 = true;
+        }
       } else if (type === "page" && pageName && staticPages[pageName]) {
         const page = staticPages[pageName];
         title = page.title;
@@ -1368,15 +1409,15 @@ async function startServer() {
 `;
       html = html.replace(/<\/head>/i, `${cleanMeta}\n</head>`);
 
-      // Inject fallback body into <div id="root"> if 404
+      // Inject fallback body into <div id="root"> if 404 or rich SSR content if valid
       if (is404) {
         const root404 = `<div id="root"><div data-seo-fallback="1" style="max-width: 680px; margin: 48px auto; padding: 32px 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; text-align: center; color: #1c1917;">
         <h1 style="font-size: 32px; font-weight: 800; margin-bottom: 12px; color: #881337;">404 — Page Not Found</h1>
         <p style="font-size: 16px; color: #57534e; margin-bottom: 24px; line-height: 1.6;">The page you are looking for does not exist, has been removed, or is temporarily unavailable.</p>
         <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 32px;">
-          <a href="${baseUrl}/" style="display: inline-block; padding: 12px 24px; background: #e11d48; color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: 600; font-size: 14px;">Return to Homepage</a>
-          <a href="${baseUrl}/blog" style="display: inline-block; padding: 12px 24px; background: #f5f5f4; color: #1c1917; text-decoration: none; border-radius: 9999px; font-weight: 600; font-size: 14px; border: 1px solid #e7e5e4;">Explore Fashion Blog</a>
-          <a href="${baseUrl}/contact" style="display: inline-block; padding: 12px 24px; background: #f5f5f4; color: #1c1917; text-decoration: none; border-radius: 9999px; font-weight: 600; font-size: 14px; border: 1px solid #e7e5e4;">Contact Support</a>
+          <a href="/" style="display: inline-block; padding: 12px 24px; background: #e11d48; color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: 600; font-size: 14px;">Return to Homepage</a>
+          <a href="/blog" style="display: inline-block; padding: 12px 24px; background: #f5f5f4; color: #1c1917; text-decoration: none; border-radius: 9999px; font-weight: 600; font-size: 14px; border: 1px solid #e7e5e4;">Explore Fashion Blog</a>
+          <a href="/contact" style="display: inline-block; padding: 12px 24px; background: #f5f5f4; color: #1c1917; text-decoration: none; border-radius: 9999px; font-weight: 600; font-size: 14px; border: 1px solid #e7e5e4;">Contact Support</a>
         </div>
         <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 12px; color: #1c1917;">Browse Popular Collections</h2>
         <ul style="list-style: none; padding: 0; margin: 0 auto; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
@@ -1384,6 +1425,98 @@ async function startServer() {
         </ul>
       </div></div>`;
         html = html.replace(/<div id="root">\s*<\/div>/i, root404);
+      } else {
+        if (type === "category") {
+          const rawSlug = String(req.params.slug || "").toLowerCase().trim();
+          const cleanSlug = rawSlug === "jewellery" ? "jewelry" : rawSlug;
+          const conf = (CATEGORY_CONFIGS as any)[cleanSlug];
+          if (conf) {
+            let catProducts: any[] = [];
+            try {
+              const { data } = await supabase.from("products").select("id, name, price, description, category").eq("category", conf.dbCategory).limit(24);
+              catProducts = data || [];
+              if (catProducts.length < 6) {
+                const { data: all } = await supabase.from("products").select("id, name, price, description, category").limit(200);
+                if (all) {
+                  const existingIds = new Set(catProducts.map(p => p.id));
+                  const kws = conf.matchKeywords || [conf.name.toLowerCase()];
+                  for (const p of all) {
+                    if (existingIds.has(p.id)) continue;
+                    const text = `${p.name || ''} ${p.description || ''}`.toLowerCase();
+                    if (kws.some((kw: string) => text.includes(kw))) {
+                      catProducts.push(p);
+                      existingIds.add(p.id);
+                      if (catProducts.length >= 16) break;
+                    }
+                  }
+                  if (catProducts.length < 6) {
+                    for (const p of all) {
+                      if (!existingIds.has(p.id)) {
+                        catProducts.push(p);
+                        existingIds.add(p.id);
+                        if (catProducts.length >= 12) break;
+                      }
+                    }
+                  }
+                }
+              }
+            } catch (_) {}
+            const rootCategory = `<div id="root"><div data-seo-fallback="1" style="max-width: 960px; margin: 0 auto; padding: 32px 20px;">
+              <nav><a href="/">Home</a> &gt; <a href="/blog">Blog</a> &gt; <span>${escapeXml(conf.name)}</span></nav>
+              <h1>${escapeXml(conf.h1)}</h1>
+              <p>${escapeXml(conf.intro)}</p>
+              <div style="background: #fff1f2; padding: 14px; border-radius: 8px; margin: 20px 0;">
+                <p style="margin: 0; color: #9f1239;">Style Advice: Read <a href="/blog/${conf.blogId}" style="color: #e11d48; font-weight: 700;">${escapeXml(conf.blogTitle)}</a></p>
+              </div>
+              <h2>Featured ${escapeXml(conf.name)} (${catProducts.length} Items)</h2>
+              <ul style="list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px;">
+                ${catProducts.map(p => `<li><article><a href="/product/${p.id}"><strong>${escapeXml(p.name)}</strong> — ₹${escapeXml(p.price || '')}</a></article></li>`).join('')}
+              </ul>
+              <h3>Explore Other Collections</h3>
+              <ul style="display: flex; gap: 12px; flex-wrap: wrap;">
+                ${CATEGORY_LINKS.filter(l => l.href !== `/category/${cleanSlug}`).map(l => `<li><a href="${l.href}">${escapeXml(l.label)}</a></li>`).join('')}
+              </ul>
+            </div></div>`;
+            html = html.replace(/<div id="root">\s*<\/div>/i, rootCategory);
+          }
+        } else if (pageName === "home") {
+          let topProducts: any[] = [];
+          let topBlogs: any[] = [];
+          try {
+            const [pRes, bRes] = await Promise.all([
+              supabase.from("products").select("id, name, price").limit(16),
+              supabase.from("blogs").select("id, title, excerpt").neq("id", 999999).neq("category", "site_settings").order("timestamp", { ascending: false }).limit(6)
+            ]);
+            topProducts = pRes.data || [];
+            topBlogs = (bRes.data || []).filter(b => b.title !== "ggdf" && String(b.id) !== "1782274718063");
+          } catch (_) {}
+          const rootHome = `<div id="root"><div data-seo-fallback="1" style="max-width: 960px; margin: 0 auto; padding: 32px 20px;">
+            <h1>${escapeXml(h1)}</h1>
+            <p>${escapeXml(body)}</p>
+            <h2>Shop by Category</h2>
+            <ul style="display: flex; gap: 12px; flex-wrap: wrap;">${CATEGORY_LINKS.map(l => `<li><a href="${l.href}"><strong>${escapeXml(l.label)}</strong></a></li>`).join('')}</ul>
+            <h2>Trending Fashion Picks</h2>
+            <ul>${topProducts.map(p => `<li><a href="/product/${p.id}"><strong>${escapeXml(p.name)}</strong> — ₹${escapeXml(p.price || '')}</a></li>`).join('')}</ul>
+            <h2>Latest Fashion Stories</h2>
+            <ul>${topBlogs.map(b => `<li><a href="/blog/${b.id}"><strong>${escapeXml(b.title)}</strong></a></li>`).join('')}</ul>
+          </div></div>`;
+          html = html.replace(/<div id="root">\s*<\/div>/i, rootHome);
+        } else if (pageName === "blog") {
+          let topBlogs: any[] = [];
+          try {
+            const { data } = await supabase.from("blogs").select("id, title, excerpt").neq("id", 999999).neq("category", "site_settings").order("timestamp", { ascending: false }).limit(10);
+            topBlogs = (data || []).filter(b => b.title !== "ggdf" && String(b.id) !== "1782274718063");
+          } catch (_) {}
+          const rootBlog = `<div id="root"><div data-seo-fallback="1" style="max-width: 960px; margin: 0 auto; padding: 32px 20px;">
+            <h1>${escapeXml(h1)}</h1>
+            <p>${escapeXml(body)}</p>
+            <h2>All Published Stories (${topBlogs.length} Articles)</h2>
+            <ul>${topBlogs.map(b => `<li><a href="/blog/${b.id}"><strong>${escapeXml(b.title)}</strong></a></li>`).join('')}</ul>
+            <h3>Browse Collections</h3>
+            <ul style="display: flex; gap: 12px; flex-wrap: wrap;">${CATEGORY_LINKS.map(l => `<li><a href="${l.href}">${escapeXml(l.label)}</a></li>`).join('')}</ul>
+          </div></div>`;
+          html = html.replace(/<div id="root">\s*<\/div>/i, rootBlog);
+        }
       }
     } catch (replaceErr) {
       console.error("Replacement failed in server seo handler:", replaceErr);
@@ -1442,6 +1575,7 @@ async function startServer() {
   app.get("/index.html", (req, res) => serveSeoHtml(req, res, "page", "home"));
 
   // Dynamic SEO routes
+  app.get("/category/:slug", (req, res) => serveSeoHtml(req, res, "category"));
   app.get("/blog/:id", (req, res) => serveSeoHtml(req, res, "blog"));
   app.get("/product/:id", (req, res) => serveSeoHtml(req, res, "product"));
   app.get("/post/:id", (req, res) => serveSeoHtml(req, res, "post"));

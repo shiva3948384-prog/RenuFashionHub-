@@ -74,6 +74,11 @@ export default async function handler(req, res) {
 
     const staticPages = [
       { loc: `${baseUrl}/`, changefreq: "daily", priority: "1.0" },
+      { loc: `${baseUrl}/category/sarees`, changefreq: "weekly", priority: "0.8" },
+      { loc: `${baseUrl}/category/kurtas`, changefreq: "weekly", priority: "0.8" },
+      { loc: `${baseUrl}/category/lehengas`, changefreq: "weekly", priority: "0.8" },
+      { loc: `${baseUrl}/category/dresses`, changefreq: "weekly", priority: "0.8" },
+      { loc: `${baseUrl}/category/jewelry`, changefreq: "weekly", priority: "0.8" },
       { loc: `${baseUrl}/about`, changefreq: "monthly", priority: "0.7" },
       { loc: `${baseUrl}/blog`, changefreq: "daily", priority: "0.9" },
       { loc: `${baseUrl}/contact`, changefreq: "monthly", priority: "0.6" },

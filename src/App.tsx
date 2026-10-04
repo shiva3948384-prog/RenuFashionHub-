@@ -797,6 +797,225 @@ const ContactSupportAndFaq = ({ theme }: { theme: string }) => {
   );
 };
 
+const getCategorySlug = (cat?: string) => {
+  if (!cat) return "sarees";
+  const c = String(cat).toLowerCase();
+  if (c.includes("saree")) return "sarees";
+  if (c.includes("kurta") || c.includes("kurti") || c.includes("suit")) return "kurtas";
+  if (c.includes("lehenga") || c.includes("choli")) return "lehengas";
+  if (c.includes("dress") || c.includes("nighty")) return "dresses";
+  if (c.includes("jewel") || c.includes("neck") || c.includes("ear") || c.includes("bangle")) return "jewelry";
+  return "sarees";
+};
+
+const CategoryLandingPage = ({
+  products,
+  blogs,
+  theme,
+  navigate,
+  isLoaded,
+  isMobile
+}: {
+  products: any[];
+  blogs: any[];
+  theme: string;
+  navigate: any;
+  isLoaded: boolean;
+  isMobile: boolean;
+}) => {
+  const { slug } = useParams<{ slug: string }>();
+  const rawSlug = String(slug || "").toLowerCase().trim();
+  const cleanSlug = rawSlug === "jewellery" ? "jewelry" : rawSlug;
+  const dark = theme === "dark";
+
+  const conf = {
+    sarees: {
+      name: "Sarees",
+      title: "Designer Sarees & Festive Drapes",
+      intro: "Explore handcrafted and designer sarees personally styled by Renu Agarwal. From pure silk Banarasi drapes and gossamer organza to contemporary cocktail sarees, discover hand-picked pieces for weddings, festive pujas and special celebrations.",
+      dbCategory: "Sarees",
+      blogId: 1782443263146,
+      blogTitle: "Top 10 Saree Draping Styles for Festive Season 2026",
+      matchKeywords: ["saree"]
+    },
+    kurtas: {
+      name: "Kurtis & Kurta Sets",
+      title: "Kurtis & Designer Kurta Sets",
+      intro: "Step into effortless elegance with curated kurtis and designer kurta sets selected by Renu Agarwal. Featuring breathable cotton daily wear, embroidered festive Anarkalis, and sophisticated office suits tailored for comfort and grace.",
+      dbCategory: "Kurtas",
+      blogId: 1782443263147,
+      blogTitle: "How to Style Kurtis for Office and Casual Wear",
+      matchKeywords: ["kurta", "kurti", "suit", "anarkali", "chikankari"]
+    },
+    lehengas: {
+      name: "Lehengas",
+      title: "Bridal & Party Wear Lehengas",
+      intro: "Discover royal bridal lehengas, bridesmaid ensembles, and festive reception wear curated by Renu Agarwal. Each piece highlights intricate zardozi, mirror work, and rich silk fabrics designed to make unforgettable memories.",
+      dbCategory: "Lehengas",
+      blogId: 1782443263148,
+      blogTitle: "Complete Guide to Choosing the Perfect Bridal Lehenga",
+      matchKeywords: ["lehenga", "choli", "semi-stitched", "bridal", "embroidery"]
+    },
+    dresses: {
+      name: "Western Dresses",
+      title: "Western Dresses & Contemporary Outfits",
+      intro: "Elevate your modern wardrobe with flattering western dresses and fusion wear handpicked by Renu Agarwal. From breezy floral maxis and chic midi dresses to glamorous evening wear created for everyday confidence.",
+      dbCategory: "Dresses",
+      blogId: 1782443263149,
+      blogTitle: "Western Outfit Ideas for Indian Body Types",
+      matchKeywords: ["dress", "maxi", "smocked", "nighty", "western"]
+    },
+    jewelry: {
+      name: "Jewellery",
+      title: "Jewellery & Accessories Collection",
+      intro: "Complete every ethnic and western ensemble with artisanal jewellery chosen by Renu Agarwal. Featuring heirloom Kundan necklaces, temple choker sets, lightweight oxidised silver earrings, and traditional bangles.",
+      dbCategory: "Jewelry",
+      blogId: 1782443263150,
+      blogTitle: "Jewellery Styling: Matching Necklaces with Necklines",
+      matchKeywords: ["jewel", "necklace", "earring", "bangle", "choker", "kundan"]
+    }
+  }[cleanSlug as "sarees" | "kurtas" | "lehengas" | "dresses" | "jewelry"];
+
+  useEffect(() => {
+    if (conf) {
+      document.title = `${conf.title} | Renu Fashion Hub`;
+      let metaDesc = document.querySelector('meta[name="description"]');
+      if (!metaDesc) {
+        metaDesc = document.createElement('meta');
+        metaDesc.setAttribute('name', 'description');
+        document.head.appendChild(metaDesc);
+      }
+      metaDesc.setAttribute('content', conf.intro);
+      window.scrollTo(0, 0);
+    }
+  }, [conf]);
+
+  const categoryProducts = useMemo(() => {
+    if (!conf) return [];
+    let matches = products.filter(p => {
+      if (p.category && p.category.toLowerCase() === conf.dbCategory.toLowerCase()) return true;
+      const text = `${p.name || ""} ${p.description || ""}`.toLowerCase();
+      return conf.matchKeywords.some(kw => text.includes(kw));
+    });
+    if (matches.length < 6 && products.length > 0) {
+      const existing = new Set(matches.map(p => p.id));
+      for (const p of products) {
+        if (!existing.has(p.id)) {
+          matches.push(p);
+          existing.add(p.id);
+          if (matches.length >= 12) break;
+        }
+      }
+    }
+    return matches;
+  }, [conf, products]);
+
+  if (!conf) {
+    if (!isLoaded) return <PageLoader theme={theme} />;
+    return <PageNotFoundPage theme={theme} navigate={navigate} />;
+  }
+
+  const allCategories = [
+    { slug: "sarees", label: "Sarees" },
+    { slug: "kurtas", label: "Kurtis & Kurta Sets" },
+    { slug: "lehengas", label: "Lehengas" },
+    { slug: "dresses", label: "Western Dresses" },
+    { slug: "jewelry", label: "Jewellery" },
+  ];
+
+  return (
+    <div className={`min-h-screen ${dark ? "gold-grain-dark text-rose-50" : "gold-grain-light text-[#1C1B18]"} pb-24 font-sans`}>
+      <div className="max-w-6xl mx-auto px-6 pt-8 pb-12">
+        {/* Navigation & Header */}
+        <div className="flex items-center justify-between mb-8">
+          <a
+            href="/"
+            onClick={(e) => { e.preventDefault(); navigate("/"); }}
+            className={`p-2.5 rounded-xl ${dark ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"} border inline-flex items-center gap-2 group transition-all hover:bg-rose-500/10 hover:border-rose-500/50 text-inherit no-underline`}
+          >
+            <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+            <span className="text-[11px] font-bold uppercase tracking-widest">Back to Catalog</span>
+          </a>
+          <div className="text-[10px] font-black uppercase tracking-widest text-rose-500">
+            {conf.name} Collection
+          </div>
+        </div>
+
+        {/* Hero Section */}
+        <div className={`p-8 md:p-12 rounded-3xl border mb-10 ${dark ? "bg-white/[0.03] border-white/10" : "bg-white border-black/8"} shadow-xl`}>
+          <nav aria-label="Breadcrumb" className="text-[11px] font-bold uppercase tracking-widest text-rose-500 mb-3 flex items-center gap-2">
+            <a href="/" onClick={(e) => { e.preventDefault(); navigate("/"); }} className="hover:underline">Home</a>
+            <span>/</span>
+            <a href="/blog" onClick={(e) => { e.preventDefault(); navigate("/blog"); }} className="hover:underline">Blog</a>
+            <span>/</span>
+            <span className={dark ? "text-white/60" : "text-black/60"}>{conf.name}</span>
+          </nav>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black font-serif tracking-tight leading-tight mb-4">
+            {conf.title}
+          </h1>
+          <p className={`text-sm md:text-base leading-relaxed max-w-3xl ${dark ? "text-white/60" : "text-black/65"} mb-6`}>
+            {conf.intro}
+          </p>
+
+          {/* Editorial Banner */}
+          <div className={`p-4 sm:p-5 rounded-2xl border ${dark ? "bg-rose-950/30 border-rose-800/40 text-rose-200" : "bg-rose-50 border-rose-200 text-rose-950"} flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4`}>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-rose-500 mb-1">Expert Editorial Guide</p>
+              <h3 className="text-sm sm:text-base font-bold font-serif">{conf.blogTitle}</h3>
+            </div>
+            <a
+              href={`/blog/${conf.blogId}`}
+              onClick={(e) => { e.preventDefault(); navigate(`/blog/${conf.blogId}`); }}
+              className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold whitespace-nowrap transition-colors shadow-md no-underline"
+            >
+              Read Styling Guide →
+            </a>
+          </div>
+        </div>
+
+        {/* Other Categories Slider */}
+        <div className="mb-10">
+          <p className={`text-[10px] font-black uppercase tracking-widest mb-3 ${dark ? "text-white/40" : "text-black/40"}`}>Explore Collections</p>
+          <div className="flex gap-2 flex-wrap">
+            {allCategories.map(c => (
+              <a
+                key={c.slug}
+                href={`/category/${c.slug}`}
+                onClick={(e) => { e.preventDefault(); navigate(`/category/${c.slug}`); }}
+                className={`px-4 py-2 rounded-full text-xs font-bold border transition-all no-underline ${c.slug === cleanSlug ? "bg-rose-500 text-black border-rose-500 shadow-md shadow-rose-500/25" : dark ? "bg-white/5 border-white/10 text-white/70 hover:border-rose-500/40" : "bg-white border-black/10 text-black/70 hover:border-rose-500/40"}`}
+              >
+                {c.label}
+              </a>
+            ))}
+          </div>
+        </div>
+
+        {/* Product Grid */}
+        <div className="mb-16">
+          <div className="flex items-center justify-between mb-6 pb-3 border-b border-dashed border-current/15">
+            <h2 className="text-lg font-black font-serif">Curated {conf.name} Designs</h2>
+            <span className={`text-[10px] font-bold uppercase tracking-widest ${dark ? "text-white/40" : "text-black/40"}`}>
+              {categoryProducts.length} Items Available
+            </span>
+          </div>
+
+          {categoryProducts.length === 0 ? (
+            <div className="py-16 text-center">
+              <p className="text-stone-500 text-sm font-semibold">Updating catalog with new {conf.name} designs soon.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+              {categoryProducts.map((product) => (
+                <ProductCard key={product.id} product={product} navigate={navigate} isMobile={isMobile} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ProductDetailPage = ({ products, theme, navigate, isLoaded }: { products: any[]; theme: string; navigate: any; isLoaded: boolean }) => {
   const { id } = useParams();
   const product = products.find(p => p.id.toString() === id || p.docId === id);
@@ -957,9 +1176,16 @@ const ProductDetailPage = ({ products, theme, navigate, isLoaded }: { products: 
             Home
           </a>
           <span>/</span>
-          <span className="hover:text-rose-500 cursor-pointer" onClick={() => navigate(`/?category=${encodeURIComponent(product.category || 'All')}`)}>
+          <a
+            href={`/category/${getCategorySlug(product.category || product.name)}`}
+            onClick={(e) => {
+              e.preventDefault();
+              navigate(`/category/${getCategorySlug(product.category || product.name)}`);
+            }}
+            className="hover:text-rose-500 transition-colors"
+          >
             {product.category || "Apparel"}
-          </span>
+          </a>
           <span>/</span>
           <span className={`truncate max-w-[200px] sm:max-w-xs ${theme === "dark" ? "text-rose-400" : "text-rose-600"}`}>
             {product.name}
@@ -3276,50 +3502,58 @@ const BlogListPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; them
           <div className="space-y-14">
             {/* Featured Post — magazine hero */}
             {featuredBlog && (
-              <motion.article
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                onClick={() => navigate(`/blog/${featuredBlog.id}`)}
-                className={`group cursor-pointer relative overflow-hidden rounded-[2rem] border ${dark ? "bg-white/[0.03] border-white/10" : "bg-white border-black/8"} shadow-lg hover:shadow-2xl hover:shadow-rose-500/10 transition-all`}
+              <a
+                href={`/blog/${featuredBlog.id}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate(`/blog/${featuredBlog.id}`);
+                }}
+                className="block text-inherit no-underline"
               >
-                <div className="grid md:grid-cols-5 gap-0">
-                  {featuredBlog.image && (
-                    <div className="md:col-span-3 relative h-72 md:h-[440px] overflow-hidden">
-                      <MediaImage
-                        url={featuredBlog.image}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        alt={featuredBlog.title}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:via-transparent md:to-black/10" />
-                      <span className="absolute top-5 left-5 text-[10px] font-black uppercase tracking-[0.2em] bg-rose-500 text-stone-950 px-3 py-1.5 rounded-full shadow-lg">
-                        ★ Featured
-                      </span>
-                    </div>
-                  )}
-                  <div className="md:col-span-2 p-6 md:p-10 flex flex-col justify-center">
-                    {featuredBlog.category && (
-                      <span className={`self-start text-[10px] font-black uppercase tracking-[0.25em] mb-4 px-2.5 py-1 rounded-full ${dark ? "bg-rose-500/10 text-rose-400 border border-rose-500/20" : "bg-rose-50 text-rose-700 border border-rose-200"}`}>
-                        {featuredBlog.category}
-                      </span>
+                <motion.article
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`group cursor-pointer relative overflow-hidden rounded-[2rem] border ${dark ? "bg-white/[0.03] border-white/10" : "bg-white border-black/8"} shadow-lg hover:shadow-2xl hover:shadow-rose-500/10 transition-all`}
+                >
+                  <div className="grid md:grid-cols-5 gap-0">
+                    {featuredBlog.image && (
+                      <div className="md:col-span-3 relative h-72 md:h-[440px] overflow-hidden">
+                        <MediaImage
+                          url={featuredBlog.image}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          alt={featuredBlog.title}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:via-transparent md:to-black/10" />
+                        <span className="absolute top-5 left-5 text-[10px] font-black uppercase tracking-[0.2em] bg-rose-500 text-stone-950 px-3 py-1.5 rounded-full shadow-lg">
+                          ★ Featured
+                        </span>
+                      </div>
                     )}
-                    <h2 className="text-2xl md:text-4xl font-black font-serif leading-[1.05] mb-4 group-hover:text-rose-500 transition-colors">
-                      {featuredBlog.title}
-                    </h2>
-                    <p className={`text-sm md:text-base ${dark ? "text-white/60" : "text-black/60"} leading-relaxed mb-6 line-clamp-3`}>
-                      {featuredBlog.excerpt || "A signature story from the editorial desk."}
-                    </p>
-                    <div className={`flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest ${dark ? "text-white/40" : "text-black/40"} mb-6`}>
-                      <span>{formatDate(featuredBlog.timestamp)}</span>
-                      <span>•</span>
-                      <span>{readTime(featuredBlog)} min read</span>
-                    </div>
-                    <div className="inline-flex items-center gap-2 group-hover:gap-3 transition-all font-black text-xs uppercase tracking-widest text-rose-500">
-                      <span>Read Story</span>
-                      <span className="text-base">→</span>
+                    <div className="md:col-span-2 p-6 md:p-10 flex flex-col justify-center">
+                      {featuredBlog.category && (
+                        <span className={`self-start text-[10px] font-black uppercase tracking-[0.25em] mb-4 px-2.5 py-1 rounded-full ${dark ? "bg-rose-500/10 text-rose-400 border border-rose-500/20" : "bg-rose-50 text-rose-700 border border-rose-200"}`}>
+                          {featuredBlog.category}
+                        </span>
+                      )}
+                      <h2 className="text-2xl md:text-4xl font-black font-serif leading-[1.05] mb-4 group-hover:text-rose-500 transition-colors">
+                        {featuredBlog.title}
+                      </h2>
+                      <p className={`text-sm md:text-base ${dark ? "text-white/60" : "text-black/60"} leading-relaxed mb-6 line-clamp-3`}>
+                        {featuredBlog.excerpt || "A signature story from the editorial desk."}
+                      </p>
+                      <div className={`flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest ${dark ? "text-white/40" : "text-black/40"} mb-6`}>
+                        <span>{formatDate(featuredBlog.timestamp)}</span>
+                        <span>•</span>
+                        <span>{readTime(featuredBlog)} min read</span>
+                      </div>
+                      <div className="inline-flex items-center gap-2 group-hover:gap-3 transition-all font-black text-xs uppercase tracking-widest text-rose-500">
+                        <span>Read Story</span>
+                        <span className="text-base">→</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </motion.article>
+                </motion.article>
+              </a>
             )}
 
             {/* Section label */}
@@ -3338,14 +3572,21 @@ const BlogListPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; them
             {gridBlogs.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                 {gridBlogs.map((blog, idx) => (
-                  <motion.article
+                  <a
                     key={blog.id}
-                    initial={{ opacity: 0, y: 24 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: Math.min(idx * 0.06, 0.4) }}
-                    onClick={() => navigate(`/blog/${blog.id}`)}
-                    className={`group cursor-pointer overflow-hidden rounded-2xl border transition-all hover:-translate-y-1 hover:shadow-xl ${dark ? "bg-white/[0.03] border-white/10 hover:border-rose-500/40 hover:shadow-rose-500/10" : "bg-white border-black/8 hover:border-rose-500/40 hover:shadow-rose-500/10"}`}
+                    href={`/blog/${blog.id}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      navigate(`/blog/${blog.id}`);
+                    }}
+                    className="block text-inherit no-underline"
                   >
+                    <motion.article
+                      initial={{ opacity: 0, y: 24 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: Math.min(idx * 0.06, 0.4) }}
+                      className={`group cursor-pointer overflow-hidden rounded-2xl border transition-all hover:-translate-y-1 hover:shadow-xl ${dark ? "bg-white/[0.03] border-white/10 hover:border-rose-500/40 hover:shadow-rose-500/10" : "bg-white border-black/8 hover:border-rose-500/40 hover:shadow-rose-500/10"}`}
+                    >
                     {blog.image ? (
                       <div className="relative w-full h-52 overflow-hidden">
                         <MediaImage
@@ -3381,7 +3622,8 @@ const BlogListPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; them
                       </span>
                     </div>
                   </motion.article>
-                ))}
+                </a>
+              ))}
               </div>
             )}
           </div>
@@ -3514,6 +3756,17 @@ const BlogDetailPage = ({ blogs, theme, navigate, isLoaded }: { blogs: any[]; th
             className="hover:text-rose-500 transition-colors"
           >
             Fashion Blog
+          </a>
+          <span>/</span>
+          <a
+            href={`/category/${getCategorySlug(blog.category || blog.title)}`}
+            onClick={(e) => {
+              e.preventDefault();
+              navigate(`/category/${getCategorySlug(blog.category || blog.title)}`);
+            }}
+            className="hover:text-rose-500 transition-colors"
+          >
+            {blog.category || "Collection"}
           </a>
           <span>/</span>
           <span className={`truncate max-w-[200px] sm:max-w-xs ${theme === "dark" ? "text-rose-400" : "text-rose-600"}`}>
@@ -4303,20 +4556,27 @@ const ProductFilter = React.memo(({
         onWheel={handleWheelScroll}
         className="flex gap-2 overflow-x-auto pb-1.5 scrollbar-none px-0.5 scroll-smooth"
       >
-        {categories.map((cat) => (
-          <button 
-            key={cat}
-            type="button"
-            onClick={() => setActiveCat(cat)}
-            className={`flex-none px-4 py-2.5 rounded-xl text-[11px] font-bold transition-all duration-300 ${
-              activeCat === cat 
-                ? (theme === "dark" ? "bg-purple-500 text-white shadow-lg shadow-purple-500/25" : "bg-purple-600 text-white shadow-lg shadow-purple-600/15") 
-                : (theme === "dark" ? "bg-white/5 border border-white/10 hover:bg-white/10 text-white/70" : "bg-black/5 border border-black/10 hover:bg-black/10 text-black/70")
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
+        {categories.map((cat) => {
+          const l = cat.toLowerCase();
+          const slug = l.includes("saree") ? "sarees" : l.includes("kurta") || l.includes("kurti") ? "kurtas" : l.includes("lehenga") ? "lehengas" : l.includes("dress") ? "dresses" : l.includes("jewel") ? "jewelry" : l;
+          return (
+            <a 
+              key={cat}
+              href={cat === "All" ? "/" : `/category/${slug}`}
+              onClick={(e) => {
+                e.preventDefault();
+                setActiveCat(cat);
+              }}
+              className={`flex-none px-4 py-2.5 rounded-xl text-[11px] font-bold transition-all duration-300 no-underline text-inherit ${
+                activeCat === cat 
+                  ? (theme === "dark" ? "bg-purple-500 text-white shadow-lg shadow-purple-500/25" : "bg-purple-600 text-white shadow-lg shadow-purple-600/15") 
+                  : (theme === "dark" ? "bg-white/5 border border-white/10 hover:bg-white/10 text-white/70" : "bg-black/5 border border-black/10 hover:bg-black/10 text-black/70")
+              }`}
+            >
+              {cat}
+            </a>
+          );
+        })}
       </div>
     </div>
   );
@@ -4339,58 +4599,74 @@ const EmptyState = React.memo(({ icon: Icon, message }: { icon: any; message: st
 ));
 
 const ProductCard = React.memo(({ product, navigate, isMobile }: { product: any; navigate: any; isMobile: boolean }) => (
-  <motion.div 
-    initial={isMobile ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-    whileInView={isMobile ? undefined : { opacity: 1, y: 0 }}
-    viewport={{ once: true, margin: "-50px" }}
-    transition={{ duration: 0.4, ease: "easeOut" }}
-    onClick={() => navigate(`/product/${product.id}`)}
-    className="group cursor-pointer flex flex-col perf-card"
+  <a
+    href={`/product/${product.id}`}
+    onClick={(e) => {
+      e.preventDefault();
+      navigate(`/product/${product.id}`);
+    }}
+    className="group cursor-pointer flex flex-col perf-card text-inherit no-underline"
   >
-    <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-white/5 border border-white/10 mb-2 relative">
-      <MediaImage 
-        url={product.url} 
-        alt={product.name}
-        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-        loading="lazy"
-      />
-      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-        <div className="px-4 py-2 rounded-full bg-white text-black text-[10px] font-bold shadow-xl">View Details</div>
+    <motion.div 
+      initial={isMobile ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+      whileInView={isMobile ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="flex flex-col w-full"
+    >
+      <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-white/5 border border-white/10 mb-2 relative">
+        <MediaImage 
+          url={product.url} 
+          alt={product.name}
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+          <div className="px-4 py-2 rounded-full bg-white text-black text-[10px] font-bold shadow-xl">View Details</div>
+        </div>
       </div>
-    </div>
-    <div className="px-1">
-      <h4 className="font-semibold text-[11px] truncate mb-0.5">{product.name}</h4>
-      <p className="text-white/40 text-[10px]">₹{product.price}</p>
-    </div>
-  </motion.div>
+      <div className="px-1">
+        <h4 className="font-semibold text-[11px] truncate mb-0.5">{product.name}</h4>
+        <p className="text-white/40 text-[10px]">₹{product.price}</p>
+      </div>
+    </motion.div>
+  </a>
 ));
 
 const ShopPostCard = React.memo(({ post, navigate, isMobile }: { post: any; navigate: any; isMobile: boolean }) => (
-  <motion.div 
-    initial={isMobile ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-    whileInView={isMobile ? undefined : { opacity: 1, y: 0 }}
-    viewport={{ once: true, margin: "-50px" }}
-    transition={{ duration: 0.4, ease: "easeOut" }}
-    onClick={() => navigate(`/post/${post.id}`)}
-    className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-white/5 border border-white/10 group cursor-pointer will-change-transform"
+  <a
+    href={`/post/${post.id}`}
+    onClick={(e) => {
+      e.preventDefault();
+      navigate(`/post/${post.id}`);
+    }}
+    className="block text-inherit no-underline"
   >
-    {post.type === "video" ? (
-      <div className="w-full h-full">
-        <VideoEmbed url={post.url} minimal={true} />
-        <div className="absolute top-3 right-3 p-1.5 rounded-lg bg-black/80 md:backdrop-blur-md">
-          <Play className="w-3 h-3 text-white fill-white" />
+    <motion.div 
+      initial={isMobile ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+      whileInView={isMobile ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-white/5 border border-white/10 group cursor-pointer will-change-transform"
+    >
+      {post.type === "video" ? (
+        <div className="w-full h-full">
+          <VideoEmbed url={post.url} minimal={true} />
+          <div className="absolute top-3 right-3 p-1.5 rounded-lg bg-black/80 md:backdrop-blur-md">
+            <Play className="w-3 h-3 text-white fill-white" />
+          </div>
         </div>
-      </div>
-    ) : (
-      <MediaImage url={post.url} className="w-full h-full object-cover" loading="lazy" />
-    )}
-    {post.taggedProducts?.length > 0 && (
-      <div className="absolute top-3 left-3 p-1.5 rounded-lg bg-black/80 md:backdrop-blur-md flex items-center gap-1">
-        <ShoppingBag className="w-3 h-3 text-white" />
-        <span className="text-[9px] font-bold text-white">{post.taggedProducts.length}</span>
-      </div>
-    )}
-  </motion.div>
+      ) : (
+        <MediaImage url={post.url} className="w-full h-full object-cover" loading="lazy" />
+      )}
+      {post.taggedProducts?.length > 0 && (
+        <div className="absolute top-3 left-3 p-1.5 rounded-lg bg-black/80 md:backdrop-blur-md flex items-center gap-1">
+          <ShoppingBag className="w-3 h-3 text-white" />
+          <span className="text-[9px] font-bold text-white">{post.taggedProducts.length}</span>
+        </div>
+      )}
+    </motion.div>
+  </a>
 ));
 
 const PostCard = React.memo(({ post, products, navigate, onTabChange, isMobile }: { post: any; products: any[]; navigate: any; onTabChange: (tab: string) => void; isMobile: boolean }) => (
@@ -9428,6 +9704,7 @@ export default function App() {
           <Route path="/disclaimer" element={<DisclaimerPage profile={profile} theme={theme} navigate={handleNavigate} />} />
           <Route path="/affiliate-disclosure" element={<AffiliateDisclosurePage theme={theme} navigate={handleNavigate} />} />
           <Route path="/cookie-policy" element={<CookiePolicyPage theme={theme} navigate={handleNavigate} />} />
+          <Route path="/category/:slug" element={<CategoryLandingPage products={products} blogs={blogs} theme={theme} navigate={handleNavigate} isLoaded={isProductsLoaded} isMobile={isMobile} />} />
           <Route path="/product/:id" element={<ProductDetailPage products={products} theme={theme} navigate={handleNavigate} isLoaded={isProductsLoaded} />} />
           <Route path="/post/:id" element={<PostDetailPage posts={posts} products={products} profile={profile} theme={theme} navigate={handleNavigate} isMuted={isMuted} setIsMuted={setIsMuted} isLoaded={isPostsLoaded} />} />
           <Route path="/blog" element={<BlogListPage blogs={blogs} theme={theme} navigate={handleNavigate} isLoaded={isBlogsLoaded} />} />
